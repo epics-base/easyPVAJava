@@ -1,0 +1,2045 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+  <title>EPICS easyPVA</title>
+  <link rel="stylesheet" type="text/css"
+  href="http://epics-pvdata.sourceforge.net/base.css" />
+  <link rel="stylesheet" type="text/css"
+  href="http://epics-pvdata.sourceforge.net/epicsv4.css" />
+  <style type="text/css">
+/*<![CDATA[*/
+     .about { margin-left: 3em; margin-right: 3em; font-size: .83em}
+     table { margin-left: auto; margin-right: auto }
+     .diagram { text-align: center; margin: 2.5em 0 }
+     body { margin-right: 10% }
+/*]]>*/</style>
+</head>
+
+<body>
+
+<div class="head">
+<h1>EPICS easyPVA</h1>
+<!-- Maturity: Working Draft or Request for Comments, or Recommendation, and date.  -->
+
+<h2 class="nocount">EPICS V4 Working Group, Working Draft,
+2012-04-10</h2>
+<dl>
+  <dt>This version:</dt>
+    <dd><a
+      href="http://epics-pvdata.sourceforge.net/alphaJava/easyPVA/documentation/easyPVA.html">easyPVA.html
+      </a></dd>
+  <dt>Latest version:</dt>
+    <dd>To be added</dd>
+  <dt>Previous version:</dt>
+    <dd>To be added</dd>
+  <dt>Editors:</dt>
+    <dd>Matej Sekoranja, Cosylab</dd>
+    <dd>Marty Kraimer, BNL</dd>
+</dl>
+
+<h2 class="nocount">Abstract</h2>
+
+<p>easyPVA (Easy PVAccess) is a easy to use interface for pvAccess.
+pvAccess provides a callback based interface, which can be hard to use.
+easyPVA provides an interface that does not require callbacks even for monitors.
+It also provides many "convenience" methods to directly get and put common data types such as double.
+Thus the client can use common data types without any introspection.
+Additional methods provide access to the full features of pvAccess.
+<p>easyPVA will become part of pvAccess when it is ready. </p>
+
+<h2 class="nocount">Status of this Document</h2>
+
+<p>EasyPVA, EasyChannel, EasyGET, and EasyPut are the only interfaces currently
+implemented and only in Java. The Java interfaces have been defined for all
+intended Easy facilties. But the unimplemented interfaces are just a first
+draft.</p>
+
+<p>The Java implementation of EasyGet and EasyPut has example code that works.
+There is also a test for EasyGet. But it is not completre. Much more testing
+should be done.</p>
+
+<h2 class="nocount">Contents</h2>
+
+</div>
+<h2>Installation and Example Database</h2>
+<h3>Installation</h3>
+<p>This project requires that the following projects are already available: pvDataJava, pvAccessJava, and pvIOCJava.</p>
+<p>The Java version of easyPVA currently resides in mercurial repository:</p>
+<pre>
+epics-pvdata.hg.sourceforge.net/hgroot/epics-pvdata/alphaJava
+</pre>
+<p>easyPVA resides in the top level directory easyPVA.</p>
+<p>After cloning this repository import the project into eclipse as follows:</p>
+Via the file menu select import "Existing Projects into Workspace".
+Then "Select root directory".
+Then select the easyPVA directory from the mercurial clone.</p>
+<p>The next step is to get the correct build path for pvAccessJava and pvDataJava.
+Select the project properties for easyPVA.
+Then select Java Build Path.
+Then select Projects.
+Then make sure you are correctly accessing your version of pvDataJava and pvAccessJava.
+</p>
+<h3>Example pvIOCJava database</h3>
+<p>The directory where this documentation is located also has a file:</p>
+<pre>
+    easyPVADatabase.zip
+</pre>
+<p>This file contains an example pvIOCJava database for use by the examples and tests described below.
+Unzip the file somewhere.
+Edit the "source" file so that it has the correct location of everything required to run the example.
+The just execute:</p>
+<pre>
+./startExample
+</pre>
+
+
+<h2>Introduction</h2>
+
+<p>EasyPVA is a synchronous API for accessing PVData via PVAccess. It provides
+a synchronous interface to the features provided by pvData/pvAccess.</p>
+
+<p>The API has the following features:</p>
+<ol>
+  <li>It makes common requests easy to use.</li>
+  <li>Provides full access to the pvAccess API for more demanding
+  applcations.</li>
+  <li>It allows an efficent implementation.</li>
+</ol>
+
+<p>The following describes the Java version of EasyPVA. There will also be C++
+version and wrapper code for Python and for Mathlab.</p>
+
+<h3>Initialization</h3>
+
+<p>A client obtains the interface to EasyPVA via the call:</p>
+<pre>EasyPVA easy = EasyPVAFactory.get();</pre>
+
+<p>The client can make this call multiple times but an instance of EastPVA is
+only created in the first call. The first call also results in the a call to
+start the PVAccess client factory.</p>
+
+<h3>EasyPVA</h3>
+
+<p>EasyPVA creates interfaces to one of the following:</p>
+<dl>
+  <dt>EasyChannel</dt>
+    <dd>This creates an interface for accessing a single channel.</dd>
+  <dt>EasyMultiChannel</dt>
+    <dd>This creates an interface for accessing a set of channels.</dd>
+</dl>
+
+<p>For each there are two methods, with the difference being that the second
+specified the name of the provider. The other assumes that the provider is
+"pvAccess".</p>
+
+<p>There are additional methods that allows the client to:</p>
+<ol>
+  <li>Control how error messages are handled.</li>
+  <li>Control when get/put commands are sent the the V3 channel.</li>
+</ol>
+
+<h3>EasyChannel</h3>
+
+<p>This interface creates Easy support for each PVAccess::Channel create
+method:</p>
+<dl>
+  <dt>EasyField</dt>
+    <dd>This gets the introspection interface from a channel. The
+      implementation provides full access to the features of
+    Channel::getField.</dd>
+  <dt>EasyProcess</dt>
+    <dd>This is used to process a channel. The implementation provides full
+      access to the features of ChannelProcess.</dd>
+  <dt>EasyGet</dt>
+    <dd>This is used to get values from a channel. The implementation allows
+      full access to all the features of ChannelGet. By default it asks for the
+      fields value, alarm, and timeStamp. If the channel has a value field then
+      EasyGet provides convenience methods for a scalar value and for an array
+      value. </dd>
+  <dt>EasyPut</dt>
+    <dd>This is used to get the current value of a channel and to put values to
+      a channel. The implementation allows full access to all the features of
+      ChannelPut. By default it asks for the field value, alarm, and timeStamp.
+      If the channel has a value field then EasyPut provides convenience
+      methods for a scalar value and for an array value. </dd>
+  <dt>EasyPutGet</dt>
+    <dd>This is an interface to ChannelPutGet. Details TBD.</dd>
+  <dt>EasyMonitor</dt>
+    <dd>This is an interface to ChannelPutGet. Details TBD.</dd>
+  <dt>EasyArray</dt>
+    <dd>This is an interface to ChannelPutGet. Details TBD.</dd>
+  <dt>EasyRPC</dt>
+    <dd>This is an interface to ChannelPutGet. Details TBD.</dd>
+  <dt>EasyProcess</dt>
+    <dd>This is an interface to ChannelPutGet. Details TBD.</dd>
+  <dt>EasyField</dt>
+    <dd>This is an interface to ChannelPutGet. Details TBD.</dd>
+</dl>
+
+
+<h2>Hello World Examples</h2>
+
+<p>The examples described in this section are located in
+easyPVA/test/org/epics/ca/easyPVA. The examples access channels from the V3
+test IOC that comes with pvIOCCPP. An example of how it is started is:</p>
+<pre>mrk&gt; pwd
+/home/mrk/hg/pvIOCCPP/iocBoot/testV3Channel
+mrk&gt; ../../bin/linux-x86/testV3Channel st.cmd</pre>
+
+<p>The waveform records in the test database all have an initial length of 0.
+When EasyPut is implemented there will be a an example that gives them a non
+zero value. For now, on linux or darwin, just execute:</p>
+<pre>mrk&gt; pwd
+/home/mrk/hg/alphaCPP/easyPVA/documentation
+mrk&gt; source START_TEST_IOC</pre>
+
+<p>In the future an example V4 IOC will also be provided.</p>
+
+<h3>Get Scalar</h3>
+
+<p>This section provides code excerpts taken from ExampleEasyGetScalar.java</p>
+<pre>    public static void main(String[] args) {
+        ... calls to the various examples
+    };
+   ...
+   static EasyPVA easyPVA = EasyPVAFactory.get();
+
+   static String alarmToString(Alarm alarm){
+       ... code that converts an alarm to a string
+   }
+
+   static String timeStampToString(Alarm alarm){
+       ... code that converts a timeStamp to a string
+   }</pre>
+
+<p>Notes:</p>
+<ul>
+  <li>easyPVA is created once and shared by all the examples in
+    ExampleEasyGetScalar.</li>
+  <li>alarmToString converts the alarm information to a string.</li>
+  <li>timeStampToString converts the tiimeStamp to a string.</li>
+</ul>
+
+<p>The first example is a simple way to get a scalar value from a channel. This
+example has one line of code that gets the value field of the specified channel
+as a double. If anything goes wrong a message is displayed on standard out.</p>
+<pre>    static void exampleDouble(String channelName) {
+        // get the scalar value
+        double value easyPVA.createChannel(
+            channelName).createGet().getDouble();
+        System.out.println(channelName +" = " + value);
+    }</pre>
+
+<p>The following example detects problems without using exceptions.. Each
+method of EasyPVA that can cause problems returns a boolean result with true
+meaning OK and false meaning that there is a problem. The method getStatus is
+called to find the problem.</p>
+<pre>    static void exampleDoubleCheck(String channelName) {
+        easyPVA.setAuto(false, true);
+        EasyChannel channel =  easyPVA.createChannel(channelName);
+        boolean result = channel.connect(2.0);
+        if(!result) {
+            System.out.printf(
+                "exampleDoubleCheck %s channel connect failed %s%n",
+                channelName,
+                channel.getStatus());
+            easyPVA.setAuto(true, true);
+            return;
+        }
+        EasyGet get = channel.createGet();
+        result = get.connect();
+        if(!result) {
+            System.out.printf(
+                "exampleDoubleCheck %s get connect failed %s%n",
+                channelName,
+                get.getStatus());
+            easyPVA.setAuto(true, true);
+            return;
+        }
+        get.issueGet();
+        result = get.waitGet();
+        if(!result) {
+            System.out.printf(
+                "exampleDoubleCheck %s get failed %s%n",
+                channelName,
+                get.getStatus());
+            easyPVA.setAuto(true, true);
+            return;
+        }
+        System.out.printf("%s %s%n",channelName,get.getString());
+        channel.destroy();
+        easyPVA.setAuto(true, true);
+    }</pre>
+
+<p>The next example gets the value plus the alarm and timeStamp:</p>
+<pre>static void exampleDoubleAlarmTimeStamp(String channelName) {
+        EasyGet easyGet = easyPVA.createChannel(channelName).createGet();
+        double value = easyGet.getDouble();
+        Alarm alarm = easyGet.getAlarm();
+        TimeStamp timeStamp = easyGet.getTimeStamp();
+        System.out.printf(
+            "%s %s %s %s%n",
+            channelName,
+            Double.toString(value),
+            alarmToString(alarm),
+            timeStampToString(timeStamp));
+    }</pre>
+
+<p>The last scalar examples show how to get the value from two channels
+allowing parallel operation wherever possible. This means that pvAccess will
+minimize the number of network packets being sent and received:</p>
+<pre>    static void exampleTwoChannels(String channelName0,String channelName1) {
+        easyPVA.setAuto(false, true);
+        EasyChannel channel0 =  easyPVA.createChannel(channelName0);
+        EasyChannel channel1 = easyPVA.createChannel(channelName1);
+        // the connects will be done in parallel
+        channel0.issueConnect();
+        channel1.issueConnect();
+        channel0.waitConnect(2.0);
+        channel1.waitConnect(2.0);
+        EasyGet get0 = channel0.createGet();
+        EasyGet get1 = channel1.createGet();
+        // the get connects will be done in parallel
+        get0.issueConnect();
+        get1.issueConnect();
+        get0.waitConnect();
+        get1.waitConnect();
+        // the gets will be done in parallel
+        get0.issueGet();
+        get1.issueGet();
+        get0.waitGet();
+        get1.waitGet();
+        System.out.printf("%s %s %s %s%n",
+            channelName0, get0.getString(),
+            channelName1,get1.getString());
+        channel0.destroy();
+        channel1.destroy();
+        easyPVA.setAuto(true, true);
+    }</pre>
+
+<h3>Get Array</h3>
+
+<p>ExampleEasyGetArray.java has examples get array values from V3 waveform
+channels.</p>
+
+<p>The following gets a value from an array channel. This example makes no
+checks to look for problems. If anything goes wrong, e. g. channel not found,
+no value field, value not an array, etc, a message is displayed.</p>
+<pre>    static void exampleDoubleArrayNoChecks(String channelName) {
+        double[] value = easyPVA.createChannel(
+            channelName).createGet().getDoubleArray();
+        System.out.printf("%s%n[",channelName);
+        for(int i=0;i&lt;value.length;i++) {
+              if(i%10 == 0) {
+                   System.out.printf("%n  ");
+              }
+              if(i!=0) System.out.printf(",");
+              System.out.printf("%f",value[i]);
+        }
+        System.out.printf("%n]%n");
+    }</pre>
+
+<p>The next example also gets an array of double values but checks for
+problems:</p>
+<pre>   static void exampleDoubleArray(String channelName) {
+        easyPVA.setAuto(false, true);
+        EasyChannel channel =  easyPVA.createChannel(channelName);
+        boolean result = channel.connect(2.0);
+        if(!result) {
+            System.out.printf(
+                "exampleDoubleCheck %s channel connect failed %s%n",
+                channelName,
+                channel.getStatus());
+            easyPVA.setAuto(true, true);
+            return;
+        }
+        EasyGet get = channel.createGet();
+        result = get.connect();
+        if(!result) {
+            System.out.printf(
+                "exampleDoubleCheck %s get connect failed %s%n",
+                channelName,
+                get.getStatus());
+            easyPVA.setAuto(true, true);
+            return;
+        }
+        PVScalarArray pvArray = get.getScalarArrayValue();
+        if(pvArray==null) {
+            System.err.printf("%s is not a scalar array%s", channelName);
+            easyPVA.setAuto(true, true);
+            return;
+        }
+        if(!pvArray.getScalarArray().getElementType().isNumeric()) {
+            System.err.printf("%s is not a numeric array%n", channelName);
+            easyPVA.setAuto(true, true);
+            return;
+        }
+        double[] value = get.getDoubleArray();
+        System.out.printf("%s%n[",channelName);
+        for(int i=0;i&lt;value.length;i++) {
+              if(i%10 == 0) {
+                   System.out.printf("%n  ");
+              }
+              if(i!=0) System.out.printf(",");
+              System.out.printf("%f",value[i]);
+        }
+        System.out.printf("%n]%n");
+        channel.destroy();
+        easyPVA.setAuto(true, true);
+    }</pre>
+
+<p>The next example performs multiple gets. The method "double[] value =
+get.getDoubleArray();" returns a copy of the data held by EasyGet, NOT the
+actual data. If a client makes repeated calls the other form of getDoubleArray
+should be used for all except the first call. This will be a common feature of
+array methods, e. g. one methods will create an array copy and return it to the
+caller and the other will let the caller pass that array into which the data is
+copied.</p>
+<pre>    static void exampleDoubleArrayMultiCall(String channelName) {
+        EasyGet easyGet = easyPVA.createChannel(channelName).createGet();
+        PVScalarArray pvArray = easyGet.getScalarArrayValue();
+        if(pvArray==null) {
+            System.err.printf("%s is not a scalar array%s", channelName);
+            return;
+        }
+        if(!pvArray.getScalarArray().getElementType().isNumeric()) {
+            System.err.printf("%s is not a numeric array%n", channelName);
+            return;
+        }
+        double[] value = easyGet.getDoubleArray();
+        int length = value.length;
+        System.out.printf("first getDoubleArray %s%n[",channelName);
+        for(int i=0;i&lt;length;i++) {
+              if(i%10 == 0) {
+                   System.out.printf("%n  ");
+              }
+              if(i!=0) System.out.printf(",");
+              System.out.printf("%f",value[i]);
+        }
+        System.out.printf("%n]%n");
+        // at some later time get using already created array
+        easyGet.getDoubleArray(value, length);
+        System.out.printf("second getDoubleArray %s%n[",channelName);
+        for(int i=0;i&lt;length;i++) {
+              if(i%10 == 0) {
+                   System.out.printf("%n  ");
+              }
+              if(i!=0) System.out.printf(",");
+              System.out.printf("%f",value[i]);
+        }
+        System.out.printf("%n]%n");
+    }</pre>
+
+<p>The last array example is an example that handles all of the scalar arrays
+data types:</p>
+<pre>    static void exampleScalarArray(String channelName) {
+        EasyGet easyGet = easyPVA.createChannel(channelName).createGet();
+        PVScalarArray pvArray = easyGet.getScalarArrayValue();
+        if(pvArray==null) {
+            System.err.printf("%s is not a scalar array%s", channelName);
+            return;
+        }
+        ScalarType scalarType = pvArray.getScalarArray().getElementType();
+        switch(scalarType) {
+            case pvBoolean: {
+                boolean[] value = easyPVA.createChannel(
+                    channelName).createGet().getBooleanArray();
+                System.out.printf("%s%n[",channelName);
+                for(int i=0;i&lt;value.length;i++) {
+                      if(i%10 == 0) {
+                           System.out.printf("%n  ");
+                      }
+                      if(i!=0) System.out.printf(",");
+                      System.out.printf("%b",value[i]);
+                }
+                System.out.printf("%n]%n");
+            }
+            break;
+            case pvByte: {
+                byte[] value = easyPVA.createChannel(
+                    channelName).createGet().getByteArray();
+                System.out.printf("%s%n[",channelName);
+                for(int i=0;i&lt;value.length;i++) {
+                      if(i%10 == 0) {
+                           System.out.printf("%n  ");
+                      }
+                      if(i!=0) System.out.printf(",");
+                      System.out.printf("%d",value[i]);
+                }
+                System.out.printf("%n]%n");
+            }
+            break;
+            case pvShort: {
+                short[] value = easyPVA.createChannel(
+                    channelName).createGet().getShortArray();
+                System.out.printf("%s%n[",channelName);
+                for(int i=0;i&lt;value.length;i++) {
+                      if(i%10 == 0) {
+                           System.out.printf("%n  ");
+                      }
+                      if(i!=0) System.out.printf(",");
+                      System.out.printf("%d",value[i]);
+                }
+                System.out.printf("%n]%n");
+            }
+            break;
+            case pvInt: {
+                int[] value = easyPVA.createChannel(
+                    channelName).createGet().getIntArray();
+                System.out.printf("%s%n[",channelName);
+                for(int i=0;i&lt;value.length;i++) {
+                      if(i%10 == 0) {
+                           System.out.printf("%n  ");
+                      }
+                      if(i!=0) System.out.printf(",");
+                      System.out.printf("%d",value[i]);
+                }
+                System.out.printf("%n]%n");
+            }
+            break;
+            case pvLong: {
+                long[] value = easyPVA.createChannel(
+                     channelName).createGet().getLongArray();
+                System.out.printf("%s%n[",channelName);
+                for(int i=0;i&lt;value.length;i++) {
+                      if(i%10 == 0) {
+                           System.out.printf("%n  ");
+                      }
+                      if(i!=0) System.out.printf(",");
+                      System.out.printf("%d",value[i]);
+                }
+                System.out.printf("%n]%n");
+            }
+            break;
+            case pvFloat: {
+                float[] value = easyPVA.createChannel(
+                    channelName).createGet().getFloatArray();
+                System.out.printf("%s%n[",channelName);
+                for(int i=0;i&lt;value.length;i++) {
+                      if(i%10 == 0) {
+                           System.out.printf("%n  ");
+                      }
+                      if(i!=0) System.out.printf(",");
+                      System.out.printf("%f",value[i]);
+                }
+                System.out.printf("%n]%n");
+            }
+            break;
+            case pvDouble : {
+                double[] value = easyPVA.createChannel(
+                    channelName).createGet().getDoubleArray();
+                System.out.printf("%s%n[",channelName);
+                for(int i=0;i&lt;value.length;i++) {
+                      if(i%10 == 0) {
+                           System.out.printf("%n  ");
+                      }
+                      if(i!=0) System.out.printf(",");
+                      System.out.printf("%f",value[i]);
+                }
+                System.out.printf("%n]%n");
+            }
+            break;
+            case pvString : {
+                String[] value = easyPVA.createChannel(
+                    channelName).createGet().getStringArray();
+                System.out.printf("%s%n[",channelName);
+                for(int i=0;i&lt;value.length;i++) {
+                      if(i%10 == 0) {
+                           System.out.printf("%n  ");
+                      }
+                      if(i!=0) System.out.printf(",");
+                      System.out.printf("%s",value[i]);
+                }
+                System.out.printf("%n]%n");
+            }
+            break;
+        }
+    }</pre>
+
+<h3>MultiGet</h3>
+
+<p>TBD</p>
+
+<h3>Put Scalar</h3>
+
+<p>The examples in this section are taken from ExampleEasyPutScalar.java</p>
+
+<p>The first example is a simple way to get a scalar value from a channel. This
+example has one line of code that puts a double to the value field of the
+specified channel. If anything goes wrong a message is displayed on standard
+out.</p>
+<pre>    static void exampleDouble(String channelName, double value) {
+       easyPVA.createChannel(channelName).createPut(
+            "record[process=true]field(value)").putDouble(value);
+    }</pre>
+
+<p>The following example detects problems without using exceptions.. Each
+method of EasyPVA that can cause problems returns a boolean result with true
+meaning OK and false meaning that there is a problem. The method getStatus is
+called to find the problem.</p>
+<pre>    static void exampleDoubleCheck(String channelName,double value) {
+        easyPVA.setAuto(false, true);
+        EasyChannel channel =  easyPVA.createChannel(channelName);
+        boolean result = channel.connect(2.0);
+        if(!result) {
+            System.out.printf(
+                    "exampleDoubleCheck %s channel connect failed %s%n",
+                    channelName,
+                    channel.getStatus());
+            easyPVA.setAuto(true, true);
+            return;
+        }
+        EasyPut put = channel.createPut();
+        result = put.connect();
+        if(!result) {
+            System.out.printf(
+                    "exampleDoubleCheck %s get connect failed %s%n",
+                    channelName,
+                    put.getStatus());
+            easyPVA.setAuto(true, true);
+            return;
+        }
+        result = put.putDouble(value);
+        if(!result) {
+            System.out.printf(
+                "exampleDoubleCheck %s putDouble failed %s%n",
+                channelName,
+                put.getStatus());
+            easyPVA.setAuto(true, true);
+            return;
+        }
+        put.issuePut();
+        result = put.waitPut();
+        if(!result) {
+            System.out.printf(
+                "exampleDoubleCheck %s waitPut failed %s%n",
+                channelName,
+                put.getStatus());
+            easyPVA.setAuto(true, true);
+            return;
+        }
+        easyPVA.setAuto(true, true);
+    }</pre>
+
+<h3>Put Array</h3>
+
+<p>The examples in this section are taken from ExampleEasyPutArray.java</p>
+
+<p>The following puts a value to an array channel. This example makes no checks
+to look for problems. If anything goes wrong, e. g. channel not found, no value
+field, value not an array, etc, a message is displayed.</p>
+<pre>    static void exampleDoubleArrayNoChecks(String channelName) {
+        int len = 5;
+        double[] value = new double[5];
+        for(int i=0; i&lt; len; i++) value[i] = i;
+        int num = easyPVA.createChannel(
+            channelName).createPut().putDoubleArray(value,len);
+        System.out.printf("%s put %d elements%n",channelName,num);
+    }</pre>
+
+<p>The next example also puts an array of double values but checks for
+problems:</p>
+<pre>    static void exampleDoubleArray(String channelName) {
+        easyPVA.setAuto(false, true);
+        int length = 5;
+        double[] value = new double[5];
+        for(int i=0; i&lt; length; i++) value[i] = i;
+        EasyChannel channel =  easyPVA.createChannel(channelName);
+        boolean result = channel.connect(2.0);
+        if(!result) {
+            System.err.printf(
+                "exampleDoubleCheck %s channel connect failed %s%n",
+                channelName,
+                channel.getStatus());
+            easyPVA.setAuto(true, true);
+            return;
+        }
+        EasyPut put = channel.createPut();
+        result = put.connect();
+        if(!result) {
+            System.err.printf(
+                "exampleDoubleCheck %s put connect failed %s%n",
+                channelName,
+                put.getStatus());
+            easyPVA.setAuto(true, true);
+            return;
+        }
+        PVField pvField = put.getValue();
+        if(pvField.getField().getType()!=Type.scalarArray) {
+            System.err.printf(
+                    "exampleDoubleCheck %s value is not a scalar aarray %s%n",
+                    channelName,
+                    put.getStatus());
+            easyPVA.setAuto(true, true);
+            return;
+        }
+        PVScalarArray pvScalarArray = (PVScalarArray)pvField;
+        if(!pvScalarArray.getScalarArray().getElementType().isNumeric()) {
+            System.err.printf(
+                    "exampleDoubleCheck %s value is not a numeric scalar array %s%n",
+                    channelName,
+                    put.getStatus());
+            easyPVA.setAuto(true, true);
+            return;
+        }
+        put.putDoubleArray(value, length);
+        put.issuePut();
+        result = put.waitPut();
+        if(!result) {
+            System.err.printf(
+                "exampleDoubleCheck %s wait put failed %s%n",
+                channelName,
+                put.getStatus());
+            easyPVA.setAuto(true, true);
+            return;
+        }
+        channel.destroy();
+        easyPVA.setAuto(true, true);
+    }</pre>
+
+<p>The last array example is an example that handles all of the scalar arrays
+data types:</p>
+<pre>    static void exampleScalarArray(String channelName) {
+        EasyGet easyGet = easyPVA.createChannel(channelName).createGet();
+        PVScalarArray pvArray = easyGet.getScalarArrayValue();
+        if(pvArray==null) {
+            System.err.printf("%s is not a scalar array%s", channelName);
+            return;
+        }
+        ScalarType scalarType = pvArray.getScalarArray().getElementType();
+        switch(scalarType) {
+            case pvBoolean: {
+                int length = 5;
+                boolean[] value = new boolean[5];
+                value[0] = value[4] = true;
+                value[1] = value[2] = value[3] = false;
+                int num  = easyPVA.createChannel(
+                    channelName).createPut().putBooleanArray(value,length);
+                System.out.printf("%s put %d values%n",channelName,num);
+            }
+            break;
+            case pvByte: {
+                int length = 5;
+                byte[] value = new byte[5];
+                for(int i=0; i&lt;length; i++) value[i] = (byte)i;
+                int num  = easyPVA.createChannel(
+                    channelName).createPut().putByteArray(value,length);
+                System.out.printf("%s put %d values%n",channelName,num);
+            }
+            break;
+            case pvShort: {
+                int length = 5;
+                short[] value = new short[5];
+                for(int i=0; i&lt;length; i++) value[i] = (short)(i*10);
+                int num  = easyPVA.createChannel(
+                    channelName).createPut().putShortArray(value,length);
+                System.out.printf("%s put %d values%n",channelName,num);
+            }
+            break;
+            case pvInt: {
+                int length = 5;
+                int[] value = new int[5];
+                for(int i=0; i&lt;length; i++) value[i] = i*100;
+                int num  = easyPVA.createChannel(
+                    channelName).createPut().putIntArray(value,length);
+                System.out.printf("%s put %d values%n",channelName,num);
+            }
+            break;
+            case pvLong: {
+                int length = 5;
+                long[] value = new long[5];
+                for(int i=0; i&lt;length; i++) value[i] = (long)(i*1000);
+                int num  = easyPVA.createChannel(
+                    channelName).createPut().putLongArray(value,length);
+                System.out.printf("%s put %d values%n",channelName,num);
+            }
+            break;
+            case pvFloat: {
+                int length = 5;
+                float[] value = new float[5];
+                for(int i=0; i&lt;length; i++) value[i] = i;
+                int num  = easyPVA.createChannel(
+                    channelName).createPut().putFloatArray(value,length);
+                System.out.printf("%s put %d values%n",channelName,num);
+            }
+            break;
+            case pvDouble : {
+                int length = 5;
+                double[] value = new double[5];
+                for(int i=0; i&lt;length; i++) value[i] = 1.5*(i*100);
+                int num  = easyPVA.createChannel(
+                    channelName).createPut().putDoubleArray(value,length);
+                System.out.printf("%s put %d values%n",channelName,num);
+            }
+            break;
+            case pvString : {
+                int length = 5;
+                String[] value = new String[5];
+                value[0] = "name 0";
+                value[1] = "name 1";
+                value[2] = "name 2";
+                value[3] = "name 3";
+                value[4] = "name 4";
+                int num  = easyPVA.createChannel(
+                        channelName).createPut().putStringArray(value,length);
+                System.out.printf("%s put %d values%n",channelName,num);
+            }
+            break;
+        }
+    }
+}</pre>
+
+<h3>MultiPut</h3>
+
+<p>TBD</p>
+
+<h3>PutGet</h3>
+
+<p>TBD</p>
+
+<h3>RPC</h3>
+
+<p>TBD</p>
+
+<h3>Introspection</h3>
+
+<p>TBD</p>
+
+<h3>Process</h3>
+
+<p>TBD</p>
+
+<h3>Array</h3>
+
+<p>TBD</p>
+
+<h3>Monitor</h3>
+
+<p>TBD</p>
+
+<h2>EasyPVA</h2>
+
+<p>The EasyPVAFactory API is:</p>
+<pre>    class EasyPVAFactory {
+        static EasyPVA get();
+    }</pre>
+
+<p>where</p>
+<dl>
+  <dt>create</dt>
+    <dd>Gets the single instance of EasyPVA. The first time this is called it
+      creates the single instance and also starts the pvAccess client
+    factory.</dd>
+</dl>
+
+<p>The EasyPVA API is:</p>
+<pre>public interface EasyPVA {
+    void destroy();
+    EasyChannel createChannel(String channelName);
+    EasyMultiChannel createMultiChannel(String[] channelNames);
+    EasyChannel createChannel(String channelName,String providerName);
+    EasyMultiChannel createMultiChannel(String[] channelNames,String providerName);
+    void setRequester(Requester requester);
+    void clearRequester();
+    void setStatus(Status status);
+    Status getStatus();
+    void setAuto(boolean get, boolean put);
+    boolean isAutoGet();
+    boolean isAutoPut();
+    void setAutoMessage(Status.StatusType type);
+}</pre>
+
+<p>where</p>
+<dl>
+  <dt>destroy</dt>
+    <dd>This will cleanup all resources created by EasyPVA. This should only be
+      called when the client process is ready to exit.</dd>
+  <dt>createChannel</dt>
+    <dd>Creates an instance of EasyChannel. </dd>
+  <dt>createMultiChannel</dt>
+    <dd>Create an instance of EasyMultiChannel.</dd>
+  <dt>setRequester</dt>
+    <dd>Set a requester. The default is for EasyPVA to handle messages by
+      printing to System.out.</dd>
+  <dt>clearRequester</dt>
+    <dd>Clear the requester. EasyPVA will handle messages.</dd>
+  <dt>setStatus</dt>
+    <dd>Set a new status value. The new value will replace the current status.
+      The initial status is statusOK. This method is normally only called by
+      easyPVA methods to report problems.</dd>
+  <dt>getStatus</dt>
+    <dd>Get the latest status. Calling this resets the latest status to
+      statusOK.</dd>
+  <dt>setAuto</dt>
+    <dd>Set auto state. This is a global state for other Easy classes. The
+      default values for both get and put are true. </dd>
+  <dt>isAutoGet</dt>
+    <dd>Is autoGet true</dd>
+  <dt>isAutoPut</dt>
+    <dd>Is autoPut true</dd>
+  <dt>setAutoMessage</dt>
+    <dd>This determines if message is called as a result of setStatus. The
+      argument is the minimum status which causes message to be called. The
+      default is WARNING. </dd>
+</dl>
+
+<p><span style="font-weight:bold;">NOTE</span>: pvIOCJava has a package named
+caV3. It has a caV3 server that allows a caV3 client to access records in
+pvIOCJava BUT it also has client code that allows a pvAccess client to use
+jca/caj to communicate with a V3 record. This client code <span
+style="font-weight:bold;">SHOULD</span> be moved to pvAccess and become a
+standard provider.</p>
+
+<h2>EasyChannel</h2>
+
+<p>An <span style="font-weight:bold;">EasyChannel</span> is created via a call
+to <span style="font-weight:bold;">easypva.createChannel()</span>. The first
+call to a <span style="font-weight:bold;">EasyChannel</span> method blocks
+until the channel is connected or a timeout occurs. If a channel can not be
+created then the first time a <span
+style="font-weight:bold;">EasyChannel</span> method is called an exception is
+thrown. The only exception is <span style="font-weight:bold;">getStatus</span>.
+If there was a problem creating the channel, status will provide the reason.</p>
+
+<p>The EasyChannel API is:</p>
+<pre>interface EasyChannel {
+    void destroy();
+    String getChannelName();
+    Channel getChannel();
+    boolean connect(double timeout);
+    void issueConnect();
+    boolean waitConnect(double timeout);
+    EasyField createField();
+    EasyField createField(String subField);
+    EasyProcess createProcess();
+    EasyProcess createProcess(String request);
+    EasyProcess createProcess(PVStructure pvRequest);
+    EasyGet createGet();
+    EasyGet createGet(String request);
+    EasyGet createGet(PVStructure pvRequest);
+    EasyPut createPut();
+    EasyPut createPut(String request);
+    EasyPut createPut(PVStructure pvRequest);
+    EasyPutGet createPutGet();
+    EasyPutGet createPutGet(String request);
+    EasyPutGet createPutGet(PVStructure pvRequest);
+    EasyRPC createRPC();
+    EasyRPC createRPC(String request);
+    EasyRPC createRPC(PVStructure pvRequest);
+    EasyArray createArray();
+    EasyArray createArray(String request);
+    EasyArray createArray(PVStructure pvRequest);
+    EasyMonitor createMonitor();
+    EasyMonitor createMonitor(String request);
+    EasyMonitor createMonitor(PVStructure pvRequest);
+
+    void setStatus(Status status);
+    Status getStatus();
+}</pre>
+
+<p>where</p>
+<dl>
+  <dt>destroy</dt>
+    <dd>Destroy this channel and all resources that have been created via this
+      channel.</dd>
+  <dt>getChannelName</dt>
+    <dd>Get the name of the channel.</dd>
+  <dt>getChannel</dt>
+    <dd>Get the channel.</dd>
+  <dt>connect</dt>
+    <dd>Connect to the channel. This calls issueConnect and waitConnect.</dd>
+    <dd></dd>
+  <dt>issueConnect</dt>
+    <dd>Issue a connect request and return immediately.</dd>
+  <dt>waitConnect</dt>
+    <dd>Wait until the connection completes or for timeout.</dd>
+  <dt>createField</dt>
+    <dd>Creates an <span style="font-weight:bold;">EasyField</span>. If no
+      subField is specified then <span style="font-weight:bold;">""</span> is
+      assumed. The syntax for subField is defined in package <span
+      style="font-weight:bold;">org.epics.ca.client</span>.</dd>
+  <dt>createProcess</dt>
+    <dd>Creates an <span style="font-weight:bold;">EasyProcess</span>. If no
+      request is specified then <span style="font-weight:bold;">""</span> is
+      assumed. The other two methods use the syntax defined by <span
+      style="font-weight:bold;">ChannelRequest</span> as described in package
+      <span style="font-weight:bold;">org.epics.ca.client</span>.</dd>
+  <dt>createGet</dt>
+    <dd>Creates an <span style="font-weight:bold;">EasyGet</span>. If no
+      request is specified then <span
+      style="font-weight:bold;">"field(value,alarm,timeStamp)"</span> is
+      assumed. The other two methods use the syntax defined by <span
+      style="font-weight:bold;">ChannelRequest</span> as described in package
+      <span style="font-weight:bold;">org.epics.ca.client</span>.</dd>
+  <dt>createPut</dt>
+    <dd>Creates an <span style="font-weight:bold;">EasyPut</span>. If no
+      request is specified then <span
+      style="font-weight:bold;">"field(value,alarm,timeStamp)"</span> is
+      assumed. The other two methods use the syntax defined by <span
+      style="font-weight:bold;">ChannelRequest</span> as described in package
+      <span style="font-weight:bold;">org.epics.ca.client</span>.</dd>
+  <dt>createPutGet</dt>
+    <dd>Creates an EasyPutGet. If no request is specified then <span
+      style="font-weight:bold;">"record[process=true]putField(arguments)getField(result)"</span>
+      is assumed. The other two methods use the syntax defined by <span
+      style="font-weight:bold;">ChannelRequest</span> as described in package
+      <span style="font-weight:bold;">org.epics.ca.client</span>.</dd>
+  <dt>createRPC</dt>
+    <dd>Creates an EasyRPC. If no request is specified then <span
+      style="font-weight:bold;">"record[process=true]putField(arguments)getField(result)"
+      </span> is assumed. The other two methods use the syntax defined by <span
+      style="font-weight:bold;">ChannelRequest</span> as described in package
+      <span style="font-weight:bold;">org.epics.ca.client</span>.</dd>
+  <dt>createArray</dt>
+    <dd>Creates an EasyArray, which gets/puts a sub array. In no request is
+      specified <span style="font-weight:bold;">"field(value)"</span> is
+      assumed. The other two methods use the syntax defined by ChannelRequest
+      as described in package org.epics.ca.client.</dd>
+  <dt>createMonitor</dt>
+    <dd>Creates an EasyMonitor. If no request is specified <span
+      style="font-weight:bold;">record[queueSize=2]field(value,alarm,timeStamp)
+      </span> is assumed. The other two methods use the syntax defined by <span
+      style="font-weight:bold;">ChannelRequest</span> as described in package
+      <span style="font-weight:bold;">org.epics.ca.client</span>.</dd>
+  <dt>setStatus</dt>
+    <dd>Set a new status value. The new value will replace the current status.
+      The initial status is statusOK. </dd>
+  <dt>getStatus</dt>
+    <dd>Get the latest status. Calling this resets the latest status to
+      statusOK.</dd>
+</dl>
+
+<h2>EasyField</h2>
+
+<p>An <span style="font-weight:bold;">EasyField</span> is created via a call to
+<span style="font-weight:bold;">easychannel.createField</span>. The first call
+to an <span>EasyGet</span> method will block until create is complete. If a
+channel can not be created then the first time a <span
+style="font-weight:bold;">EasyField</span> method is called an exception is
+thrown. The only exception is <span style="font-weight:bold;">getStatus</span>.
+If there was a problem creating, status will provide the reason.</p>
+
+<p>The EasyField API is:</p>
+<pre>public interface EasyField {
+    void destroy();
+    boolean get();
+    void issueGet();
+    boolean waitGet();
+    Field getField();
+
+    void setStatus(Status status);
+    Status getStatus();
+}</pre>
+
+<p>where</p>
+<dl>
+  <dt>destroy</dt>
+    <dd>Destroy this <span style="font-weight:bold;">EasyField</span></dd>
+  <dt>get</dt>
+    <dd>Calls issueGet and then waitGet.</dd>
+  <dt>issueGet</dt>
+    <dd>Issue a get request and return immediately.</dd>
+  <dt>waitGet</dt>
+    <dd>Block until the get request completes. The return value indicates if
+      the get request was successful, If not the request fails, i. e. false is
+      returned, than getStatus can be called to find the reason. </dd>
+  <dt>getField</dt>
+    <dd>Get the introspection interace.</dd>
+  <dt>setStatus</dt>
+    <dd>Set a new status value. The new value will replace the current status.
+      The initial status is statusOK. </dd>
+  <dt>getStatus</dt>
+    <dd>Get the latest status. Calling this resets the latest status to
+      statusOK.</dd>
+</dl>
+
+<h2>EasyProcess</h2>
+
+<p>An <span style="font-weight:bold;">EasyProcess</span> is created via a call
+to <span style="font-weight:bold;">easychannel.createProcess</span>. The first
+call to an <span>EasyGet</span> method will block until create is complete. If
+a channel can not be created then the first time a <span
+style="font-weight:bold;">EasyProcess</span> method is called an exception is
+thrown. The only exception is <span style="font-weight:bold;">getStatus</span>.
+If there was a problem creating, status will provide the reason.</p>
+
+<p>The EasyProcess API is:</p>
+<pre>public interface EasyProcess {
+    void destroy();
+    boolean connect();
+    void issueConnect();
+    boolean waitConnect();
+    boolean process();
+    void issueProcess();
+    boolean waitProcess();
+
+    void setStatus(Status status);
+    Status getStatus();
+}</pre>
+
+<p>where</p>
+<dl>
+  <dt>destroy</dt>
+    <dd>Destroy this <span style="font-weight:bold;">EasyProcess</span></dd>
+  <dt>connect</dt>
+    <dd>Connect to the channel. This blocks until connected.</dd>
+  <dt>issueConnect</dt>
+    <dd>Issue a connect request and return immediately.</dd>
+  <dt>waitConnect</dt>
+    <dd>Wait until the connection completes or for timeout/</dd>
+  <dt>process</dt>
+    <dd>Calls issueProcess and then waitProcess.</dd>
+  <dt>issueProcess</dt>
+    <dd>Issue a process request and return immediately.</dd>
+  <dt>waitProcess</dt>
+    <dd>Block until the process request completes. getStatus can be called to
+      see if the request was successful.</dd>
+  <dt>setStatus</dt>
+    <dd>Set a new status value. The new value will replace the current status.
+      The initial status is statusOK. </dd>
+  <dt>getStatus</dt>
+    <dd>Get the latest status. Calling this resets the latest status to
+      statusOK.</dd>
+</dl>
+
+<h2>EasyGet</h2>
+
+<p>An <span style="font-weight:bold;">EasyGet</span> is created via a call to
+<span style="font-weight:bold;">easychannel.createGet</span>. The first call to
+an <span>EasyGet</span> method will block until create is complete. If a
+channel can not be created then the first time a <span
+style="font-weight:bold;">EasyGet</span> method is called an exception is
+thrown. The only exception is <span style="font-weight:bold;">getStatus</span>.
+If there was a problem creating, status will provide the reason.</p>
+
+<p>The EasyGet API is:</p>
+<pre>public interface EasyGet {
+    void destroy();
+    boolean connect();
+    void issueConnect();
+    boolean waitConnect();
+    boolean get();
+    void issueGet();
+    boolean waitGet();
+    Alarm getAlarm();
+    TimeStamp getTimeStamp();
+    boolean hasValue();
+    boolean isValueScalar();
+    PVField getValue();
+    PVScalar getScalarValue();
+    PVScalarArray getScalarArrayValue();
+
+    boolean getBoolean();
+    byte getByte();
+    short getShort();
+    int getInt();
+    long getLong();
+    float getFloat();
+    double getDouble();
+    String getString();
+
+    boolean[] getBooleanArray();
+    byte[] getByteArray();
+    short[] getShortArray();
+    int[] getIntArray();
+    long[] getLongArray();
+    float[] getFloatArray();
+    double[] getDoubleArray();
+    String[] getStringArray();
+
+    int getBooleanArray(boolean[] value,int length);
+    int getByteArray(byte[] value,int length);
+    int getShortArray(short[] value,int length);
+    int getIntArray(int[] value,int length);
+    int getLongArray(long[] value,int length);
+    int getFloatArray(float[] value,int length);
+    int getDoubleArray(double[] value,int length);
+    int getStringArray(String[] value,int length);
+
+    PVStructure getPVStructure();
+    BitSet getBitSet();
+
+    void setStatus(Status status);
+    Status getStatus();
+}</pre>
+
+<p>where</p>
+<dl>
+  <dt>destroy</dt>
+    <dd>Destroy this <span style="font-weight:bold;">EasyGet</span></dd>
+  <dt>connect</dt>
+    <dd>Connect to the channel. This blocks until connected.</dd>
+  <dt>issueConnect</dt>
+    <dd>Issue a connect request and return immediately.</dd>
+  <dt>waitConnect</dt>
+    <dd>Wait until the connection completes or for timeout/</dd>
+  <dt>get</dt>
+    <dd>Call issueGet and then waitGet. The methods below, except getAlarm and
+      getTimeStamp, have the following feature: If autoGet is true then the
+      method calls get before returning the data.</dd>
+  <dt>issueGet</dt>
+    <dd>Issue a get request and return immediately.</dd>
+  <dt>waitGet</dt>
+    <dd>Block until the get request completes. The return value indicates if
+      the get request was successful, If not the request fails, i. e. false is
+      returned, than getStatus can nbe called to find the reason. </dd>
+  <dt>getAlarm</dt>
+    <dd>Get the alarm. If the create request did not specify alarm the status
+      and severity will both be <span style="font-weight:bold;">NONE</span> and
+      the message will be "<span style="font-weight:bold;"></span>".</dd>
+  <dt>getTimeStamp</dt>
+    <dd>Get the time stamp. If the create request did not specify timeStamp all
+      elements of the timeStamp will have the value 0.</dd>
+  <dt>hasValue</dt>
+    <dd>Is there a field named value in the top level structure returned by
+      ChannelGet?</dd>
+  <dt>isValueScalar</dt>
+    <dd>Is the value field a scalar?</dd>
+  <dt>getValue</dt>
+    <dd>Return the interface for the value field or null if no value field.</dd>
+  <dt>getScalarValue</dt>
+    <dd>Return the interface for a scalar value field or null if no scalar
+      value field.</dd>
+  <dt>get ScalarArrayValue</dt>
+    <dd>Return the interface for a scalar array value field or null if no
+      scalar array value field.</dd>
+  <dt>getBoolean</dt>
+    <dd>Get the boolean value. If value is not a boolean setStatus is called
+      and false is returned.</dd>
+  <dt>getByte</dt>
+  <dt>getShort</dt>
+  <dt>getInt</dt>
+  <dt>getLong</dt>
+  <dt>getFloat</dt>
+  <dt>getDouble</dt>
+    <dd>Get the value as the specified type. If value is not a numeric scalar
+      setStatus is called and 0 is returned.</dd>
+  <dt>getString</dt>
+    <dd>Get the value as a string. If value is not a scalar setStatus is called
+      and 0 is returned.</dd>
+  <dt>getBooleanArray</dt>
+    <dd>If the value is not a boolean array null is returned. There are two
+      versions. One returns a newly created copy of the value. The other copies
+      the data from the value to the array supplied by the caller.</dd>
+  <dt>getByteArray</dt>
+  <dt>getShortArray</dt>
+  <dt>getIntArray</dt>
+  <dt>getLongArray</dt>
+  <dt>getFloatArray</dt>
+  <dt>getDoubleArray</dt>
+    <dd>If the value is not a numeric array null is returned. There are two
+      versions. One returns a newly created copy of the value. The other copies
+      the data from the value to the array supplied by the caller.</dd>
+  <dt>getStringArray</dt>
+    <dd> If value is not a string array null is returned. There are two
+      versions. One returns a newly created copy of the array and the other
+      copies the data from the value to the array supplied by the caller.</dd>
+  <dt>getPVStructure</dt>
+    <dd>Get top level <span style="font-weight:bold;">PVStructure</span> for
+      the data. The client can use nor<span
+      style="font-weight:bold;"></span>mal pvData introspection to access the
+      data.</dd>
+  <dt>getBitSet</dt>
+    <dd>Get the bitSet for the top level <span
+      style="font-weight:bold;">PVStructure</span>.</dd>
+  <dt>setStatus</dt>
+    <dd>Set a new status value. The new value will replace the current status.
+      The initial status is statusOK. </dd>
+  <dt>getStatus</dt>
+    <dd>Get the latest status. Calling this resets the latest status to
+      statusOK.</dd>
+</dl>
+
+<h2>EasyPut</h2>
+
+<p>An <span style="font-weight:bold;">EasyPut</span> is created via a call to
+<span style="font-weight:bold;">easychannel.createPut</span>. The first call to
+an <span>EasyPut</span> method will block until create is complete. If a
+channel can not be created then the first time a <span
+style="font-weight:bold;">EasyPut</span> method is called an exception is
+thrown. The only exception is <span style="font-weight:bold;">getStatus</span>.
+If there was a problem creating, status will provide the reason.</p>
+
+<p>The EasyPut API is:</p>
+<pre>public interface EasyPut {
+    void destroy();
+    boolean connect();
+    void issueConnect();
+    boolean waitConnect();
+    boolean get();
+    void issueGet();
+    boolean waitGet();
+    boolean put();
+    void issuePut();
+    boolean waitPut();
+
+    boolean hasValue();
+    boolean isValueScalar();
+    PVField getValue();
+    PVScalar getScalarValue();
+    PVArray getArrayValue();
+    PVScalarArray getScalarArrayValue();
+
+    boolean getBoolean();
+    byte getByte();
+    short getShort();
+    int getInt();
+    long getLong();
+    float getFloat();
+    double getDouble();
+    String getString();
+
+    void putBoolean(boolean value);
+    void putByte(byte value);
+    void putShort(short value);
+    void putInt(int value);
+    void putLong(int value);
+    void putFloat(float value);
+    void putDouble(double value);
+    void putString(String value);
+
+    boolean[] getBooleanArray();
+    byte[] getByteArray();
+    short[] getShortArray();
+    int[] getIntArray();
+    long[] getLongArray();
+    float[] getFloatArray();
+    double[] getDoubleArray();
+    String[] getStringArray();
+
+    void getBooleanArray(boolean[] value,int length);
+    void getByteArray(byte[] value,int length);
+    void getShortArray(short[] value,int length);
+    void getIntArray(int[] value,int length);
+    void getLongArray(long[] value,int length);
+    void getFloatArray(float[] value,int length);
+    void getDoubleArray(double[] value,int length);
+    void getStringArray(String[] value,int length);
+
+    void putBooleanArray(boolean[] value,int length);
+    void putByteArray(byte[] value,int length);
+    void putShortArray(short[] value,int length);
+    void putIntArray(int[] value,int length);
+    void putLongArray(int[] value,int length);
+    void putFloatArray(float[] value,int length);
+    void putDoubleArray(double[] value,int length);
+    void putStringArray(String[] value,int length);
+
+    PVStructure getPVStructure();
+    BitSet getBitSet();
+
+    void setStatus(Status status);
+    Status getStatus();
+}</pre>
+
+<p>where</p>
+<dl>
+  <dt>destroy</dt>
+    <dd>Destroy this <span style="font-weight:bold;">EasyPut</span></dd>
+  <dt>connect</dt>
+    <dd>Connect to the channel. This blocks until connected.</dd>
+  <dt>issueConnect</dt>
+    <dd>Issue a connect request and return immediately.</dd>
+  <dt>waitConnect</dt>
+    <dd>Wait until the connection completes or for timeout/</dd>
+  <dt>get</dt>
+    <dd>Calls issueGet and then waitGet. The get methods below honor autoGet
+      just like EasuGet.</dd>
+  <dt>issueGet</dt>
+    <dd>Issue a get request and return immediately.</dd>
+  <dt>waitGet</dt>
+    <dd>Block until the get request completes. The return value indicates if
+      the get request was successful, If not the request fails, i. e. false is
+      returned, than getStatus can nbe called to find the reason. </dd>
+  <dt>put</dt>
+    <dd>Calls issuePut and waitPut. The put methods below honor autoPut. Thus
+      if autoPut is true the put methods call put before returning.</dd>
+  <dt>issuePut</dt>
+    <dd>Issue a put request and return immediately.</dd>
+  <dt>waitPut</dt>
+    <dd>Block until the put request completes. The return value indicates if
+      the put request was successful, If not the request fails, i. e. false is
+      returned, than getStatus can nbe called to find the reason. </dd>
+  <dt>hasValue</dt>
+    <dd>Is there a field named value in the top level structure returned by
+      ChannelPut?</dd>
+  <dt>isValueScalar</dt>
+    <dd>Is the value field a scalar?</dd>
+  <dt>getValue</dt>
+    <dd>Return the interface for the value field or null if no value field.</dd>
+  <dt>getScalarValue</dt>
+    <dd>Return the interface for a scalar value field or null if no scalar
+      value field.</dd>
+  <dt>get ScalarArrayValue</dt>
+    <dd>Return the interface for a scalar array value field or null if no
+      scalar array value field.</dd>
+  <dt>getBoolean</dt>
+    <dd>Put the boolean value. If the value is not a boolen then setStatus is
+      called and false is returned.</dd>
+  <dt>getByte</dt>
+  <dt>getShort</dt>
+  <dt>getInt</dt>
+  <dt>getLong</dt>
+  <dt>getFloat</dt>
+  <dt>getDouble</dt>
+    <dd>Get the value as the specified type. If value is not a numeric scalar
+      setStatus is called and 0 is returned.</dd>
+  <dt>getString</dt>
+    <dd>Get the value as a string. If value is not a scalar setStatus is called
+      and 0 is returned.</dd>
+  <dt>putBoolean</dt>
+    <dd>Put the boolean value. If value field is not a boolean setStatus is
+      callled.</dd>
+  <dt>putByte</dt>
+  <dt>putShort</dt>
+  <dt>putInt</dt>
+  <dt>putLong</dt>
+  <dt>putFloat</dt>
+  <dt>putDouble</dt>
+    <dd>Put value into the value field . If the value fielld is not a numeric
+      scalar setStatus is called and 0 is returned.</dd>
+  <dt>putString</dt>
+    <dd>Put the value as a string. If value field is not a string setStatus is
+      called.</dd>
+  <dt>getBooleanArray</dt>
+    <dd>If the value is not a boolean array null is returned. There are two
+      versions. One returns a newly created copy of the value. The other copies
+      the data from the value to the array supplied by the caller.</dd>
+  <dt>getByteArray</dt>
+  <dt>getShortArray</dt>
+  <dt>getIntArray</dt>
+  <dt>getLongArray</dt>
+  <dt>getFloatArray</dt>
+  <dt>getDoubleArray</dt>
+    <dd>If the value is not a numeric array null is returned. There are two
+      versions. One returns a newly created copy of the value. The other copies
+      the data from the value to the array supplied by the caller.</dd>
+  <dt>getStringArray</dt>
+    <dd>If value is not a string array null is returned. There are two
+      versions. One returns a newly created copy of the array and the other
+      copies the data from the value to the array supplied by the caller.</dd>
+  <dt>putBooleanArray</dt>
+    <dd>If the value is not a boolean array setStatus is called. Otherwise the
+      value is copied to the value field.</dd>
+  <dt>putByteArray</dt>
+  <dt>putShortArray</dt>
+  <dt>putIntArray</dt>
+  <dt>putLongArray</dt>
+  <dt>putFloatArray</dt>
+  <dt>putDoubleArray</dt>
+    <dd>If the value is not a numeric scalar array setStatus is called.
+      Otherwise the value is copied to the value field.</dd>
+  <dt>putStringArray</dt>
+    <dd>If the value is not a string array setStatus is called. Otherwise the
+      value is copied to the value field.</dd>
+  <dt>getPVStructure</dt>
+    <dd>Get the top level <span style="font-weight:bold;">PVStructure</span>
+      for the data. The client can use normal pvData introspection to access
+      the data.</dd>
+  <dt>getBitSet</dt>
+    <dd>Get the bitSet for the top level <span
+      style="font-weight:bold;">PVStructure</span>. </dd>
+  <dt>setStatus</dt>
+    <dd>Set a new status value. The new value will replace the current status.
+      The initial status is statusOK. </dd>
+  <dt>getStatus</dt>
+    <dd>Get the latest status. Calling this resets the latest status to
+      statusOK.</dd>
+</dl>
+
+<h2>EasyPutGet</h2>
+
+<p>An <span style="font-weight:bold;">EasyPutGet</span> is created via a call
+to <span style="font-weight:bold;">easychannel.createPutGet</span>. The first
+call to a <span style="font-weight:bold;">EasyPutGet</span> method will block
+until creation is complete. If a channel can not be created then the first time
+a <span style="font-weight:bold;">EasyPutGet</span> method is called an
+exception is thrown. The only exception is <span
+style="font-weight:bold;">getStatus</span>. If there was a problem creating,
+status will provide the reason.</p>
+
+<p>The EasyPutGet API is:</p>
+<pre>public interface EasyPutGet {
+    void destroy();
+    boolean connect();
+    void issueConnect();
+    boolean waitConnect();
+    void putGet();
+    void getPut();
+    void getGet();
+    PVStructure getPVPutStructure();
+    PVStructure getPVGetStructure();
+    Alarm getAlarm();
+    TimeStamp getTimeStamp();
+
+    void setStatus(Status status);
+    Status getStatus();
+}</pre>
+
+<p>where</p>
+<dl>
+  <dt>destroy</dt>
+    <dd>Destroy this EasyPutGet</dd>
+  <dt>connect</dt>
+    <dd>Connect to the channel. This blocks until connected.</dd>
+  <dt>issueConnect</dt>
+    <dd>Issue a connect request and return immediately.</dd>
+  <dt>waitConnect</dt>
+    <dd>Wait until the connection completes or for timeout/</dd>
+  <dt>putGet</dt>
+    <dd>Do another putGet. It is assumed that the client has put new values
+      into the structure returned by getPVPutStructure.</dd>
+  <dt>getPut</dt>
+    <dd>Get the latest value of the put structure from the channel. This is
+      done automatically when the EasyPutGet is created.</dd>
+  <dt>getGet</dt>
+    <dd>Get the latest value of the get structure from the channel without
+      requesting that the channel be processed. This is done automatically when
+      the EasyPutGet is created.</dd>
+  <dt>getPVPutStructure</dt>
+    <dd>Get the put structure. This does NOT mean that the data is up to
+    date.</dd>
+  <dt>getPVGetStructure</dt>
+    <dd>Get the get structure. This does not mean the data is up to date.</dd>
+  <dt>getAlarm</dt>
+    <dd>Get the alarm. If the create request did not specify alarm the status
+      and severity will both be NONE and the message will be "alarm not
+      implemented".</dd>
+  <dt>getTimeStamp</dt>
+    <dd>Get the time stamp. If the create request did not specify timeStamp all
+      elements of the timeStamp will have the value 0.</dd>
+  <dt>setStatus</dt>
+    <dd>Set a new status value. The new value will replace the current status.
+      The initial status is statusOK. </dd>
+  <dt>getStatus</dt>
+    <dd>Get the latest status. Calling this resets the latest status to
+      statusOK.</dd>
+</dl>
+
+<h2>EasyRPC - Remote Procedure Call</h2>
+
+<p>An <span style="font-weight:bold;">EasyRPC</span> is created via a call to
+<span style="font-weight:bold;">easychannel.createRPC</span>. The first call to
+a <span>EasyRPC</span> method will block until creation is complete. If a
+channel can not be created then the first time a <span
+style="font-weight:bold;">EasyRPC</span> method is called an exception is
+thrown. The only exception is <span style="font-weight:bold;">getStatus</span>.
+If there was a problem creating, status will provide the reason.</p>
+
+<p>The EasyRPC API is:</p>
+<pre>public interface EasyRPC {
+    void destroy();
+    boolean connect();
+    void issueConnect();
+    boolean waitConnect();
+    PVStructure request(PVStructure request,boolean lastRequest);
+    void issueRequest(PVStructure request,boolean lastRequest);
+    PVStructure waitRequest();
+
+    void setStatus(Status status);
+    Status getStatus();
+}</pre>
+
+<p>where</p>
+<dl>
+  <dt>destroy</dt>
+    <dd>Destroy this EasyRPC</dd>
+  <dt>connect</dt>
+    <dd>Connect to the channel. This blocks until connected.</dd>
+  <dt>issueConnect</dt>
+    <dd>Issue a connect request and return immediately.</dd>
+  <dt>waitConnect</dt>
+    <dd>Wait until the connection completes or for timeout/</dd>
+  <dt>request</dt>
+    <dd>Make a remote procedure call and block until done. The result is
+      returned.</dd>
+  <dt>issueRequest</dt>
+    <dd>Issue a request and return immediately.</dd>
+  <dt>waitRequest</dt>
+    <dd>Wait for the request to complete.</dd>
+  <dt>setStatus</dt>
+    <dd>Set a new status value. The new value will replace the current status.
+      The initial status is statusOK. </dd>
+  <dt>getStatus</dt>
+    <dd>Get the latest status. Calling this resets the latest status to
+      statusOK.</dd>
+</dl>
+
+<h2>EasyArray</h2>
+
+<p>EasyArray allows a client to get and put a sub-array.</p>
+
+<p>An <span style="font-weight:bold;">EasyArray</span> is created via a call to
+<span style="font-weight:bold;">easychannel.createArray</span>. The first call
+to a <span style="font-weight:bold;">EasyArray</span> method will block until
+creation is complete. If a channel can not be created then the first time a
+<span style="font-weight:bold;">EasyArray</span> method is called an exception
+is thrown. The only exception is <span
+style="font-weight:bold;">getStatus</span>. If there was a problem creating,
+status will provide the reason.</p>
+
+<p>The EasyArray API is:</p>
+<pre>public interface EasyArray {
+    void destroy();
+    boolean connect();
+    void issueConnect();
+    boolean waitConnect();
+    PVArray getPVArray();
+    void get(int offset,int length);
+    void put(int offset,int length);
+
+    void getBoolean(boolean[] array, int offset, int length);
+    void getByte(byte[] array,int offset,int length);
+    void getShort(short[] array, int offset, int length);
+    void getInt(int[] array, int offset, int length);
+    void getLong(long[] array, int offset, int length);
+    void getFloat(float[] array, int offset, int length);
+    void getDouble(double[] array, int offset, int length);
+    void getString(String[] array, int offset, int length);
+    void getStructure(PVStructure[] array, int offset, int length);
+
+    void putBoolean(boolean[] array, int offset, int length);
+    void putByte(byte[] array,int offset,int length);
+    void putShort(short[] array, int offset, int length);
+    void putInt(int[] array, int offset, int length);
+    void putLong(long[] array, int offset, int length);
+    void putFloat(float[] array, int offset, int length);
+    void putDouble(double[] array, int offset, int length);
+    void putString(String[] array, int offset, int length);
+    void putStructure(PVStructure[] array, int offset, int length);
+
+    void setStatus(Status status);
+    Status getStatus();
+}</pre>
+
+<p>where</p>
+<dl>
+  <dt>destroy</dt>
+    <dd>Destroy this EasyArray</dd>
+  <dt>connect</dt>
+    <dd>Connect to the channel. This blocks until connected.</dd>
+  <dt>issueConnect</dt>
+    <dd>Issue a connect request and return immediately.</dd>
+  <dt>waitConnect</dt>
+    <dd>Wait until the connection completes or for timeout/</dd>
+  <dt>getPVArray</dt>
+    <dd>This gets the PVArray which holds data to get/put from the channel.</dd>
+  <dt>get</dt>
+    <dd>Get the specified sub arrray. It is put into PVArray starting a offset
+      0.</dd>
+  <dt>put</dt>
+    <dd>Put the specified sub arrray. It is taken from PVArray starting at
+      offset 0.</dd>
+  <dt>getBoolean</dt>
+    <dd>Get data from PVArray and put it into array. An exception is thrown if
+      PVArray is not a boolean array. Offset and length refer to array NOT to
+      PVArray.</dd>
+  <dt>getByte,...,getDouble</dt>
+    <dd>Transfer data from PVArray to array.</dd>
+  <dt>getString</dt>
+    <dd>Get data from PVArray and put it into array. An exception is thrown if
+      PVArray is not a string array.</dd>
+  <dt>getStructure</dt>
+    <dd>Get data from PVArray and put it into array. An exception is thrown if
+      pvArray is not a structure array.</dd>
+  <dt>putBoolean</dt>
+    <dd>Put data into PVArray from array. An exception is thrown if PVArray is
+      not a boolean array. Offset and length refer to array NOT to PVArray.</dd>
+  <dt>putByte,...,putDouble</dt>
+    <dd>Transfer data from array to PVArray.</dd>
+  <dt>putString</dt>
+    <dd>Put data into PVArray from array. An exception is thrown if PVArray is
+      not a string array.</dd>
+  <dt>putStructure</dt>
+    <dd>Put data into PVArray from array. An exception is thrown if PVArray is
+      not a structure array.</dd>
+  <dt>setStatus</dt>
+    <dd>Set a new status value. The new value will replace the current status.
+      The initial status is statusOK. </dd>
+  <dt>getStatus</dt>
+    <dd>Get the latest status. Calling this resets the latest status to
+      statusOK.</dd>
+</dl>
+
+<h2>EasyMonitor</h2>
+
+<p>An <span style="font-weight:bold;">EasyMonitor</span> is created via a call
+to <span style="font-weight:bold;">easychannel.createMonitor</span>. The first
+call to a <span style="font-weight:bold;">EasyMonitor</span> method will block
+until creation is complete. If a channel can not be created then the first time
+a <span style="font-weight:bold;">EasyMonitor</span> method is called an
+exception is thrown. The only exception is <span
+style="font-weight:bold;">getStatus</span>. If there was a problem creating,
+status will provide the reason.</p>
+
+<p>The EasyMonitor API is:</p>
+<pre>public interface EasyMonitor {
+    void destroy();
+    boolean connect();
+    void issueConnect();
+    boolean waitConnect();
+    void setRequester(MonitorRequester monitorRequester);
+    void start();
+    void stop();
+    PVStructure getEvent();
+    BitSet getChangedBitSet();
+    BitSet getOverrunBitSet();
+    void releaseEvent();
+
+    void setStatus(Status status);
+    Status getStatus();
+}</pre>
+
+<p>where</p>
+<dl>
+  <dt>destroy</dt>
+    <dd>Destroy this EasyPut</dd>
+  <dt>connect</dt>
+    <dd>Connect to the channel. This blocks until connected.</dd>
+  <dt>issueConnect</dt>
+    <dd>Issue a connect request and return immediately.</dd>
+  <dt>waitConnect</dt>
+    <dd>Wait until the connection completes or for timeout/</dd>
+  <dt>setRequester</dt>
+    <dd>Set the requester. If this is not sepcified the only way to get events
+      is to call getEvent.</dd>
+  <dt>getEvent</dt>
+    <dd>Get an event. This wil return null if no events are available. If data
+      is returned that this may not be called again until releaseEvent is
+      called.</dd>
+  <dt>getChangedBitSet</dt>
+    <dd>Get the changed bitSet for the last event.</dd>
+  <dt>getOverunBitSet</dt>
+    <dd>Get the overrun bitSet for the last event.</dd>
+  <dt>releaseEvent</dt>
+    <dd>If getEvent returns data then this must be called when the client is
+      done with the data.</dd>
+  <dt>setStatus</dt>
+    <dd>Set a new status value. The new value will replace the current status.
+      The initial status is statusOK. </dd>
+  <dt>getStatus</dt>
+    <dd>Get the latest status. Calling this resets the latest status to
+      statusOK.</dd>
+</dl>
+
+<h2>EasyMultiChannel</h2>
+
+<p>An <span style="font-weight:bold;">EasyMultiChannel</span> is created via a
+call to <span style="font-weight:bold;">easypva.createMultiChannel.</span> The
+first call to an <span style="font-weight:bold;">EasyMultiChannel</span> method
+blocks until creation is complete.If a channel can not be created then the
+first time a <span style="font-weight:bold;">EasyMultiChannel</span> method is
+called an exception is thrown. The only exception is <span
+style="font-weight:bold;">getStatus</span>. If there was a problem creating the
+multiChannel, status will provide the reason.</p>
+
+<p>The EasyMultiChannel API is:</p>
+<pre>public interface EasyMultiChannel{
+    void destroy();
+    boolean connect(double timeout);
+    void issueConnect();
+    boolean waitConnect(double timeout);
+    // EAField TBD
+    // EasyMultiProcess TBD 
+    EasyMultiGet createGet();
+    EasyMultiGet createGet(String request);
+    EasyMultiGet createGet(PVStructure pvRequest);
+    EasyMultiPut createPut();
+    EasyMultiPut createPut(String request);
+    EasyMultiPut createPut(PVStructure pvRequest);
+
+    void setStatus(Status status);
+    Status getStatus();
+}</pre>
+
+<p>where</p>
+<dl>
+  <dt>destroy</dt>
+    <dd>Destroy this channel and all resources that have been created via this
+      channel.</dd>
+  <dt>connect</dt>
+    <dd>Connect to the channel. This blocks until connected or timeout.</dd>
+  <dt>issueConnect</dt>
+    <dd>Issue a connect request and return immediately.</dd>
+  <dt>waitConnect</dt>
+    <dd>Wait until the connection completes or for timeout/</dd>
+  <dt>createGet</dt>
+    <dd>Creates an <span style="font-weight:bold;">EasyMultiGet</span>. If no
+      request is specified then "<span
+      style="font-weight:bold;">value,alarm,timeStamp</span>" is assumed. The
+      other two methods use the syntax defined by <span
+      style="font-family: Arial,Helvetica,sans-serif">ChannelRequest</span> as
+      described in package <span
+      style="font-weight:bold;">org.epics.ca.client</span>. The request refers
+      to the request for each individual channel. The get itself will also have
+      an alarm and a timeStamp.</dd>
+  <dt>setStatus</dt>
+    <dd>Set a new status value. The new value will replace the current status.
+      The initial status is statusOK. </dd>
+  <dt>getStatus</dt>
+    <dd>Get the latest status. Calling this resets the latest status to
+      statusOK.</dd>
+</dl>
+
+<h2>EasyMultiGet</h2>
+
+<p>An <span style="font-weight:bold;">EasyMultiGet</span> is created via a call
+to <span style="font-weight:bold;">easychannel.createMultiGet</span>. If a
+channel can not be created then the first time a <span
+style="font-weight:bold;">EasyMultiGet</span> method is called an exception is
+thrown. The only exception is <span style="font-weight:bold;">getStatus</span>.
+If there was a problem creating, status will provide the reason.</p>
+
+<p>The EasyMultiGet API is:</p>
+<pre> public interface EasyMultiGet {
+    void destroy();
+    boolean connect();
+    void issueConnect();
+    boolean waitConnect();
+    void get();
+    Alarm getAlarm();
+    TimeStamp getTimeStamp();
+    int getLength();
+
+    Alarm[] getAlarms();
+    TimeStamp[] getTimeStamps();
+    boolean[] isConnectedArray();
+    boolean[] getBooleanArray();
+    byte[] getByteArray();
+    short[] getShortArray();
+    int[] getIntArray();
+    long[] getLongArray();
+    float[] getFloatArray();
+    double[] getDoubleArray();
+    String[] getStringArray();
+
+    void getAlarms(Alarm[]alarms,int length);
+    void getTimeStamps(TimeStamp[]timeStamps,int length);
+    void isConnectedArray(boolean[]data,int length);
+    void getBooleanArray(boolean[]data,int length);
+    void getByteArray(byte[]data,int length);
+    void getShortArray(short[]data,int length);
+    void getIntArray(int[]data,int length);
+    void getLongArray(long[]data,int length);
+    void getFloatArray(float[]data,int length);
+    void getDoubleArray( double[]data,int length);
+    void getStringArray(String[]data,int length);
+
+    void setStatus(Status status);
+    Status getStatus();
+}</pre>
+
+<p>where</p>
+<dl>
+  <dt>destroy</dt>
+    <dd>Destroy this EasyMultiGet</dd>
+  <dt>connect</dt>
+    <dd>Connect to the channel. This blocks until connected.</dd>
+  <dt>issueConnect</dt>
+    <dd>Issue a connect request and return immediately.</dd>
+  <dt>waitConnect</dt>
+    <dd>Wait until the connection completes or for timeout/</dd>
+  <dt>get</dt>
+    <dd>Do another get. When <span
+      style="font-weight:bold;">EasyMultiGet</span> is successfully created it
+      automatically does the first get. If a get fails than the next call to
+      another method will throw an exception. The only exception is <span
+      style="font-weight:bold;">getStatus</span>. If there was a problem,
+      status will provide the reason. If an channel is not connected the
+      severity will be INVALID.</dd>
+  <dt>getAlarm</dt>
+    <dd>Get the alarm. This is the overall alarm for the get. The severity is
+      always at least as great as the greatest severity of the channel alarms.
+      It is also used to report other problems.</dd>
+  <dt>getTimeStamp</dt>
+    <dd>Get the time stamp. This is the time when that last get completed.</dd>
+  <dt>isConnectedArray</dt>
+    <dd>The connection state for each channel.</dd>
+  <dt>getBooleanArray</dt>
+    <dd>Get the boolean[] value. If each channel is not a boolean an exception
+      is thrown,</dd>
+  <dt>getByteArray</dt>
+    <dd>Get the value as a byte[]. If each channel is not a numeric scalar an
+      exception is thrown.</dd>
+  <dt>getShortArray</dt>
+    <dd>Get the value as a short[]. If each channel is not a numeric scalar an
+      exception is thrown.</dd>
+  <dt>getIntArray</dt>
+    <dd>Get the value as an int[]. If each channel is not a numeric scalar an
+      exception is thrown.</dd>
+  <dt>getLongArray</dt>
+    <dd>Get the value as a long[]. If each channel is not a numeric scalar an
+      exception is thrown.</dd>
+  <dt>getFloatArray</dt>
+    <dd>Get the value as a float[]. If each channel is not a numeric scalar an
+      exception is thrown.</dd>
+  <dt>getDoubleArray</dt>
+    <dd>Get the value as a double[]. If each channel is not a numeric scalar an
+      exception is thrown.</dd>
+  <dt>getStringArray</dt>
+    <dd>Get the value as a string[]. If each channel is not a scalar an
+      exception is thrown.</dd>
+  <dt>getAlarms</dt>
+    <dd>Get an array of the alarms for each channel. <span
+      style="font-weight:bold;">alarm_t</span> is an alarm structure. If the
+      request did not specify an alarm the array will be empty. Thus <span
+      style="font-weight:bold;">alarm_t[]</span> is a structure array with each
+      element being an alarm structure. If an individual channel does not have
+      an alarm the status and severity will both be <span
+      style="font-weight:bold;">NONE</span> and the message will be "<span
+      style="font-weight:bold;">alarm not implemented</span>".</dd>
+  <dt>getTimeStamps</dt>
+    <dd>Get an array of the timeStamps for each channel. If the request did not
+      include timeStamp then the array will be empty. <span
+      style="font-weight:bold;">timeStamp_t</span> is an alarm structure. Thus
+      <span style="font-weight:bold;">timeStamp_t[]</span> is a structure array
+      with each element being a timeStamp structure. If an individual channel
+      does not have a timeStamp then all elements of the timeStamp will have
+      the value 0.</dd>
+  <dt>setStatus</dt>
+    <dd>Set a new status value. The new value will replace the current status.
+      The initial status is statusOK. </dd>
+  <dt>getStatus</dt>
+    <dd>Get the latest status. Calling this resets the latest status to
+      statusOK.</dd>
+</dl>
+
+<h2>EasyMultiPut</h2>
+
+<p>An <span style="font-weight:bold;">EasyMultiPut</span> is created via a call
+to <span style="font-weight:bold;">easychannel.createMultiPut</span>. If a
+channel can not be created then the first time a <span
+style="font-weight:bold;">EasyMultiPut</span> method is called an exception is
+thrown. The only exception is <span style="font-weight:bold;">getStatus</span>.
+If there was a problem creating, status will provide the reason.</p>
+
+<p>The EasyMultiPut API is:</p>
+<pre>public interface EasyMultiPut {
+    void destroy();
+    boolean connect();
+    void issueConnect();
+    boolean waitConnect();
+    void get();
+    void put();
+    Alarm getAlarm();
+    TimeStamp getTimeStamp();
+
+    boolean[] isConnectedArray();
+    boolean[] getBooleanArray();
+    byte[] getByteArray();
+    short[] getShortArray();
+    int[] getIntArray();
+    long[] getLongArray();
+    float[] getFloatArray();
+    double[] getDoubleArray();
+    String[] getStringArray();
+
+    void isConnectedArray(boolean[]data,int length);
+    void getBooleanArray(boolean[]data,int length);
+    void getByteArray(byte[]data,int length);
+    void getShortArray(short[]data,int length);
+    void getIntArray(int[]data,int length);
+    void getLongArray(long[]data,int length);
+    void getFloatArray(float[]data,int length);
+    void getDoubleArray( double[]data,int length);
+    void getStringArray(String[]data,int length);
+
+    void putBooleanArray(boolean[] value,int length);
+    void putByteArray(byte[] value,int lengt);
+    void putShortArray(short[] value,int lengt);
+    void putIntArray(int[] value,int lengt);
+    void putLongArray(long[] value,int lengt);
+    void putFloatArray(float[] value,int lengt);
+    void putDoubleArray(double[] value,int lengt);
+    void putStringArray(String[] value,int lengt);
+
+    void setStatus(Status status);
+    Status getStatus();
+}</pre>
+
+<p>where</p>
+<dl>
+  <dt>destroy</dt>
+    <dd>Destroy this EasyMultiPut</dd>
+  <dt>connect</dt>
+    <dd>Connect to the channel. This blocks until connected.</dd>
+  <dt>issueConnect</dt>
+    <dd>Issue a connect request and return immediately.</dd>
+  <dt>waitConnect</dt>
+    <dd>Wait until the connection completes or for timeout/</dd>
+  <dt>get</dt>
+    <dd>Do another get. When <span
+      style="font-weight:bold;">EasyMultiPut</span> is successfully created it
+      automatically does the first get. If a get fails than the next call to
+      another method will throw an exception. The only exception is <span
+      style="font-weight:bold;">getStatus</span>. If there was a problem,
+      status will provide the reason. If an channel is not connected the
+      severity will be INVALID.</dd>
+  <dt>getAlarm</dt>
+    <dd>Put the alarm. This is the overall alarm for the get. The severity is
+      always at least as great as the greatest severity of the channel alarms.
+      It is also used to report other problems.</dd>
+  <dt>getTimeStamp</dt>
+    <dd>Put the time stamp. This is the time when that last get completed.</dd>
+  <dt>isConnectedArray</dt>
+    <dd>The connection state for each channel.</dd>
+  <dt>getBooleanArray</dt>
+    <dd>Put the boolean[] value. If each channel is not a boolean an exception
+      is thrown,</dd>
+  <dt>getByteArray</dt>
+    <dd>Put the value as a byte[]. If each channel is not a numeric scalar an
+      exception is thrown.</dd>
+  <dt>getShortArray</dt>
+    <dd>Put the value as a short[]. If each channel is not a numeric scalar an
+      exception is thrown.</dd>
+  <dt>getIntArray</dt>
+    <dd>Put the value as an int[]. If each channel is not a numeric scalar an
+      exception is thrown.</dd>
+  <dt>getLongArray</dt>
+    <dd>Put the value as a long[]. If each channel is not a numeric scalar an
+      exception is thrown.</dd>
+  <dt>getFloatArray</dt>
+    <dd>Put the value as a float[]. If each channel is not a numeric scalar an
+      exception is thrown.</dd>
+  <dt>getDoubleArray</dt>
+    <dd>Put the value as a double[]. If each channel is not a numeric scalar an
+      exception is thrown.</dd>
+  <dt>getStringArray</dt>
+    <dd>Put the value as a string[]. If each channel is not a scalar an
+      exception is thrown.</dd>
+  <dt>putBooleanArray</dt>
+    <dd>Put the boolean[] value. If each channel is not a boolean an exception
+      is thrown,</dd>
+  <dt>putByteArray</dt>
+    <dd>Put the value as a byte[]. If each channel is not a numeric scalar an
+      exception is thrown.</dd>
+  <dt>putShortArray</dt>
+    <dd>Put the value as a short[]. If each channel is not a numeric scalar an
+      exception is thrown.</dd>
+  <dt>putIntArray</dt>
+    <dd>Put the value as an int[]. If each channel is not a numeric scalar an
+      exception is thrown.</dd>
+  <dt>putLongArray</dt>
+    <dd>Put the value as a long[]. If each channel is not a numeric scalar an
+      exception is thrown.</dd>
+  <dt>putFloatArray</dt>
+    <dd>Put the value as a float[]. If each channel is not a numeric scalar an
+      exception is thrown.</dd>
+  <dt>putDoubleArray</dt>
+    <dd>Put the value as a double[]. If each channel is not a numeric scalar an
+      exception is thrown.</dd>
+  <dt>putStringArray</dt>
+    <dd>Put the value as a string[]. If each channel is not a scalar an
+      exception is thrown.</dd>
+  <dt>setStatus</dt>
+    <dd>Set a new status value. The new value will replace the current status.
+      The initial status is statusOK. </dd>
+  <dt>getStatus</dt>
+    <dd>Get the latest status. Calling this resets the latest status to
+      statusOK.</dd>
+</dl>
+</body>
+</html>
