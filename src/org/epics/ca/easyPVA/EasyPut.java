@@ -3,9 +3,13 @@
  */
 package org.epics.ca.easyPVA;
 
-import org.epics.pvData.pv.*;
-import org.epics.pvData.property.*;
-import org.epics.pvData.misc.*;
+import org.epics.pvdata.misc.BitSet;
+import org.epics.pvdata.pv.PVArray;
+import org.epics.pvdata.pv.PVField;
+import org.epics.pvdata.pv.PVScalar;
+import org.epics.pvdata.pv.PVScalarArray;
+import org.epics.pvdata.pv.PVStructure;
+import org.epics.pvdata.pv.Status;
 
 /**
  * @author mrk

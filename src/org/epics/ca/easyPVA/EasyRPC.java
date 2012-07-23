@@ -3,9 +3,8 @@
  */
 package org.epics.ca.easyPVA;
 
-import org.epics.pvData.pv.*;
-import org.epics.pvData.property.*;
-import org.epics.pvData.misc.*;
+import org.epics.pvdata.pv.PVStructure;
+import org.epics.pvdata.pv.Status;
 
 /**
  * @author mrk
@@ -16,8 +15,8 @@ public interface EasyRPC {
     boolean connect();
     void issueConnect();
     boolean waitConnect();
-    PVStructure request(PVStructure request,boolean lastRequest);
-    void issueRequest(PVStructure request,boolean lastRequest);
+    PVStructure request(PVStructure request);
+    void issueRequest(PVStructure request);
     PVStructure waitRequest();
     /**
      * Set a new status value. The new value will replace the current status. The initial status is statusOK.

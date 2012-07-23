@@ -3,10 +3,10 @@
  */
 package org.epics.ca.easyPVA;
 
-import org.epics.pvData.misc.BitSet;
-import org.epics.pvData.monitor.MonitorRequester;
-import org.epics.pvData.pv.PVStructure;
-import org.epics.pvData.pv.Status;
+import org.epics.pvdata.misc.BitSet;
+import org.epics.pvdata.monitor.MonitorRequester;
+import org.epics.pvdata.pv.PVStructure;
+import org.epics.pvdata.pv.Status;
 
 /**
  * @author mrk

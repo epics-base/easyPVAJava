@@ -3,9 +3,10 @@
  */
 package org.epics.ca.easyPVA;
 
-import org.epics.pvData.pv.*;
-import org.epics.pvData.property.*;
-import org.epics.pvData.misc.*;
+import org.epics.pvdata.property.Alarm;
+import org.epics.pvdata.property.TimeStamp;
+import org.epics.pvdata.pv.PVStructure;
+import org.epics.pvdata.pv.Status;
 
 /**
  * @author mrk

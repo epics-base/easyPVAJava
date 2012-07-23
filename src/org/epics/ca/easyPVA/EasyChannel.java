@@ -3,9 +3,9 @@
  */
 package org.epics.ca.easyPVA;
 
-import org.epics.pvData.pv.PVStructure;
-import org.epics.pvData.pv.Status;
-import org.epics.ca.client.*;
+import org.epics.pvaccess.client.Channel;
+import org.epics.pvdata.pv.PVStructure;
+import org.epics.pvdata.pv.Status;
 
 /**
  * @author mrk

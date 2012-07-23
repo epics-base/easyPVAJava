@@ -6,14 +6,48 @@ package org.epics.ca.easyPVA;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.epics.ca.client.*;
-import org.epics.ca.client.Channel.ConnectionState;
-import org.epics.pvData.misc.*;
-import org.epics.pvData.property.*;
-import org.epics.pvData.pv.*;
-import org.epics.pvData.pv.Status.StatusType;
-import org.epics.pvData.factory.*;
-import org.epics.pvData.pv.Status;
+import org.epics.pvaccess.client.Channel;
+import org.epics.pvaccess.client.Channel.ConnectionState;
+import org.epics.pvaccess.client.ChannelAccess;
+import org.epics.pvaccess.client.ChannelAccessFactory;
+import org.epics.pvaccess.client.ChannelGet;
+import org.epics.pvaccess.client.ChannelGetRequester;
+import org.epics.pvaccess.client.ChannelProvider;
+import org.epics.pvaccess.client.ChannelPut;
+import org.epics.pvaccess.client.ChannelPutRequester;
+import org.epics.pvaccess.client.ChannelRPC;
+import org.epics.pvaccess.client.ChannelRPCRequester;
+import org.epics.pvaccess.client.ChannelRequester;
+import org.epics.pvaccess.client.CreateRequestFactory;
+import org.epics.pvdata.factory.ConvertFactory;
+import org.epics.pvdata.factory.StatusFactory;
+import org.epics.pvdata.misc.BitSet;
+import org.epics.pvdata.misc.LinkedList;
+import org.epics.pvdata.misc.LinkedListCreate;
+import org.epics.pvdata.misc.LinkedListNode;
+import org.epics.pvdata.property.Alarm;
+import org.epics.pvdata.property.PVAlarm;
+import org.epics.pvdata.property.PVAlarmFactory;
+import org.epics.pvdata.property.PVTimeStamp;
+import org.epics.pvdata.property.PVTimeStampFactory;
+import org.epics.pvdata.property.TimeStamp;
+import org.epics.pvdata.property.TimeStampFactory;
+import org.epics.pvdata.pv.BooleanArrayData;
+import org.epics.pvdata.pv.Convert;
+import org.epics.pvdata.pv.MessageType;
+import org.epics.pvdata.pv.PVArray;
+import org.epics.pvdata.pv.PVBoolean;
+import org.epics.pvdata.pv.PVBooleanArray;
+import org.epics.pvdata.pv.PVField;
+import org.epics.pvdata.pv.PVScalar;
+import org.epics.pvdata.pv.PVScalarArray;
+import org.epics.pvdata.pv.PVStructure;
+import org.epics.pvdata.pv.Requester;
+import org.epics.pvdata.pv.ScalarType;
+import org.epics.pvdata.pv.Status;
+import org.epics.pvdata.pv.Status.StatusType;
+import org.epics.pvdata.pv.StatusCreate;
+import org.epics.pvdata.pv.Type;
 
 
 /**
@@ -24,15 +58,15 @@ public class EasyPVAFactory {
     static public synchronized EasyPVA get() {
         if(easyPVA==null) {
             easyPVA = new EasyPVAImpl();
-            org.epics.ca.ClientFactory.start();
+            org.epics.pvaccess.ClientFactory.start();
         }
         return easyPVA;
     }
 
     static private EasyPVA easyPVA = null;
     private static final StatusCreate statusCreate = StatusFactory.getStatusCreate();
-    private static final PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
-    private static final FieldCreate fieldCreate = FieldFactory.getFieldCreate();
+    //private static final PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
+    //private static final FieldCreate fieldCreate = FieldFactory.getFieldCreate();
     private static final Convert convert = ConvertFactory.getConvert();
     private static final ChannelAccess channelAccess = ChannelAccessFactory.getChannelAccess();
     private static final String easyPVAName = "easyPVA";
@@ -358,20 +392,20 @@ public class EasyPVAFactory {
 
         @Override
         public EasyRPC createRPC() {
-            // TODO Auto-generated method stub
-            return null;
+        	return createRPC((PVStructure)null);	// null allowed for RPC
         }
 
         @Override
         public EasyRPC createRPC(String request) {
-            // TODO Auto-generated method stub
-            return null;
+       	 PVStructure pvStructure = CreateRequestFactory.createRequest(request, this);
+         if(pvStructure==null) return null;
+         return createRPC(pvStructure);
         }
 
         @Override
         public EasyRPC createRPC(PVStructure pvRequest) {
             if(!checkConnected()) return null;
-            return null;
+            return new EasyRPCImpl(this,channel,pvRequest);
         }
 
         @Override
@@ -1025,6 +1059,7 @@ public class EasyPVAFactory {
         private enum PutState {putIdle,putActive,putDone};
         private PutState putState = PutState.putIdle;
         
+        // TODO this methid is neve called! Is this OK??!!!!
         private boolean checkPutState() {
         	if(!checkConnected()) return false;
             if(!easyPVA.isAutoPut()) return true;
@@ -1762,4 +1797,191 @@ public class EasyPVAFactory {
             return save;
         }
     }
+
+	private static class EasyRPCImpl implements EasyRPC, ChannelRPCRequester {
+	    private volatile boolean isDestroyed = false;
+	    private final EasyChannelImpl easyChannel;
+	    private final Channel channel;
+	    private final PVStructure pvRequest;
+	    
+	    private final ReentrantLock lock = new ReentrantLock();
+	    private final Condition waitForConnect = lock.newCondition();
+	    private final Condition waitForRPC = lock.newCondition();
+	    
+	    private volatile Status status = statusCreate.getStatusOK();
+	    private volatile ChannelRPC channelRPC = null;
+	    private volatile PVStructure result = null;
+	    
+	    private enum ConnectState {connectIdle,notConnected,connected};
+	    private volatile ConnectState connectState = ConnectState.connectIdle;
+	    
+	    private boolean checkConnected() {
+	        if(connectState==ConnectState.connectIdle) connect();
+	        if(connectState==ConnectState.connected) return true;
+	        if(connectState==ConnectState.notConnected) {
+	            String message = channel.getChannelName() + " rpc not connected";
+	            Status status = statusCreate.createStatus(StatusType.ERROR, message, null);
+	            setStatus(status);
+	        	return false;
+	        }
+	        String message = channel.getChannelName() + " illegal rpcConnect state";
+	        Status status = statusCreate.createStatus(StatusType.ERROR, message, null);
+	        setStatus(status);
+	        return false;
+	
+	    }
+	
+	    private enum RPCState {rpcIdle,rpcActive,rpcDone};
+	    private RPCState rpcState = RPCState.rpcIdle;
+	    
+	    EasyRPCImpl(EasyChannelImpl easyChannel,Channel channel,PVStructure pvRequest) {
+	        this.easyChannel = easyChannel;
+	        this.channel = channel;
+	        this.pvRequest = pvRequest;
+	    }
+	    @Override
+	    public String getRequesterName() {
+	        return easyChannel.providerName;
+	    }
+	    @Override
+	    public void message(String message, MessageType messageType) {
+	        if(isDestroyed) return;
+	        easyChannel.message(message, messageType);
+	    }
+	    @Override
+	    public void channelRPCConnect(Status status, ChannelRPC channelRPC) {
+	        if(isDestroyed) return;
+	        this.channelRPC = channelRPC;
+	        this.status = status;
+	        if(!status.isSuccess()) {
+	        	connectState = ConnectState.notConnected;
+	        } else {
+        		connectState = ConnectState.connected;
+	        }
+	        lock.lock();
+	        try {
+	           waitForConnect.signal();
+	        } finally {
+	           lock.unlock();
+	        }
+	    }
+	    @Override
+	    public void requestDone(Status status, PVStructure result) {
+	        this.status = status;
+	        this.result = result;
+	        rpcState = RPCState.rpcDone;
+	        lock.lock();
+	        try {
+	           waitForRPC.signal();
+	        } finally {
+	           lock.unlock();
+	        }
+	    }
+	    @Override
+	    public void destroy() {
+	        synchronized (this) {
+	           if(isDestroyed) return;
+	           isDestroyed = true;
+	        }
+	        channelRPC.destroy();
+	    }
+	    @Override
+	    public boolean connect() {
+	        issueConnect();
+	        return waitConnect();
+	    }
+	    @Override
+	    public void issueConnect() {
+	    	if(isDestroyed) return;
+	    	if(connectState!=ConnectState.connectIdle) {
+	    		Status status = statusCreate.createStatus(
+	    				StatusType.ERROR,"connect already issued",null);
+	    		setStatus(status);
+	    		return;
+	    	}
+	    	channelRPC = channel.createChannelRPC(this, pvRequest);
+	    }
+	    @Override
+	    public boolean waitConnect() {
+	    	if(isDestroyed) return false;
+	    	try {
+	    		lock.lock();
+	    		try {
+	    			if(connectState==ConnectState.connectIdle) waitForConnect.await();
+	    		} catch(InterruptedException e) {
+	    			Status status = statusCreate.createStatus(
+	    					StatusType.ERROR,
+	    					e.getMessage(),
+	    					e.fillInStackTrace());
+	    			setStatus(status);
+	    			return false;
+	    		}
+	    	} finally {
+	    		lock.unlock();
+	    	}
+	    	if(connectState==ConnectState.connectIdle) {
+	    		Status status = statusCreate.createStatus(StatusType.ERROR," did not connect",null);
+	    		setStatus(status);
+	    		return false;
+	    	}
+	    	return true;
+	    }
+	    
+		@Override
+		public PVStructure request(PVStructure request) {
+	        issueRequest(request);
+	        return waitRequest();
+	    }
+	
+	    @Override
+		public void issueRequest(PVStructure request) {
+	        if(isDestroyed) return;
+	        if(!checkConnected()) return;
+	        if(rpcState!=RPCState.rpcIdle) {
+	        	Status status = statusCreate.createStatus(
+	    				StatusType.ERROR,"rpc already issued",null);
+	    		setStatus(status);
+	    		return;
+	        }
+	        rpcState = RPCState.rpcActive;
+	        channelRPC.request(request,false);
+	    }
+	    @Override
+	    public PVStructure waitRequest() {
+	        if(isDestroyed) return null;
+	        if(!checkConnected()) return null;
+	        try {
+	            lock.lock();
+	            try {
+	                if(rpcState==RPCState.rpcActive) waitForRPC.await();
+	            } catch(InterruptedException e) {
+	                Status status = statusCreate.createStatus(StatusType.ERROR, e.getMessage(), e.fillInStackTrace());
+	                setStatus(status);
+	                return null;
+	            }
+	        } finally {
+	            lock.unlock();
+	        }
+	        if(rpcState==RPCState.rpcActive) {
+	            Status status = statusCreate.createStatus(StatusType.ERROR," rpc failed",null);
+	            setStatus(status);
+	            return null;
+	        }
+	        rpcState = RPCState.rpcIdle;
+	        return result;
+	    }
+	
+	    @Override
+	    public void setStatus(Status status) {
+	    	this.status = status;
+	    	easyChannel.setStatus(status);
+	    }
+	    @Override
+	    public Status getStatus() {
+	    	Status save = status;
+	    	status = statusCreate.getStatusOK();
+	        return save;
+	    }
+	
+	}
 }

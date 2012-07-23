@@ -2,10 +2,8 @@
  * 
  */
 package org.epics.ca.easyPVA;
-import org.epics.pvData.pv.*;
-import org.epics.pvData.property.TimeStamp;
-import org.epics.pvData.property.*;
-import org.epics.pvData.misc.*;
+import org.epics.pvdata.pv.Requester;
+import org.epics.pvdata.pv.Status;
 
 /**
  * @author mrk

@@ -2,16 +2,8 @@
  * 
  */
 package org.epics.ca.easyPVA;
-import java.util.Date;
-
-import org.epics.ca.client.*;
-import org.epics.ca.client.Channel.ConnectionState;
-import org.epics.pvData.misc.*;
-import org.epics.pvData.property.*;
-import org.epics.pvData.pv.*;
-import org.epics.pvData.pv.Status.StatusType;
-import org.epics.pvData.factory.*;
-import org.epics.pvData.pv.Status;
+import org.epics.pvdata.pv.PVScalarArray;
+import org.epics.pvdata.pv.ScalarType;
 
 /**
  * @author mrk

@@ -4,19 +4,17 @@ import java.util.Date;
 
 import junit.framework.TestCase;
 
-import org.epics.ca.client.*;
-import org.epics.ca.client.Channel.ConnectionState;
-import org.epics.pvData.misc.*;
-import org.epics.pvData.property.Alarm;
-import org.epics.pvData.property.TimeStamp;
-import org.epics.pvData.pv.*;
-import org.epics.pvData.pv.Status.StatusType;
-import org.epics.pvData.factory.*;
-import org.epics.pvData.pv.Status;
+import org.epics.pvdata.property.Alarm;
+import org.epics.pvdata.property.TimeStamp;
+import org.epics.pvdata.pv.PVField;
+import org.epics.pvdata.pv.PVScalar;
+import org.epics.pvdata.pv.PVScalarArray;
+import org.epics.pvdata.pv.PVStructure;
+import org.epics.pvdata.pv.ScalarType;
+import org.epics.pvdata.pv.Status;
 
 
 public class TestEasyGet extends TestCase {
-    private static final StatusCreate statusCreate = StatusFactory.getStatusCreate();
     private static final EasyPVA easyPVA = EasyPVAFactory.get();
     
     public static void bad(Status status) {
@@ -25,7 +23,6 @@ public class TestEasyGet extends TestCase {
     }
     
     public static EasyGet getCommon(String testName,EasyChannel channel) {
-        String channelName = channel.getChannelName();
         System.out.printf("%n%s channel %s%n",testName,channel.getChannelName());
         boolean result = channel.connect(2.0);
         if(!result) bad(channel.getStatus());
