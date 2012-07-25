@@ -183,7 +183,7 @@ method:</p>
 <h2>Hello World Examples</h2>
 
 <p>The examples described in this section are located in
-easyPVA/test/org/epics/ca/easyPVA. The examples access channels from the V3
+easyPVA/test/org.epics.pvaccess/easyPVA. The examples access channels from the V3
 test IOC that comes with pvIOCCPP. An example of how it is started is:</p>
 <pre>mrk&gt; pwd
 /home/mrk/hg/pvIOCCPP/iocBoot/testV3Channel
@@ -960,50 +960,50 @@ If there was a problem creating the channel, status will provide the reason.</p>
     <dd>Creates an <span style="font-weight:bold;">EasyField</span>. If no
       subField is specified then <span style="font-weight:bold;">""</span> is
       assumed. The syntax for subField is defined in package <span
-      style="font-weight:bold;">org.epics.ca.client</span>.</dd>
+      style="font-weight:bold;">org.epics.pvaccess.client</span>.</dd>
   <dt>createProcess</dt>
     <dd>Creates an <span style="font-weight:bold;">EasyProcess</span>. If no
       request is specified then <span style="font-weight:bold;">""</span> is
       assumed. The other two methods use the syntax defined by <span
       style="font-weight:bold;">ChannelRequest</span> as described in package
-      <span style="font-weight:bold;">org.epics.ca.client</span>.</dd>
+      <span style="font-weight:bold;">org.epics.pvaccess.client</span>.</dd>
   <dt>createGet</dt>
     <dd>Creates an <span style="font-weight:bold;">EasyGet</span>. If no
       request is specified then <span
       style="font-weight:bold;">"field(value,alarm,timeStamp)"</span> is
       assumed. The other two methods use the syntax defined by <span
       style="font-weight:bold;">ChannelRequest</span> as described in package
-      <span style="font-weight:bold;">org.epics.ca.client</span>.</dd>
+      <span style="font-weight:bold;">org.epics.pvaccess.client</span>.</dd>
   <dt>createPut</dt>
     <dd>Creates an <span style="font-weight:bold;">EasyPut</span>. If no
       request is specified then <span
       style="font-weight:bold;">"field(value,alarm,timeStamp)"</span> is
       assumed. The other two methods use the syntax defined by <span
       style="font-weight:bold;">ChannelRequest</span> as described in package
-      <span style="font-weight:bold;">org.epics.ca.client</span>.</dd>
+      <span style="font-weight:bold;">org.epics.pvaccess.client</span>.</dd>
   <dt>createPutGet</dt>
     <dd>Creates an EasyPutGet. If no request is specified then <span
       style="font-weight:bold;">"record[process=true]putField(arguments)getField(result)"</span>
       is assumed. The other two methods use the syntax defined by <span
       style="font-weight:bold;">ChannelRequest</span> as described in package
-      <span style="font-weight:bold;">org.epics.ca.client</span>.</dd>
+      <span style="font-weight:bold;">org.epics.pvaccess.client</span>.</dd>
   <dt>createRPC</dt>
     <dd>Creates an EasyRPC. If no request is specified then <span
       style="font-weight:bold;">"record[process=true]putField(arguments)getField(result)"
       </span> is assumed. The other two methods use the syntax defined by <span
       style="font-weight:bold;">ChannelRequest</span> as described in package
-      <span style="font-weight:bold;">org.epics.ca.client</span>.</dd>
+      <span style="font-weight:bold;">org.epics.pvaccess.client</span>.</dd>
   <dt>createArray</dt>
     <dd>Creates an EasyArray, which gets/puts a sub array. In no request is
       specified <span style="font-weight:bold;">"field(value)"</span> is
       assumed. The other two methods use the syntax defined by ChannelRequest
-      as described in package org.epics.ca.client.</dd>
+      as described in package org.epics.pvaccess.client.</dd>
   <dt>createMonitor</dt>
     <dd>Creates an EasyMonitor. If no request is specified <span
       style="font-weight:bold;">record[queueSize=2]field(value,alarm,timeStamp)
       </span> is assumed. The other two methods use the syntax defined by <span
       style="font-weight:bold;">ChannelRequest</span> as described in package
-      <span style="font-weight:bold;">org.epics.ca.client</span>.</dd>
+      <span style="font-weight:bold;">org.epics.pvaccess.client</span>.</dd>
   <dt>setStatus</dt>
     <dd>Set a new status value. The new value will replace the current status.
       The initial status is statusOK. </dd>
@@ -1773,7 +1773,7 @@ multiChannel, status will provide the reason.</p>
       other two methods use the syntax defined by <span
       style="font-family: Arial,Helvetica,sans-serif">ChannelRequest</span> as
       described in package <span
-      style="font-weight:bold;">org.epics.ca.client</span>. The request refers
+      style="font-weight:bold;">org.epics.pvaccess.client</span>. The request refers
       to the request for each individual channel. The get itself will also have
       an alarm and a timeStamp.</dd>
   <dt>setStatus</dt>
