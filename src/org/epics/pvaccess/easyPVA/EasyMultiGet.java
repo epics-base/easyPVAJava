@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.epics.ca.easyPVA;
+package org.epics.pvaccess.easyPVA;
 
 import org.epics.pvdata.property.Alarm;
 import org.epics.pvdata.property.TimeStamp;
@@ -11,16 +11,18 @@ import org.epics.pvdata.pv.Status;
  * @author mrk
  *
  */
-public interface EasyMultiPut {
+public interface EasyMultiGet {
     void destroy();
     boolean connect();
     void issueConnect();
     boolean waitConnect();
     void get();
-    void put();
     Alarm getAlarm();
     TimeStamp getTimeStamp();
+    int getLength();
     
+    Alarm[] getAlarms();
+    TimeStamp[] getTimeStamps();
     boolean[] isConnectedArray();
     boolean[] getBooleanArray();
     byte[] getByteArray();
@@ -31,6 +33,8 @@ public interface EasyMultiPut {
     double[] getDoubleArray();
     String[] getStringArray();
     
+    void getAlarms(Alarm[]alarms,int length);
+    void getTimeStamps(TimeStamp[]timeStamps,int length);
     void isConnectedArray(boolean[]data,int length);
     void getBooleanArray(boolean[]data,int length);
     void getByteArray(byte[]data,int length);
@@ -40,15 +44,6 @@ public interface EasyMultiPut {
     void getFloatArray(float[]data,int length);
     void getDoubleArray( double[]data,int length);
     void getStringArray(String[]data,int length);
-    
-    void putBooleanArray(boolean[] value,int length);
-    void putByteArray(byte[] value,int lengt);
-    void putShortArray(short[] value,int lengt);
-    void putIntArray(int[] value,int lengt);
-    void putLongArray(long[] value,int lengt);
-    void putFloatArray(float[] value,int lengt);
-    void putDoubleArray(double[] value,int lengt);
-    void putStringArray(String[] value,int lengt);
     /**
      * Set a new status value. The new value will replace the current status. The initial status is statusOK.
      * @param status The new status.

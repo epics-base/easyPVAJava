@@ -1,7 +1,11 @@
 /**
  * 
  */
-package org.epics.ca.easyPVA;
+package org.epics.pvaccess.easyPVA;
+import org.epics.pvaccess.easyPVA.EasyChannel;
+import org.epics.pvaccess.easyPVA.EasyPVA;
+import org.epics.pvaccess.easyPVA.EasyPVAFactory;
+import org.epics.pvaccess.easyPVA.EasyRPC;
 import org.epics.pvdata.factory.FieldFactory;
 import org.epics.pvdata.factory.PVDataFactory;
 import org.epics.pvdata.pv.Field;

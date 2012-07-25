@@ -1,7 +1,11 @@
 /**
  * 
  */
-package org.epics.ca.easyPVA;
+package org.epics.pvaccess.easyPVA;
+import org.epics.pvaccess.easyPVA.EasyChannel;
+import org.epics.pvaccess.easyPVA.EasyGet;
+import org.epics.pvaccess.easyPVA.EasyPVA;
+import org.epics.pvaccess.easyPVA.EasyPVAFactory;
 import org.epics.pvdata.pv.PVScalarArray;
 import org.epics.pvdata.pv.ScalarType;
 

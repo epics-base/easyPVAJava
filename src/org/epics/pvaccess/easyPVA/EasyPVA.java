@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.epics.ca.easyPVA;
+package org.epics.pvaccess.easyPVA;
 import org.epics.pvdata.pv.Requester;
 import org.epics.pvdata.pv.Status;
 

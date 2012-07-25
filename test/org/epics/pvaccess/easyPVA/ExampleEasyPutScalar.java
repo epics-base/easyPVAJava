@@ -1,7 +1,12 @@
 /**
  * 
  */
-package org.epics.ca.easyPVA;
+package org.epics.pvaccess.easyPVA;
+
+import org.epics.pvaccess.easyPVA.EasyChannel;
+import org.epics.pvaccess.easyPVA.EasyPVA;
+import org.epics.pvaccess.easyPVA.EasyPVAFactory;
+import org.epics.pvaccess.easyPVA.EasyPut;
 
 /**
  * @author mrk

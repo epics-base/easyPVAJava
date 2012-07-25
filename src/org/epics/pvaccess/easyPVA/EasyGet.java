@@ -1,9 +1,11 @@
 /**
  * 
  */
-package org.epics.ca.easyPVA;
+package org.epics.pvaccess.easyPVA;
 
 import org.epics.pvdata.misc.BitSet;
+import org.epics.pvdata.property.Alarm;
+import org.epics.pvdata.property.TimeStamp;
 import org.epics.pvdata.pv.PVArray;
 import org.epics.pvdata.pv.PVField;
 import org.epics.pvdata.pv.PVScalar;
@@ -15,7 +17,7 @@ import org.epics.pvdata.pv.Status;
  * @author mrk
  *
  */
-public interface EasyPut {
+public interface EasyGet {
     void destroy();
     boolean connect();
     void issueConnect();
@@ -23,10 +25,8 @@ public interface EasyPut {
     boolean get();
     void issueGet();
     boolean waitGet();
-    boolean put();
-    void issuePut();
-    boolean waitPut();
-
+    Alarm getAlarm();
+    TimeStamp getTimeStamp();
     boolean hasValue();
     boolean isValueScalar();
     PVField getValue();
@@ -42,15 +42,6 @@ public interface EasyPut {
     float getFloat();
     double getDouble();
     String getString();
-    
-    boolean putBoolean(boolean value);
-    boolean putByte(byte value);
-    boolean putShort(short value);
-    boolean putInt(int value);
-    boolean putLong(long value);
-    boolean putFloat(float value);
-    boolean putDouble(double value);
-    boolean putString(String value);
     
     boolean[] getBooleanArray();
     byte[] getByteArray();
@@ -69,16 +60,6 @@ public interface EasyPut {
     int getFloatArray(float[] value,int length);
     int getDoubleArray(double[] value,int length);
     int getStringArray(String[] value,int length);
-    
-    int putBooleanArray(boolean[] value,int length);
-    int putByteArray(byte[] value,int length);
-    int putShortArray(short[] value,int length);
-    int putIntArray(int[] value,int length);
-    int putLongArray(long[] value,int length);
-    int putFloatArray(float[] value,int length);
-    int putDoubleArray(double[] value,int length);
-    int putStringArray(String[] value,int length);
-
     PVStructure getPVStructure();
     BitSet getBitSet();
     /**

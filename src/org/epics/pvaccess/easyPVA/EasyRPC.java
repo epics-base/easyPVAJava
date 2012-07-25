@@ -1,22 +1,23 @@
 /**
  * 
  */
-package org.epics.ca.easyPVA;
+package org.epics.pvaccess.easyPVA;
 
+import org.epics.pvdata.pv.PVStructure;
 import org.epics.pvdata.pv.Status;
 
 /**
  * @author mrk
  *
  */
-public interface EasyProcess {
+public interface EasyRPC {
     void destroy();
     boolean connect();
     void issueConnect();
     boolean waitConnect();
-    boolean process();
-    void issueProcess();
-    boolean waitProcess();
+    PVStructure request(PVStructure request);
+    void issueRequest(PVStructure request);
+    PVStructure waitRequest();
     /**
      * Set a new status value. The new value will replace the current status. The initial status is statusOK.
      * @param status The new status.
@@ -27,5 +28,4 @@ public interface EasyProcess {
      * @return The status.
      */
     Status getStatus();
-
 }

@@ -1,9 +1,13 @@
 /**
  * 
  */
-package org.epics.ca.easyPVA;
+package org.epics.pvaccess.easyPVA;
 import java.util.Date;
 
+import org.epics.pvaccess.easyPVA.EasyChannel;
+import org.epics.pvaccess.easyPVA.EasyGet;
+import org.epics.pvaccess.easyPVA.EasyPVA;
+import org.epics.pvaccess.easyPVA.EasyPVAFactory;
 import org.epics.pvdata.property.Alarm;
 import org.epics.pvdata.property.AlarmSeverity;
 import org.epics.pvdata.property.AlarmStatus;

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.epics.ca.easyPVA;
+package org.epics.pvaccess.easyPVA;
 
 import org.epics.pvdata.pv.PVStructure;
 import org.epics.pvdata.pv.Status;
