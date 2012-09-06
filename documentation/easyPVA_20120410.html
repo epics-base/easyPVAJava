@@ -16,10 +16,6 @@
      .diagram { text-align: center; margin: 2.5em 0 }
      body { margin-right: 10% }
 /*]]>*/</style>
-
- <!-- Script that generates the Table of Contents -->
-  <script type="text/javascript" src="http://epics-pvdata.sourceforge.net/script/tocgen.js"></script>
-
 </head>
 
 <body>
@@ -27,80 +23,48 @@
 <div class="head">
 <h1>EPICS easyPVA</h1>
 <!-- Maturity: Working Draft or Request for Comments, or Recommendation, and date.  -->
+
 <h2 class="nocount">EPICS V4 Working Group, Working Draft,
-2012-09-06</h2>
+2012-04-10</h2>
 <dl>
   <dt>This version:</dt>
     <dd><a
-      href="ttp://epics-pvdata.hg.sourceforge.net/hgweb/epics-pvdata/alphaJava/raw-file/tip/easyPVA/documentation/easyPVA_20120906.html">easyPVA_20120906.html</a>
-    </dd>
+      href="http://epics-pvdata.hg.sourceforge.net/hgweb/epics-pvdata/alphaJava/raw-file/tip/easyPVA/documentation/easyPVA_20120410.html">easyPVA_20120410.html
+      </a></dd>
   <dt>Latest version:</dt>
     <dd><a href="http://epics-pvdata.hg.sourceforge.net/hgweb/epics-pvdata/alphaJava/raw-file/tip/easyPVA/documentation/easyPVA.html">easyPVA.html</a></dd>
   <dt>Previous version:</dt>
-    <dd><a
-      href="http://epics-pvdata.hg.sourceforge.net/hgweb/epics-pvdata/alphaJava/raw-file/tip/easyPVA/documentation/easyPVA_20120410.html">easyPVA_20120410.html
-      </a></dd>
+    <dd>To be added</dd>
   <dt>Editors:</dt>
     <dd>Matej Sekoranja, Cosylab</dd>
     <dd>Marty Kraimer, BNL</dd>
-    <dd>Greg White, SLAC/PSI</dd>
 </dl>
 
 <h2 class="nocount">Abstract</h2>
 
-<p>EasyPVA (Easy PVAccess) is a software library that provides a user, or programmer, a friendly
-client side programming interface to the data of an EPICS based control system. It is intended 
-for such uses as rapid development of ad hoc programs by controls engineers, or to provide 
-scientists a way to directly develop analytical applications.</p>
-
-<p>Specifically, easyPVA provides an easy interface for pvAccess, which is the
-software support for high speed controls network communications used in EPICS version 4.
-PvAccess provides a callback based interface, which can be hard to use.
-EasyPVA provides an interface that does not require callbacks even for monitors.
-It also provides many "convenience" methods to directly get and put common data 
-types such as double, without reference to the introspection interface of pvAccess.
+<p>easyPVA (Easy PVAccess) is a easy to use interface for pvAccess.
+pvAccess provides a callback based interface, which can be hard to use.
+easyPVA provides an interface that does not require callbacks even for monitors.
+It also provides many "convenience" methods to directly get and put common data types such as double.
+Thus the client can use common data types without any introspection.
 Additional methods provide access to the full features of pvAccess.
-<p>EasyPVA will become part of pvAccess when it is ready. </p>
+<p>easyPVA will become part of pvAccess when it is ready. </p>
 
-  <!-- last para of Abstract is boilerplate reference to EPICS -->
-      <p>For more information about EPICS generally, please refer to the home page of the <a
-       href="http://www.aps.anl.gov/epics/">Experimental Physics and Industrial
-      Control System</a>.</p>
+<h2 class="nocount">Status of this Document</h2>
 
+<p>EasyPVA, EasyChannel, EasyGET, and EasyPut are the only interfaces currently
+implemented and only in Java. The Java interfaces have been defined for all
+intended Easy facilties. But the unimplemented interfaces are just a first
+draft.</p>
 
-
-<h2 class="nocount">Status of this Document and of the EasyPVA Software</h2>
-
-<p>This is the September 5th, 2012 revision of the EPICS EasyPVA document.</p>
-<p>This document acts as both a specification document and as a user guide. As of this revision,
-the software is NOT specification complete. Therefore, 
-readers should be aware that the present implementation may not include all of the facilities 
-described here.</p>
-
-<p>As of this September 5th 2012 revision, at least draft 
-Java interfaces 
-have been described here for all of the intended EasyPVA facilities. However, 
-<em>EasyPVA, EasyChannel, EasyGet, EasyPut, and EasyRPC are the only interfaces currently
-implemented, and they have only been implemented in Java.</em></p>
-
-<p>There is example source code included here, which exercises the Java implementation of 
-EasyGet and EasyPut.
-There is also a test suite for EasyGet. However, it is not complete and much more testing
+<p>The Java implementation of EasyGet and EasyPut has example code that works.
+There is also a test for EasyGet. But it is not completre. Much more testing
 should be done.</p>
 
-</div> <!-- head -->
+<h2 class="nocount">Contents</h2>
 
-<div id="toc">
-  <h2 class="nocount">Table of Contents</h2>
 </div>
-
-<!-- Place what you would like in the Table of Contents, inside the contents div -->
-<div id="contents" class="contents">	  
-<hr />
-
 <h2>Installation and Example Database</h2>
-<p>This section describes the prerequisites of easyPVA, how to acquire the software, and
-how to set up a demonstration example so that you can test out the illustrations. </p>
 <h3>Installation</h3>
 <p>This project requires that the following projects are already available: pvDataJava, pvAccessJava, and pvIOCJava.</p>
 <p>The Java version of easyPVA currently resides in mercurial repository:</p>
@@ -135,28 +99,27 @@ The just execute:</p>
 <h2>Introduction</h2>
 
 <p>EasyPVA is a synchronous API for accessing PVData via PVAccess. It provides
-an interface to many of the features provided by pvData and pvAccess.</p>
+a synchronous interface to the features provided by pvData/pvAccess.</p>
 
-<p>The EasyPVA API has the following features:</p>
+<p>The API has the following features:</p>
 <ol>
-  <li>Makes common requests easy to program</li>
+  <li>It makes common requests easy to use.</li>
   <li>Provides full access to the pvAccess API for more demanding
-  applications</li>
-  <li>Allows efficient client side programs.</li>
+  applcations.</li>
+  <li>It allows an efficent implementation.</li>
 </ol>
 
-<p>The following describes the Java version of EasyPVA.  Since newer versions of Matlab support direct
-calls to Java, EasyPVA is ideally suitable for accessing EPICS data from Matlab. There will also be C++
-version and wrapper code for Python.</p>
+<p>The following describes the Java version of EasyPVA. There will also be C++
+version and wrapper code for Python and for Mathlab.</p>
 
 <h3>Initialization</h3>
 
 <p>A client obtains the interface to EasyPVA via the call:</p>
 <pre>EasyPVA easy = EasyPVAFactory.get();</pre>
 
-<p>The client can make this call many times, but an instance of the EastPVA interface object is
-only created in the first call. This first call also
-starts the PVAccess client factory.</p>
+<p>The client can make this call multiple times but an instance of EastPVA is
+only created in the first call. The first call also results in the a call to
+start the PVAccess client factory.</p>
 
 <h3>EasyPVA</h3>
 
@@ -2078,6 +2041,5 @@ If there was a problem creating, status will provide the reason.</p>
     <dd>Get the latest status. Calling this resets the latest status to
       statusOK.</dd>
 </dl>
-</div> <!-- class="contents" -->
 </body>
 </html>
