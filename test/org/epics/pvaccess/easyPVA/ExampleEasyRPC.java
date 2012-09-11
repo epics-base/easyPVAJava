@@ -15,8 +15,20 @@ import org.epics.pvdata.pv.ScalarType;
 import org.epics.pvdata.pv.Structure;
 
 /**
+ * ExampleEasyRPC provides examples of using the EasyPVA RPC client support to get data
+ * from an EPICS V4 RPC server. 
+ * <p>
+ * The server this client was written for is RPCServiceExample.</p>
+ * <p>
+ * Example execution of this client side (assuming the server RPCServiceExample has been started):</p>
+ * <code>
+ * easyPVA/bin] greg% java -classpath .:../../../pvDataJava/bin:../../../pvAccessJava/bin \
+ *                    org.epics.pvaccess.easyPVA.ExampleEasyRPC
+ * </code>                    
+ * @see RPCServiceExample
+ * 
  * @author mrk
- *
+ * @version 11-Sep-2012 Greg White (greg@slac.stanford.edu) Added header.
  */
 public class ExampleEasyRPC {
     static EasyPVA easyPVA = EasyPVAFactory.get();
