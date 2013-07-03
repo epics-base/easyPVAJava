@@ -1059,7 +1059,7 @@ public class EasyPVAFactory {
         private enum PutState {putIdle,putActive,putDone};
         private PutState putState = PutState.putIdle;
         
-        // TODO this methid is neve called! Is this OK??!!!!
+        // TODO this methid is never called! Is this OK??!!!!
         private boolean checkPutState() {
         	if(!checkConnected()) return false;
             if(!easyPVA.isAutoPut()) return true;
