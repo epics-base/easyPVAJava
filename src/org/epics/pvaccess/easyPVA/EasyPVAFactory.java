@@ -96,11 +96,11 @@ public class EasyPVAFactory {
         }
         @Override
         public EasyChannel createChannel(String channelName) {
-            return createChannel(channelName,"pvAccess");
+            return createChannel(channelName,"pva");
         }
         @Override
         public EasyMultiChannel createMultiChannel(String[] channelNames) {
-            return createMultiChannel(channelNames,"pvAccess");
+            return createMultiChannel(channelNames,"pva");
         }
         @Override
         public EasyChannel createChannel(String channelName,String providerName) {
