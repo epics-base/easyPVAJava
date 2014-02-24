@@ -59,7 +59,7 @@ public class EasyPVAFactory {
         if(easyPVA==null) {
             easyPVA = new EasyPVAImpl();
             org.epics.pvaccess.ClientFactory.start();
-            org.epics.caV3.ClientFactory.start();
+            org.epics.ca.ClientFactory.start();
         }
         return easyPVA;
     }
