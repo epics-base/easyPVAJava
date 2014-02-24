@@ -18,7 +18,7 @@ import org.epics.pvaccess.client.ChannelPutRequester;
 import org.epics.pvaccess.client.ChannelRPC;
 import org.epics.pvaccess.client.ChannelRPCRequester;
 import org.epics.pvaccess.client.ChannelRequester;
-import org.epics.pvaccess.client.CreateRequestFactory;
+import org.epics.pvaccess.client.CreateRequest;
 import org.epics.pvdata.factory.ConvertFactory;
 import org.epics.pvdata.factory.StatusFactory;
 import org.epics.pvdata.misc.BitSet;
@@ -59,6 +59,7 @@ public class EasyPVAFactory {
         if(easyPVA==null) {
             easyPVA = new EasyPVAImpl();
             org.epics.pvaccess.ClientFactory.start();
+            org.epics.caV3.ClientFactory.start();
         }
         return easyPVA;
     }
@@ -325,7 +326,7 @@ public class EasyPVAFactory {
 
 		@Override
 		public EasyProcess createProcess(String request) {
-			PVStructure pvStructure = CreateRequestFactory.createRequest(request, this);
+			PVStructure pvStructure = createRequest(request);
 			if(pvStructure==null) return null;
 			return createProcess(pvStructure);
 		}
@@ -340,10 +341,20 @@ public class EasyPVAFactory {
         public EasyGet createGet() {
             return createGet("record[]field(value,alarm,timeStamp)");
         }
+		
+		private static PVStructure createRequest(String request)
+		{
+			CreateRequest factory = CreateRequest.create();
+			PVStructure pvStructure = factory.createRequest(request);
+            if (pvStructure == null) 
+            	throw new IllegalArgumentException("invalid pvRequest: " + factory.getMessage());
+            else
+            	return pvStructure;
+		}
 
         @Override
         public EasyGet createGet(String request) {
-            PVStructure pvStructure = CreateRequestFactory.createRequest(request, this);
+            PVStructure pvStructure = createRequest(request);
             if(pvStructure==null) return null;
             return createGet(pvStructure);
         }
@@ -361,7 +372,7 @@ public class EasyPVAFactory {
 
         @Override
         public EasyPut createPut(String request) {
-        	 PVStructure pvStructure = CreateRequestFactory.createRequest(request, this);
+        	 PVStructure pvStructure = createRequest(request);
              if(pvStructure==null) return null;
              return createPut(pvStructure);
         }
@@ -397,7 +408,7 @@ public class EasyPVAFactory {
 
         @Override
         public EasyRPC createRPC(String request) {
-       	 PVStructure pvStructure = CreateRequestFactory.createRequest(request, this);
+       	 PVStructure pvStructure = createRequest(request);
          if(pvStructure==null) return null;
          return createRPC(pvStructure);
         }
@@ -1059,7 +1070,7 @@ public class EasyPVAFactory {
         private enum PutState {putIdle,putActive,putDone};
         private PutState putState = PutState.putIdle;
         
-        // TODO this methid is never called! Is this OK??!!!!
+        // TODO this method is never called! Is this OK??!!!!
         private boolean checkPutState() {
         	if(!checkConnected()) return false;
             if(!easyPVA.isAutoPut()) return true;
