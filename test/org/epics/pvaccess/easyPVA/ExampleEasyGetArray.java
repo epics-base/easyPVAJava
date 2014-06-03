@@ -58,7 +58,8 @@ public class ExampleEasyGetArray {
             return;
         }
         EasyGet get = channel.createGet();
-        result = get.connect();
+        get.issueGet();
+        result = get.waitGet();
         if(!result) {
             System.out.printf(
                 "exampleDoubleCheck %s get connect failed %s%n",
@@ -69,7 +70,7 @@ public class ExampleEasyGetArray {
         }
         PVScalarArray pvArray = get.getScalarArrayValue();
         if(pvArray==null) {
-            System.err.printf("%s is not a scalar array%s", channelName);
+            System.err.printf("%s is not a scalar array%n", channelName);
             easyPVA.setAuto(true, true);
             return;
         }
