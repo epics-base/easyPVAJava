@@ -8,18 +8,19 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.epics.pvaccess.client.Channel;
 import org.epics.pvaccess.client.Channel.ConnectionState;
-import org.epics.pvaccess.client.ChannelAccess;
-import org.epics.pvaccess.client.ChannelAccessFactory;
 import org.epics.pvaccess.client.ChannelGet;
 import org.epics.pvaccess.client.ChannelGetRequester;
 import org.epics.pvaccess.client.ChannelProvider;
+import org.epics.pvaccess.client.ChannelProviderRegistry;
+import org.epics.pvaccess.client.ChannelProviderRegistryFactory;
 import org.epics.pvaccess.client.ChannelPut;
 import org.epics.pvaccess.client.ChannelPutRequester;
 import org.epics.pvaccess.client.ChannelRPC;
 import org.epics.pvaccess.client.ChannelRPCRequester;
 import org.epics.pvaccess.client.ChannelRequester;
-import org.epics.pvaccess.client.CreateRequest;
+import org.epics.pvdata.copy.CreateRequest;
 import org.epics.pvdata.factory.ConvertFactory;
+import org.epics.pvdata.factory.PVDataFactory;
 import org.epics.pvdata.factory.StatusFactory;
 import org.epics.pvdata.misc.BitSet;
 import org.epics.pvdata.misc.LinkedList;
@@ -34,6 +35,7 @@ import org.epics.pvdata.property.TimeStamp;
 import org.epics.pvdata.property.TimeStampFactory;
 import org.epics.pvdata.pv.BooleanArrayData;
 import org.epics.pvdata.pv.Convert;
+import org.epics.pvdata.pv.Field;
 import org.epics.pvdata.pv.MessageType;
 import org.epics.pvdata.pv.PVArray;
 import org.epics.pvdata.pv.PVBoolean;
@@ -43,10 +45,13 @@ import org.epics.pvdata.pv.PVScalar;
 import org.epics.pvdata.pv.PVScalarArray;
 import org.epics.pvdata.pv.PVStructure;
 import org.epics.pvdata.pv.Requester;
+import org.epics.pvdata.pv.Scalar;
+import org.epics.pvdata.pv.ScalarArray;
 import org.epics.pvdata.pv.ScalarType;
 import org.epics.pvdata.pv.Status;
 import org.epics.pvdata.pv.Status.StatusType;
 import org.epics.pvdata.pv.StatusCreate;
+import org.epics.pvdata.pv.Structure;
 import org.epics.pvdata.pv.Type;
 
 
@@ -55,26 +60,30 @@ import org.epics.pvdata.pv.Type;
  *
  */
 public class EasyPVAFactory {
+	
     static public synchronized EasyPVA get() {
         if(easyPVA==null) {
             easyPVA = new EasyPVAImpl();
-            org.epics.pvaccess.ClientFactory.start();
+        	org.epics.pvaccess.ClientFactory.start();
             org.epics.ca.ClientFactory.start();
         }
         return easyPVA;
     }
 
-    static private EasyPVA easyPVA = null;
+    private static EasyPVA easyPVA = null;
+    
     private static final StatusCreate statusCreate = StatusFactory.getStatusCreate();
     //private static final PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
     //private static final FieldCreate fieldCreate = FieldFactory.getFieldCreate();
     private static final Convert convert = ConvertFactory.getConvert();
-    private static final ChannelAccess channelAccess = ChannelAccessFactory.getChannelAccess();
+    private static final ChannelProviderRegistry channelAccess = ChannelProviderRegistryFactory.getChannelProviderRegistry();
     private static final String easyPVAName = "easyPVA";
+    private static final String defaultProvider = org.epics.pvaccess.ClientFactory.PROVIDER_NAME;
 
     static private class EasyPVAImpl implements EasyPVA {
-        private static LinkedListCreate<EasyChannel> easyChannelListCreate = new LinkedListCreate<EasyChannel>();
-        private static LinkedList<EasyChannel> easyChannelList = easyChannelListCreate.create();
+        private static final LinkedListCreate<EasyChannel> easyChannelListCreate = new LinkedListCreate<EasyChannel>();
+        private static final LinkedList<EasyChannel> easyChannelList = easyChannelListCreate.create();
+ 
         private boolean isDestroyed = false;
         private Requester requester = null;
         private boolean autoGet = true;
@@ -84,10 +93,8 @@ public class EasyPVAFactory {
 
         @Override
         public void destroy() {
-            synchronized (this) {
-               if(isDestroyed) return;
-               isDestroyed = true;
-            }
+            if(isDestroyed) return;
+            isDestroyed = true;
             LinkedListNode<EasyChannel> listNode = easyChannelList.removeTail();
             while(listNode!=null) {
                EasyChannel channel = (EasyChannel)listNode.getObject();
@@ -97,11 +104,11 @@ public class EasyPVAFactory {
         }
         @Override
         public EasyChannel createChannel(String channelName) {
-            return createChannel(channelName,"pva");
+            return createChannel(channelName,defaultProvider);
         }
         @Override
         public EasyMultiChannel createMultiChannel(String[] channelNames) {
-            return createMultiChannel(channelNames,"pva");
+            return createMultiChannel(channelNames,defaultProvider);
         }
         @Override
         public EasyChannel createChannel(String channelName,String providerName) {
@@ -182,19 +189,21 @@ public class EasyPVAFactory {
     }
 
     static private class EasyChannelImpl implements EasyChannel, ChannelRequester {
-        private boolean isDestroyed = false;
-        private EasyPVA easyPVA;
-        private String channelName;
-        private String providerName;
-        private ReentrantLock lock = new ReentrantLock();
-        private Condition waitForConnect = lock.newCondition();
-        private Channel channel = null;
-        private Status status = statusCreate.getStatusOK();
+        private final EasyPVA easyPVA;
+        private final String channelName;
+        private final String providerName;
+        private final ReentrantLock lock = new ReentrantLock();
+        private final Condition waitForConnect = lock.newCondition();
+
+        private volatile Channel channel = null;
+        private volatile boolean isDestroyed = false;
+        private volatile Status status = statusCreate.getStatusOK();
+        
         private enum ConnectState {connectIdle,notConnected,connected};
-        private ConnectState connectState = ConnectState.connectIdle;
+        private volatile ConnectState connectState = ConnectState.connectIdle;
         
         private boolean checkConnected() {
-            if(connectState==ConnectState.connectIdle) connect(2.0);
+            if(connectState==ConnectState.connectIdle) connect(3.0);	// TODO constant
             if(connectState==ConnectState.connected) return true;
             if(connectState==ConnectState.notConnected) return false;
             String message = channelName + " illegal connect state";
@@ -224,8 +233,7 @@ public class EasyPVAFactory {
             this.channel = channel;
         }
         @Override
-        public void channelStateChange(Channel c,ConnectionState connectionState) {
-            if(c!=channel) throw new IllegalStateException("logic error in channelStateChange");
+        public void channelStateChange(Channel channel,ConnectionState connectionState) {
             synchronized (this) {
                if(isDestroyed) return;
                if(connectionState!=ConnectionState.CONNECTED) {
@@ -236,9 +244,11 @@ public class EasyPVAFactory {
                        null);
                   setStatus(status);
                }
+               else {
+                   connectState = ConnectState.connected;
+               }   
             }
             lock.lock();
-            connectState = ConnectState.connected;
             try {
                waitForConnect.signal();
             } finally {
@@ -468,36 +478,43 @@ public class EasyPVAFactory {
     }
 
     private static class EasyGetImpl implements EasyGet, ChannelGetRequester {
-        private boolean isDestroyed = false;
-        private EasyChannelImpl easyChannel;
-        private Channel channel;
-        private PVStructure pvRequest;
-        private ReentrantLock lock = new ReentrantLock();
-        private Condition waitForConnect = lock.newCondition();
-        private Condition waitForGet = lock.newCondition();
-        private Status status = statusCreate.getStatusOK();
-        private ChannelGet channelGet = null;
-        private PVStructure pvStructure = null;
-        private BitSet bitSet = null;
-        private boolean hasValue;
-        private boolean valueIsScalar = false;
-        private PVField pvValue = null;
-        private ScalarType scalarTypeValue = null;
-        private PVScalar pvScalarValue = null;
-        private PVArray pvArrayValue =  null;
-        private PVScalarArray pvScalarArrayValue = null;
-        private boolean valueIsNumeric = false;
-        private PVBoolean pvBooleanValue = null;
-        private PVStructure pvAlarmStructure = null;
-        private PVAlarm pvAlarm = PVAlarmFactory.create();
-        private Alarm alarm = new Alarm();
-        private PVStructure pvTimeStampStructure = null;
-        private PVTimeStamp pvTimeStamp = PVTimeStampFactory.create();
-        private TimeStamp timeStamp = TimeStampFactory.create();
-        private BooleanArrayData booleanArrayData = new BooleanArrayData();
+        private final EasyChannelImpl easyChannel;
+        private final Channel channel;
+        private final PVStructure pvRequest;
+        private final ReentrantLock lock = new ReentrantLock();
+        private final Condition waitForConnect = lock.newCondition();
+        private final Condition waitForGet = lock.newCondition();
+ 
+        private volatile boolean isDestroyed = false;
+
+        private volatile Status status = statusCreate.getStatusOK();
+        private volatile ChannelGet channelGet = null;
+        private volatile PVStructure pvStructure = null;
+        private volatile BitSet bitSet = null;
         
         private enum ConnectState {connectIdle,notConnected,connected};
-        private ConnectState connectState = ConnectState.connectIdle;
+        private volatile ConnectState connectState = ConnectState.connectIdle;
+
+        // volatile-s!!!
+        private volatile boolean hasValue;
+        private volatile boolean valueIsScalar = false;
+        private volatile ScalarType scalarTypeValue = null;
+        private volatile boolean valueIsNumeric = false;
+        
+        private volatile PVField pvValue = null;
+        private volatile PVScalar pvScalarValue = null;
+        private volatile PVArray pvArrayValue =  null;
+        private volatile PVScalarArray pvScalarArrayValue = null;
+        private volatile PVBoolean pvBooleanValue = null;
+        
+        private volatile PVStructure pvAlarmStructure = null;
+        private volatile PVStructure pvTimeStampStructure = null;
+        
+        private final PVAlarm pvAlarm = PVAlarmFactory.create();
+        private final Alarm alarm = new Alarm();
+        private final PVTimeStamp pvTimeStamp = PVTimeStampFactory.create();
+        private final TimeStamp timeStamp = TimeStampFactory.create();
+        private final BooleanArrayData booleanArrayData = new BooleanArrayData();
         
         private boolean checkConnected() {
             if(connectState==ConnectState.connectIdle) connect();
@@ -516,7 +533,7 @@ public class EasyPVAFactory {
         }
 
         private enum GetState {getIdle,getActive,getDone};
-        private GetState getState = GetState.getIdle;
+        private volatile GetState getState = GetState.getIdle;
         
         private boolean checkGetState() {
         	if(!checkConnected()) return false;
@@ -574,39 +591,41 @@ public class EasyPVAFactory {
             easyChannel.message(message, messageType);
         }
         @Override
-        public void channelGetConnect(Status status, ChannelGet channelGet,PVStructure pvStructure, BitSet bitSet) {
+        public void channelGetConnect(Status status, ChannelGet channelGet, Structure structure) {
             if(isDestroyed) return;
-            this.channelGet = channelGet;
-            this.pvStructure = pvStructure;
-            this.bitSet = bitSet;
             this.status = status;
+            this.channelGet = channelGet;
             if(!status.isSuccess()) {
             	connectState = ConnectState.notConnected;
-            } else {
-            	pvValue = pvStructure.getSubField("value");
-            	if(pvValue!=null) {
-            		hasValue = true;
-            		if(pvValue.getField().getType()==Type.scalar) {
-            			valueIsScalar = true;
-            			pvScalarValue = (PVScalar)pvValue;
-            			scalarTypeValue = pvScalarValue.getScalar().getScalarType();
-            			if(scalarTypeValue==ScalarType.pvBoolean) {
-            				pvBooleanValue = (PVBoolean)pvValue;
-            			}
-            			if(scalarTypeValue.isNumeric()) valueIsNumeric = true;
-            		} else if(pvValue.getField().getType()==Type.scalarArray) {
-            			pvArrayValue = (PVArray)pvValue;
-            			pvScalarArrayValue = (PVScalarArray)pvValue;
-            			scalarTypeValue = pvScalarArrayValue.getScalarArray().getElementType();
-            			if(scalarTypeValue.isNumeric()) valueIsNumeric = true;
-            		} else if(pvValue.getField().getType()==Type.structureArray) {
-            			pvArrayValue = (PVArray)pvValue;
-            		}
-            		connectState = ConnectState.connected;
-            	}
-            pvTimeStampStructure = pvStructure.getStructureField("timeStamp");
-            pvAlarmStructure = pvStructure.getStructureField("alarm");
             }
+            else {
+            	// reset (not optimal, but simpler code)
+            	hasValue = false;
+    			valueIsScalar = false;
+    			scalarTypeValue = null;
+    			valueIsNumeric = false;
+            	
+            	// update structure info
+                Field valueField = structure.getField("value");
+                if (valueField != null) {
+                	hasValue = true;
+                	if (valueField.getType() == Type.scalar) {
+            			valueIsScalar = true;
+            			Scalar scalar = (Scalar)valueField;
+            			scalarTypeValue = scalar.getScalarType();
+            			valueIsNumeric = scalarTypeValue.isNumeric();
+                	}
+                	else if (valueField.getType() == Type.scalarArray) {
+            			ScalarArray scalarArray = (ScalarArray)valueField;
+            			scalarTypeValue = scalarArray.getElementType();
+            			valueIsNumeric = scalarTypeValue.isNumeric();
+                	}
+                }
+                
+                this.connectState = ConnectState.connected;
+        	}
+            
+            // signal
             lock.lock();
             try {
                waitForConnect.signal();
@@ -615,9 +634,51 @@ public class EasyPVAFactory {
             }
         }
         @Override
-        public void getDone(Status status) {
+        public void getDone(Status status, ChannelGet channelGet, PVStructure pvStructure, BitSet bitSet) {
             this.status = status;
             getState = GetState.getDone;
+
+            PVStructure previousPvStructure = this.pvStructure;
+            
+            this.pvStructure = pvStructure;
+            this.bitSet = bitSet;
+            
+            if(!status.isSuccess()) {
+            	connectState = ConnectState.notConnected;
+            } 
+            else {
+            	if (previousPvStructure != pvStructure) {
+                	// reset (not optimal, but simpler code)
+        	        pvValue = null;
+        	        pvScalarValue = null;
+        	        pvArrayValue =  null;
+        	        pvScalarArrayValue = null;
+        	        pvBooleanValue = null;
+            		
+            		// update cached fields
+            		if(hasValue){
+    	            	pvValue = pvStructure.getSubField("value");
+    	            	Field pvValueField = pvValue.getField();
+	            		if(pvValueField.getType()==Type.scalar) {
+	            			pvScalarValue = (PVScalar)pvValue;
+	            			if(scalarTypeValue==ScalarType.pvBoolean) {
+	            				pvBooleanValue = (PVBoolean)pvValue;
+	            			}
+	            		} else if(pvValueField.getType()==Type.scalarArray) {
+	            			pvArrayValue = (PVArray)pvValue;
+	            			pvScalarArrayValue = (PVScalarArray)pvValue;
+	            		} else if(pvValueField.getType()==Type.structureArray) {
+	            			pvArrayValue = (PVArray)pvValue;
+	            		}
+	            	}
+
+	            	pvTimeStampStructure = pvStructure.getStructureField("timeStamp");
+		            pvAlarmStructure = pvStructure.getStructureField("alarm");
+            	}
+            
+    			connectState = ConnectState.connected;
+        	}
+        
             lock.lock();
             try {
                waitForGet.signal();
@@ -691,7 +752,7 @@ public class EasyPVAFactory {
         		return;
             }
             getState = GetState.getActive;
-            channelGet.get(false);
+            channelGet.get();
         }
         @Override
         public boolean waitGet() {
@@ -1007,31 +1068,35 @@ public class EasyPVAFactory {
     }
     
     private static class EasyPutImpl implements EasyPut, ChannelPutRequester {
-        private boolean isDestroyed = false;
-        private EasyChannelImpl easyChannel;
-        private Channel channel;
-        private PVStructure pvRequest;
-        private ReentrantLock lock = new ReentrantLock();
-        private Condition waitForConnect = lock.newCondition();
-        private Condition waitForPutOrGet = lock.newCondition();
-        private Status status = statusCreate.getStatusOK();
-        private ChannelPut channelPut = null;
-        private PVStructure pvStructure = null;
-        private BitSet bitSet = null;
-        private boolean hasValue;
-        private boolean valueIsScalar = false;
-        private PVField pvValue = null;
-        private ScalarType scalarTypeValue = null;
-        private PVScalar pvScalarValue = null;
-        private PVArray pvArrayValue =  null;
-        private PVScalarArray pvScalarArrayValue = null;
-        private boolean valueIsNumeric = false;
-        private PVBoolean pvBooleanValue = null;
-        private BooleanArrayData booleanArrayData = new BooleanArrayData();
+        private final EasyChannelImpl easyChannel;
+        private final Channel channel;
+        private final PVStructure pvRequest;
+        private final ReentrantLock lock = new ReentrantLock();
+        private final Condition waitForConnect = lock.newCondition();
+        private final Condition waitForPutOrGet = lock.newCondition();
+
+        private volatile boolean isDestroyed = false;
+        private volatile Status status = statusCreate.getStatusOK();
+        private volatile ChannelPut channelPut = null;
+        private volatile PVStructure pvStructure = null;
+        private volatile BitSet bitSet = null;
         
         private enum ConnectState {connectIdle,notConnected,connected};
-        private ConnectState connectState = ConnectState.connectIdle;
+        private volatile ConnectState connectState = ConnectState.connectIdle;
         
+        // volatile-s!!!
+        private volatile boolean hasValue;
+        private volatile boolean valueIsScalar = false;
+        private volatile ScalarType scalarTypeValue = null;
+        private volatile boolean valueIsNumeric = false;
+        
+        private volatile PVField pvValue = null;
+        private volatile PVScalar pvScalarValue = null;
+        private volatile PVArray pvArrayValue =  null;
+        private volatile PVScalarArray pvScalarArrayValue = null;
+        private volatile PVBoolean pvBooleanValue = null;
+        private final BooleanArrayData booleanArrayData = new BooleanArrayData();
+
         private boolean checkConnected() {
             if(connectState==ConnectState.connectIdle) connect();
             if(connectState==ConnectState.connected) return true;
@@ -1048,7 +1113,7 @@ public class EasyPVAFactory {
         }
         
         private enum GetState {getIdle,getActive,getDone};
-        private GetState getState = GetState.getIdle;
+        private volatile GetState getState = GetState.getIdle;
         
         private boolean checkGetState() {
         	if(!checkConnected()) return false;
@@ -1068,9 +1133,9 @@ public class EasyPVAFactory {
         }
 
         private enum PutState {putIdle,putActive,putDone};
-        private PutState putState = PutState.putIdle;
+        private volatile PutState putState = PutState.putIdle;
         
-        // TODO this method is never called! Is this OK??!!!!
+        /*
         private boolean checkPutState() {
         	if(!checkConnected()) return false;
             if(!easyPVA.isAutoPut()) return true;
@@ -1087,7 +1152,8 @@ public class EasyPVAFactory {
             setStatus(status);
             return false;
         }
-
+		*/
+        
         private boolean checkNumericScalar(boolean isGet) {
         	if(isGet) {
         	    if(!checkGetState()) return false;
@@ -1141,39 +1207,51 @@ public class EasyPVAFactory {
             if(isDestroyed) return;
             easyChannel.message(message, messageType);
         }
+        private void setPVStructure(PVStructure pvStructure, BitSet bitSet)
+        {
+        	this.bitSet = bitSet;
+        	if (this.pvStructure != pvStructure)
+        	{
+        		this.pvStructure = pvStructure;
+	        	pvValue = pvStructure.getSubField("value");
+	        	if(pvValue!=null) {
+	        		hasValue = true;
+	        		if(pvValue.getField().getType()==Type.scalar) {
+	        			valueIsScalar = true;
+	        			pvScalarValue = (PVScalar)pvValue;
+	        			scalarTypeValue = pvScalarValue.getScalar().getScalarType();
+	        			if(scalarTypeValue==ScalarType.pvBoolean) {
+	        				pvBooleanValue = (PVBoolean)pvValue;
+	        			}
+	        			if(scalarTypeValue.isNumeric()) valueIsNumeric = true;
+	        		} else if(pvValue.getField().getType()==Type.scalarArray) {
+	        			pvArrayValue = (PVArray)pvValue;
+	        			pvScalarArrayValue = (PVScalarArray)pvValue;
+	        			scalarTypeValue = pvScalarArrayValue.getScalarArray().getElementType();
+	        			if(scalarTypeValue.isNumeric()) valueIsNumeric = true;
+	        		} else if(pvValue.getField().getType()==Type.structureArray) {
+	        			pvArrayValue = (PVArray)pvValue;
+	        		}
+	        	}
+        	}
+        }
         @Override
-        public void channelPutConnect(Status status, ChannelPut channelPut,PVStructure pvStructure, BitSet bitSet) {
+        public void channelPutConnect(Status status, ChannelPut channelPut, Structure structure) {
             if(isDestroyed) return;
             this.channelPut = channelPut;
-            this.pvStructure = pvStructure;
-            this.bitSet = bitSet;
             this.status = status;
             if(!status.isSuccess()) {
             	connectState = ConnectState.notConnected;
             } else {
-            	pvValue = pvStructure.getSubField("value");
-            	if(pvValue!=null) {
-            		hasValue = true;
-            		if(pvValue.getField().getType()==Type.scalar) {
-            			valueIsScalar = true;
-            			pvScalarValue = (PVScalar)pvValue;
-            			scalarTypeValue = pvScalarValue.getScalar().getScalarType();
-            			if(scalarTypeValue==ScalarType.pvBoolean) {
-            				pvBooleanValue = (PVBoolean)pvValue;
-            			}
-            			if(scalarTypeValue.isNumeric()) valueIsNumeric = true;
-            		} else if(pvValue.getField().getType()==Type.scalarArray) {
-            			pvArrayValue = (PVArray)pvValue;
-            			pvScalarArrayValue = (PVScalarArray)pvValue;
-            			scalarTypeValue = pvScalarArrayValue.getScalarArray().getElementType();
-            			if(scalarTypeValue.isNumeric()) valueIsNumeric = true;
-            		} else if(pvValue.getField().getType()==Type.structureArray) {
-            			pvArrayValue = (PVArray)pvValue;
-            		}
-            		connectState = ConnectState.connected;
-            	}
-           
+            	// until get is called there is no pvStructure and bitSet
+            	// create one in case only put is called
+            	PVStructure newPVStructure = PVDataFactory.getPVDataCreate().createPVStructure(structure);
+            	setPVStructure(newPVStructure,
+            				   new BitSet(newPVStructure.getNumberFields()));
+            	
+            	connectState = ConnectState.connected;
             }
+            
             lock.lock();
             try {
                waitForConnect.signal();
@@ -1183,8 +1261,10 @@ public class EasyPVAFactory {
         }
 
         @Override
-        public void getDone(Status status) {
+        public void getDone(Status status, ChannelPut channelPut, PVStructure pvStructure, BitSet bitSet) {
             this.status = status;
+            setPVStructure(pvStructure, bitSet);
+            
             getState = GetState.getDone;
             lock.lock();
             try {
@@ -1195,7 +1275,7 @@ public class EasyPVAFactory {
         }
 
         @Override
-        public void putDone(Status status) {
+        public void putDone(Status status, ChannelPut channelPut) {
         	this.status = status;
             putState = PutState.putDone;
             lock.lock();
@@ -1322,7 +1402,7 @@ public class EasyPVAFactory {
         		return;
             }
             putState = PutState.putActive;
-            channelPut.put(false);
+            channelPut.put(pvStructure, bitSet);
         }
 
         @Override
@@ -1810,7 +1890,6 @@ public class EasyPVAFactory {
     }
 
 	private static class EasyRPCImpl implements EasyRPC, ChannelRPCRequester {
-	    private volatile boolean isDestroyed = false;
 	    private final EasyChannelImpl easyChannel;
 	    private final Channel channel;
 	    private final PVStructure pvRequest;
@@ -1818,6 +1897,8 @@ public class EasyPVAFactory {
 	    private final ReentrantLock lock = new ReentrantLock();
 	    private final Condition waitForConnect = lock.newCondition();
 	    private final Condition waitForRPC = lock.newCondition();
+
+	    private volatile boolean isDestroyed = false;
 	    
 	    private volatile Status status = statusCreate.getStatusOK();
 	    private volatile ChannelRPC channelRPC = null;
@@ -1877,7 +1958,7 @@ public class EasyPVAFactory {
 	        }
 	    }
 	    @Override
-	    public void requestDone(Status status, PVStructure result) {
+	    public void requestDone(Status status, ChannelRPC channelRPC, PVStructure result) {
 	        this.status = status;
 	        this.result = result;
 	        rpcState = RPCState.rpcDone;
@@ -1955,7 +2036,7 @@ public class EasyPVAFactory {
 	    		return;
 	        }
 	        rpcState = RPCState.rpcActive;
-	        channelRPC.request(request,false);
+	        channelRPC.request(request);
 	    }
 	    @Override
 	    public PVStructure waitRequest() {

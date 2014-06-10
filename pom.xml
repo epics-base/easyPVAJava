@@ -8,7 +8,7 @@
     <packaging>jar</packaging>
 
     <name>easyPVA - Java</name>
-    <url>http://epics-pvdata.sourceforge.net/pvDataJava</url>
+    <url>http://epics-pvdata.sourceforge.net/easyPVAJava</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -24,12 +24,12 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>pvDataJava</artifactId>
-            <version>3.0.4-SNAPSHOT</version>
+            <version>3.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>pvAccessJava</artifactId>
-            <version>3.0.6-SNAPSHOT</version>
+            <version>3.1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
     
