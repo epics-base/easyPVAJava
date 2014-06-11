@@ -73,10 +73,7 @@ public class EasyPVAFactory {
     private static EasyPVA easyPVA = null;
     
     private static final StatusCreate statusCreate = StatusFactory.getStatusCreate();
-    //private static final PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
-    //private static final FieldCreate fieldCreate = FieldFactory.getFieldCreate();
     private static final Convert convert = ConvertFactory.getConvert();
-    private static final ChannelProviderRegistry channelAccess = ChannelProviderRegistryFactory.getChannelProviderRegistry();
     private static final String easyPVAName = "easyPVA";
     private static final String defaultProvider = org.epics.pvaccess.ClientFactory.PROVIDER_NAME;
 
@@ -290,7 +287,8 @@ public class EasyPVAFactory {
                      null);
                  setStatus(status);
             }
-            ChannelProvider channelProvider = channelAccess.getProvider(providerName);
+            ChannelProvider channelProvider = ChannelProviderRegistryFactory.getChannelProviderRegistry().getProvider(providerName);
+           
             channel = channelProvider.createChannel(channelName, this, ChannelProvider.PRIORITY_DEFAULT);
         }
 
@@ -336,9 +334,9 @@ public class EasyPVAFactory {
 
 		@Override
 		public EasyProcess createProcess(String request) {
-			PVStructure pvStructure = createRequest(request);
-			if(pvStructure==null) return null;
-			return createProcess(pvStructure);
+			PVStructure pvRequest = createRequest(request);
+			if(pvRequest==null) return null;
+			return createProcess(pvRequest);
 		}
 
 		@Override
@@ -590,6 +588,9 @@ public class EasyPVAFactory {
             if(isDestroyed) return;
             easyChannel.message(message, messageType);
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.client.ChannelGetRequester#channelGetConnect(org.epics.pvdata.pv.Status, org.epics.pvaccess.client.ChannelGet, org.epics.pvdata.pv.Structure)
+         */
         @Override
         public void channelGetConnect(Status status, ChannelGet channelGet, Structure structure) {
             if(isDestroyed) return;
@@ -633,6 +634,9 @@ public class EasyPVAFactory {
                lock.unlock();
             }
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.client.ChannelGetRequester#getDone(org.epics.pvdata.pv.Status, org.epics.pvaccess.client.ChannelGet, org.epics.pvdata.pv.PVStructure, org.epics.pvdata.misc.BitSet)
+         */
         @Override
         public void getDone(Status status, ChannelGet channelGet, PVStructure pvStructure, BitSet bitSet) {
             this.status = status;
@@ -1235,6 +1239,9 @@ public class EasyPVAFactory {
 	        	}
         	}
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.client.ChannelPutRequester#channelPutConnect(org.epics.pvdata.pv.Status, org.epics.pvaccess.client.ChannelPut, org.epics.pvdata.pv.Structure)
+         */
         @Override
         public void channelPutConnect(Status status, ChannelPut channelPut, Structure structure) {
             if(isDestroyed) return;
@@ -1260,6 +1267,9 @@ public class EasyPVAFactory {
             }
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.client.ChannelPutRequester#getDone(org.epics.pvdata.pv.Status, org.epics.pvaccess.client.ChannelPut, org.epics.pvdata.pv.PVStructure, org.epics.pvdata.misc.BitSet)
+         */
         @Override
         public void getDone(Status status, ChannelPut channelPut, PVStructure pvStructure, BitSet bitSet) {
             this.status = status;
@@ -1274,6 +1284,9 @@ public class EasyPVAFactory {
             }
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.client.ChannelPutRequester#putDone(org.epics.pvdata.pv.Status, org.epics.pvaccess.client.ChannelPut)
+         */
         @Override
         public void putDone(Status status, ChannelPut channelPut) {
         	this.status = status;
