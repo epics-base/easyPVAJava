@@ -22,6 +22,12 @@ public class ExampleEasyGetScalar {
    
     public static void main(String[] args) {
         exampleDouble("double01");
+        // following will throw exception
+        try {
+            exampleDouble("xxxxJUNK");
+        } catch( Exception e) {
+            System.out.println("exception " + e.getMessage());
+        }
         exampleDoubleCheck("int01");
         exampleDoubleCheck("xxxxJUNK");
         exampleDoubleAlarmTimeStamp("double01");

@@ -28,7 +28,7 @@
 <h1>EPICS easyPVA</h1>
 <!-- Maturity: Working Draft or Request for Comments, or Recommendation, and date.  -->
 <h2 class="nocount">EPICS V4 Working Group, Working Draft,
-2012-09-06</h2>
+2014-06-20</h2>
 <dl>
   <dt>This version:</dt>
     <dd><a
@@ -57,9 +57,20 @@ scientists a way to directly develop analytical applications.</p>
 software support for high speed controls network communications used in EPICS version 4.
 PvAccess provides a callback based interface, which can be hard to use.
 EasyPVA provides an interface that does not require callbacks even for monitors.
-It also provides many "convenience" methods to directly get and put common data 
-types such as double, without reference to the introspection interface of pvAccess.
+</p>
+<p>
+EasyChannel provides many "convenience" methods to directly get and put 
+scalar and scalarArray data types.
 Additional methods provide access to the full features of pvAccess.
+</p>
+<p>
+EasyMultiChannel provides access to data from multiple channels as long
+as eacxh channel has a top level field named <b>value</b>.
+EasyMultiChannel provides two ways to access data from multiple channels:
+The first is as an NTMultiChannel. The second is as a double array.
+The double array can be used if the value field of every channel is a numeric scalar.
+There is code for NTMultiChannel that helps with access to more complicated data types.
+</p>
 <p>EasyPVA will become part of pvAccess when it is ready. </p>
 
   <!-- last para of Abstract is boilerplate reference to EPICS -->
@@ -71,22 +82,23 @@ Additional methods provide access to the full features of pvAccess.
 
 <h2 class="nocount">Status of this Document and of the EasyPVA Software</h2>
 
-<p>This is the September 5th, 2012 revision of the EPICS EasyPVA document.</p>
+<p>This is the June 20th, 2014 revision of the EPICS EasyPVA document.</p>
 <p>This document acts as both a specification document and as a user guide. As of this revision,
 the software is NOT specification complete. Therefore, 
 readers should be aware that the present implementation may not include all of the facilities 
 described here.</p>
 
-<p>As of this September 5th 2012 revision, at least draft 
-Java interfaces 
-have been described here for all of the intended EasyPVA facilities. However, 
-<em>EasyPVA, EasyChannel, EasyGet, EasyPut, and EasyRPC are the only interfaces currently
-implemented, and they have only been implemented in Java.</em></p>
+<p>As of this revision, at draft Java interfaces 
+have been described here for most of the intended EasyPVA facilities. However, 
+<em>EasyPVA, EasyChannel, EasyGet, EasyPut, EasyMultiChannel, EasyMultiGet, and EasyRPC
+are the only interfaces currently implemented, and they have only been implemented in Java.</em></p>
 
 <p>There is example source code included here, which exercises the Java implementation of 
-EasyGet and EasyPut.
+EasyGet, EasyPut, and EasyMultiGet.
 There is also a test suite for EasyGet. However, it is not complete and much more testing
 should be done.</p>
+<p>If you are using a previous version of examplePVADatabase.zip you should
+get the latest version in order to run the examples for EasyMultiChannel.</p>
 
 </div> <!-- head -->
 
@@ -102,12 +114,11 @@ should be done.</p>
 <p>This section describes the prerequisites of easyPVA, how to acquire the software, and
 how to set up a demonstration example so that you can test out the illustrations. </p>
 <h3>Installation</h3>
-<p>This project requires that the following projects are already available: pvDataJava, pvAccessJava, and pvIOCJava.</p>
+<p>This project uses pvDataJava and pvAccessJava.</p>
 <p>The Java version of easyPVA currently resides in mercurial repository:</p>
 <pre>
-epics-pvdata.hg.sourceforge.net/hgroot/epics-pvdata/alphaJava
+epics-pvdata.hg.sourceforge.net/hgroot/epics-pvdata/easyPVAJava
 </pre>
-<p>easyPVA resides in the top level directory easyPVA.</p>
 <p>After cloning this repository import the project into eclipse as follows:</p>
 Via the file menu select import "Existing Projects into Workspace".
 Then "Select root directory".
@@ -158,27 +169,97 @@ version and wrapper code for Python.</p>
 only created in the first call. This first call also
 starts the PVAccess client factory.</p>
 
-<h3>EasyPVA</h3>
+<h3>NTMultiChannel Overview</h3>
+<p>EasyMultiChannel get and put provide the data from each channel either
+as a <b>double[]</b> or as a NTMultiChannel.
+<p>
+Note that the format does <b>not</b> match what the "EPICS V4 Normative Types"
+specification states.
+I think the definiton that it has for <b>NTMultichannelArray</b>
+needs some discussion.
+</p>
+<p>
+Unless every channel has a value field that is a numeric scalar then
+only NTMultiChannel is valid.
+In order to make it easier to use MTMultiChannel there needs to be
+a facility that has something like the following interface:</p>
+<pre>
+public interface NTMultiChannel {
+    TimeStamp getTimeStamp();
+    int getLength();
+    void getAlarm(Alarm[]alarms,int length);
+    void getTimeStamp(TimeStamp[]timeStamps,int length);
+    PVArray getValue();
+    PVField getElementValue(int index);
+    boolean allValueScalar();
+    boolean isValueScalar(int index);
+    boolean isValueScalarArray(int index);
+    
+    PVStructure getNTMultiChannel();
+    boolean putMultiChannel(PVStructure pvStructure);
+ 
+    boolean[] getBooleanArray();
+    byte[] getByteArray();
+    short[] getShortArray();
+    int[] getIntArray();
+    long[] getLongArray();
+    float[] getFloatArray();
+    double[] getDoubleArray();
+    String[] getStringArray();
+    
+    boolean getBooleanArray(boolean[]data,int length);
+    boolean getByteArray(byte[]data,int length);
+    boolean getShortArray(short[]data,int length);
+    boolean getIntArray(int[]data,int length);
+    boolean getLongArray(long[]data,int length);
+    boolean getFloatArray(float[]data,int length);
+    boolean getDoubleArray( double[]data,int length);
+    boolean getStringArray(String[]data,int length);
+    
+    
+    int getLength(int index);
+    int getBooleanArray(int index,boolean[]data,int length);
+    int getByteArray(int index,byte[]data,int length);
+    int getShortArray(int index,short[]data,int length);
+    int getIntArray(int index,int[]data,int length);
+    int getLongArray(int index,long[]data,int length);
+    int getFloatArray(int index,float[]data,int length);
+    int getDoubleArray(int index, double[]data,int length);
+    int getStringArray(int index,String[]data,int length);
+    
+}
+</pre>
+<p>
+Nothing has been started on this.</p>
+
+<h3>EasyPVA Overview</h3>
 
 <p>EasyPVA creates interfaces to one of the following:</p>
 <dl>
   <dt>EasyChannel</dt>
-    <dd>This creates an interface for accessing a single channel.</dd>
+    <dd>This creates an interface for accessing a single channel.<br />
+     There are two methods for creating an EasyChannel,
+     with the difference being that the second
+     specifiers the name of the provider.
+     The other assumes that the provider is "pva" (pvAccess).</p>
+    </dd>
   <dt>EasyMultiChannel</dt>
-    <dd>This creates an interface for accessing a set of channels.</dd>
+    <dd>This creates an interface for accessing a set of channels.<br />
+     There are multiple methods for creating an EasyMultiChannel.
+     The provider can be supplied or use a default of "pva".
+     A union for the UnionArray for accessing the value fields of each channel
+     can be provided or a default of variant union will be used.
+    </dd>
 </dl>
 
-<p>For each there are two methods, with the difference being that the second
-specified the name of the provider. The other assumes that the provider is
-"pva" (pvAccess).</p>
 
 <p>There are additional methods that allows the client to:</p>
 <ol>
   <li>Control how error messages are handled.</li>
-  <li>Control when get/put commands are sent the the V3 channel.</li>
+  <li>Control when get/put commands are sent the channel or channels.</li>
 </ol>
 
-<h3>EasyChannel</h3>
+<h3>EasyChannel Overview</h3>
 
 <p>This interface creates Easy support for each PVAccess::Channel create
 method:</p>
@@ -216,24 +297,36 @@ method:</p>
     <dd>This is an interface to ChannelPutGet. Details TBD.</dd>
 </dl>
 
+<h3>EasyMultiChannel Overview</h3>
+<p>This interface creates Easy support for accessing a set of channels.
+The only requirement of the channels is that each must have a top level field named value.
+</p>
+<dl>
+  <dt>EasyMultiGet</dt>
+    <dd>This is used to get values from a a set of channels.
+      The result can either be an NTMultiChannel structure of a <b>double[]</b> array.
+      The createGet method determines the result type.
+     </dd>
+  <dt>EasyMultiPut</dt>
+    <dd>This is used to get values from a a set of channels.
+      The data supplied can either be an NTMultiChannel structure or a <b>double[]</b> array.
+      The createPut method determines the result type.
+     </dd>
+</dl>
+
 
 <h2>Hello World Examples</h2>
 
-<p>The examples described in this section are located in
-easyPVA/test/org.epics.pvaccess/easyPVA. The examples access channels from the V3
-test IOC that comes with pvIOCCPP. An example of how it is started is:</p>
-<pre>mrk&gt; pwd
-/home/mrk/hg/pvIOCCPP/iocBoot/testV3Channel
-mrk&gt; ../../bin/linux-x86/testV3Channel st.cmd</pre>
+<p>The examples described in this section require that a server is running
+that has the required channels.
+A Java server is provided by easyPVADatabase.zip that comes with this easyPVAJava.
+To run it unzip, edit the source file, and then:
+<pre>
+mrk&gt; pwd
+/home/mrk/pvjava/easyPVADatabase
+.startExample 
+</pre>
 
-<p>The waveform records in the test database all have an initial length of 0.
-When EasyPut is implemented there will be a an example that gives them a non
-zero value. For now, on linux or darwin, just execute:</p>
-<pre>mrk&gt; pwd
-/home/mrk/hg/alphaCPP/easyPVA/documentation
-mrk&gt; source START_TEST_IOC</pre>
-
-<p>In the future an example V4 IOC will also be provided.</p>
 
 <h3>Get Scalar</h3>
 
@@ -597,8 +690,62 @@ data types:</p>
     }</pre>
 
 <h3>MultiGet</h3>
+<p>The examples in this section  are taken from ExampleEasyMultiGet.java</p>
 
-<p>TBD</p>
+<p>The first example is a simple way to get an array of data from a set of channels.
+This is done via one line of code as follows:</p>
+<pre>
+ PVStructure pvStructure = easyPVA.createMultiChannel(channelName).createGet().getNTMultiChannel();
+ System.out.println(pvStructure);
+</pre>
+<p>
+The data is presented as a NTMultiChannel.
+An example is:
+</p>
+<pre>
+structure 
+    any[] value 
+        any 
+            double  0.0
+        any 
+            double  2.0
+        any 
+            double  0.0
+        any 
+            double  0.0
+        any 
+            double  0.0
+    string[] channelName [double00,double01,double02,double03,double04]
+    time_t timeStamp
+        long secondsPastEpoch 1403270954
+        int nanoSeconds 295000000
+        int userTag 0
+    int[] severity [0,2,0,0,0]
+    int[] status [0,3,0,0,0]
+    string[] message [,lowAlarm,,,]
+    double[] deltaTime [-1.403270954295E9,-5551.089,-1.403270954295E9,-1.403270954295E9,-1.403270954295E9]
+</pre>
+<p>
+If the value field of each channel is a numeric scalar then the data can be obtained
+as a double array.
+Note that the only difference from the previous example is that the argument
+to createGet is <b>true</b>:
+</p>
+<pre>
+double[] value = easyPVA.createMultiChannel(channelName).createGet(true).getDoubleArray();
+System.out.println("value length " + value.length);
+for(int i=0; &lt;value.length; ++i) System.out.println(value[i]);
+</pre>
+<p>This produces</p>
+<pre>
+value length 5
+0.0
+2.0
+0.0
+0.0
+0.0
+</pre>
+
 
 <h3>Put Scalar</h3>
 
@@ -876,9 +1023,13 @@ data types:</p>
 <pre>public interface EasyPVA {
     void destroy();
     EasyChannel createChannel(String channelName);
-    EasyMultiChannel createMultiChannel(String[] channelNames);
     EasyChannel createChannel(String channelName,String providerName);
-    EasyMultiChannel createMultiChannel(String[] channelNames,String providerName);
+    EasyMultiChannel createMultiChannel(String[] channelName);
+    EasyMultiChannel createMultiChannel(String[] channelName,String providerName);
+    EasyMultiChannel createMultiChannel(
+            String[] channelNames,
+            String providerName,
+            Union union);
     void setRequester(Requester requester);
     void clearRequester();
     void setStatus(Status status);
@@ -895,9 +1046,16 @@ data types:</p>
     <dd>This will cleanup all resources created by EasyPVA. This should only be
       called when the client process is ready to exit.</dd>
   <dt>createChannel</dt>
-    <dd>Creates an instance of EasyChannel. </dd>
+    <dd>Creates an instance of EasyChannel.
+     Two methods are provided. The first calls the second with the providerName <b>pva</b>.
+    </dd>
   <dt>createMultiChannel</dt>
-    <dd>Create an instance of EasyMultiChannel.</dd>
+    <dd>Create an instance of EasyMultiChannel.
+     Three methods are provided. The first calls the second with the providerName <b>pva</b>.
+     The second calls the third with union being a variantUnion.
+     The third can be called to limit the valid data types for the value field
+      of each channel.
+    </dd>
   <dt>setRequester</dt>
     <dd>Set a requester. The default is for EasyPVA to handle messages by
       printing to System.out.</dd>
@@ -1774,23 +1932,30 @@ style="font-weight:bold;">getStatus</span>. If there was a problem creating the
 multiChannel, status will provide the reason.</p>
 
 <p>The EasyMultiChannel API is:</p>
-<pre>public interface EasyMultiChannel{
+<pre>
+public interface EasyMultiChannel{
     void destroy();
     boolean connect(double timeout);
     void issueConnect();
     boolean waitConnect(double timeout);
-    // EAField TBD
-    // EasyMultiProcess TBD 
-    EasyMultiGet createGet();
+    boolean allConnected();
+    boolean[] isConnected();
+    EasyMultiGet createGet(); 
     EasyMultiGet createGet(String request);
     EasyMultiGet createGet(PVStructure pvRequest);
+    EasyMultiGet createGet(boolean doubleOnly); 
+    EasyMultiGet createGet(boolean doubleOnly,String request);
+    EasyMultiGet createGet(boolean doubleOnly,PVStructure pvRequest);
     EasyMultiPut createPut();
     EasyMultiPut createPut(String request);
     EasyMultiPut createPut(PVStructure pvRequest);
-
+    EasyMultiPut createPut(boolean doubleOnly);
+    EasyMultiPut createPut(boolean doubleOnly,String request);
+    EasyMultiPut createPut(boolean doubleOnly,PVStructure pvRequest);
     void setStatus(Status status);
     Status getStatus();
-}</pre>
+}
+</pre>
 
 <p>where</p>
 <dl>
@@ -1801,16 +1966,28 @@ multiChannel, status will provide the reason.</p>
     <dd>Connect to the channel. This blocks until connected or timeout.</dd>
   <dt>issueConnect</dt>
     <dd>Issue a connect request and return immediately.</dd>
+  <dt>allConnected</dt>
+    <dd>returns <b>true</b> if all channels are connected and <b>false</b> otherwise.
+    </dd>
+  <dt>isConnected</dt>
+    <dd>Returns the connectio status of each channel.</dd>
   <dt>waitConnect</dt>
     <dd>Wait until the connection completes or for timeout/</dd>
   <dt>createGet</dt>
-    <dd>Creates an <span style="font-weight:bold;">EasyMultiGet</span>. If no
+    <dd>
+     Two complete sets of create methods exist.
+      The difference between the two sets is that the second set has
+      an argument <b>boolean doubleOnly</b>.
+      If this is specified as <b>true</b> the value data is presented as
+      a <b>double[]</b>. If false , which is what the first set assumes,
+      then the data is presented as an NTMultiChannel.<br />
+      Each method creates an <span style="font-weight:bold;">EasyMultiGet</span>. If no
       request is specified then "<span
       style="font-weight:bold;">value,alarm,timeStamp</span>" is assumed. The
       other two methods use the syntax defined by <span
       style="font-family: Arial,Helvetica,sans-serif">ChannelRequest</span> as
       described in package <span
-      style="font-weight:bold;">org.epics.pvaccess.client</span>. The request refers
+      style="font-weight:bold;">org.epics.pvdata.copy</span>. The request refers
       to the request for each individual channel. The get itself will also have
       an alarm and a timeStamp.</dd>
   <dt>setStatus</dt>
@@ -1831,43 +2008,25 @@ thrown. The only exception is <span style="font-weight:bold;">getStatus</span>.
 If there was a problem creating, status will provide the reason.</p>
 
 <p>The EasyMultiGet API is:</p>
-<pre> public interface EasyMultiGet {
-    void destroy();
+<pre>
+ void destroy();
     boolean connect();
     void issueConnect();
     boolean waitConnect();
-    void get();
-    Alarm getAlarm();
+    boolean get();
+    void issueGet();
+    boolean waitGet();
     TimeStamp getTimeStamp();
     int getLength();
-
-    Alarm[] getAlarms();
-    TimeStamp[] getTimeStamps();
-    boolean[] isConnectedArray();
-    boolean[] getBooleanArray();
-    byte[] getByteArray();
-    short[] getShortArray();
-    int[] getIntArray();
-    long[] getLongArray();
-    float[] getFloatArray();
+    boolean doubleOnly();
+    PVStructure getNTMultiChannel();
+    PVStructure getPVTop();
     double[] getDoubleArray();
-    String[] getStringArray();
-
-    void getAlarms(Alarm[]alarms,int length);
-    void getTimeStamps(TimeStamp[]timeStamps,int length);
-    void isConnectedArray(boolean[]data,int length);
-    void getBooleanArray(boolean[]data,int length);
-    void getByteArray(byte[]data,int length);
-    void getShortArray(short[]data,int length);
-    void getIntArray(int[]data,int length);
-    void getLongArray(long[]data,int length);
-    void getFloatArray(float[]data,int length);
-    void getDoubleArray( double[]data,int length);
-    void getStringArray(String[]data,int length);
-
+    int getDoubleArray(int index, double[]data,int length);
     void setStatus(Status status);
     Status getStatus();
-}</pre>
+} 
+</pre>
 
 <p>where</p>
 <dl>
@@ -1880,62 +2039,34 @@ If there was a problem creating, status will provide the reason.</p>
   <dt>waitConnect</dt>
     <dd>Wait until the connection completes or for timeout/</dd>
   <dt>get</dt>
-    <dd>Do another get. When <span
-      style="font-weight:bold;">EasyMultiGet</span> is successfully created it
-      automatically does the first get. If a get fails than the next call to
-      another method will throw an exception. The only exception is <span
-      style="font-weight:bold;">getStatus</span>. If there was a problem,
+    <dd>Calls issueGet and then waitGet.</dd>
+  <dt>issueGet</dt>
+    <dd>Issues a get request for each channel.</dd>
+  <dt>waitGet</dt>
+    <dd>Get data from each channel.
+      If there was a problem,
       status will provide the reason. If an channel is not connected the
       severity will be INVALID.</dd>
-  <dt>getAlarm</dt>
-    <dd>Get the alarm. This is the overall alarm for the get. The severity is
-      always at least as great as the greatest severity of the channel alarms.
-      It is also used to report other problems.</dd>
   <dt>getTimeStamp</dt>
     <dd>Get the time stamp. This is the time when that last get completed.</dd>
-  <dt>isConnectedArray</dt>
-    <dd>The connection state for each channel.</dd>
-  <dt>getBooleanArray</dt>
-    <dd>Get the boolean[] value. If each channel is not a boolean an exception
-      is thrown,</dd>
-  <dt>getByteArray</dt>
-    <dd>Get the value as a byte[]. If each channel is not a numeric scalar an
-      exception is thrown.</dd>
-  <dt>getShortArray</dt>
-    <dd>Get the value as a short[]. If each channel is not a numeric scalar an
-      exception is thrown.</dd>
-  <dt>getIntArray</dt>
-    <dd>Get the value as an int[]. If each channel is not a numeric scalar an
-      exception is thrown.</dd>
-  <dt>getLongArray</dt>
-    <dd>Get the value as a long[]. If each channel is not a numeric scalar an
-      exception is thrown.</dd>
-  <dt>getFloatArray</dt>
-    <dd>Get the value as a float[]. If each channel is not a numeric scalar an
-      exception is thrown.</dd>
+  <dt>getLength</dt>
+    <dd>Returns the number of channels.</dd>
+  <dt>doubleOnly</dt>
+    <dd>Is doubleOnly true.</dd>
+  <dt>getNTMultiChannel</dt>
+    <dd>Return the NTMultChannel structure.
+     <b>null</b> is returned if doubleOnly is true.
+    </dd>
+  <dt>getPVTop</dt>
+    <dd>If doubleOnly is false then <b>null</b> is returned.
+     Othewise the structure has the fields value, timeStamp, and channelName.
+     </dd>
   <dt>getDoubleArray</dt>
-    <dd>Get the value as a double[]. If each channel is not a numeric scalar an
-      exception is thrown.</dd>
-  <dt>getStringArray</dt>
-    <dd>Get the value as a string[]. If each channel is not a scalar an
-      exception is thrown.</dd>
-  <dt>getAlarms</dt>
-    <dd>Get an array of the alarms for each channel. <span
-      style="font-weight:bold;">alarm_t</span> is an alarm structure. If the
-      request did not specify an alarm the array will be empty. Thus <span
-      style="font-weight:bold;">alarm_t[]</span> is a structure array with each
-      element being an alarm structure. If an individual channel does not have
-      an alarm the status and severity will both be <span
-      style="font-weight:bold;">NONE</span> and the message will be "<span
-      style="font-weight:bold;">alarm not implemented</span>".</dd>
-  <dt>getTimeStamps</dt>
-    <dd>Get an array of the timeStamps for each channel. If the request did not
-      include timeStamp then the array will be empty. <span
-      style="font-weight:bold;">timeStamp_t</span> is an alarm structure. Thus
-      <span style="font-weight:bold;">timeStamp_t[]</span> is a structure array
-      with each element being a timeStamp structure. If an individual channel
-      does not have a timeStamp then all elements of the timeStamp will have
-      the value 0.</dd>
+    <dd>If doubleOnly is false then <b>null</b> is returned for the first method
+     and <b>o</b> for the second.
+    Otherwise the data is returned for the first and the second
+    will return a value greater than zero.
+    </dd>
   <dt>setStatus</dt>
     <dd>Set a new status value. The new value will replace the current status.
       The initial status is statusOK. </dd>
@@ -1954,48 +2085,33 @@ thrown. The only exception is <span style="font-weight:bold;">getStatus</span>.
 If there was a problem creating, status will provide the reason.</p>
 
 <p>The EasyMultiPut API is:</p>
-<pre>public interface EasyMultiPut {
+<pre>
+public interface EasyMultiPut {
     void destroy();
     boolean connect();
     void issueConnect();
     boolean waitConnect();
-    void get();
-    void put();
-    Alarm getAlarm();
+    boolean get();
+    void issueGet();
+    boolean waitGet();
     TimeStamp getTimeStamp();
-
-    boolean[] isConnectedArray();
-    boolean[] getBooleanArray();
-    byte[] getByteArray();
-    short[] getShortArray();
-    int[] getIntArray();
-    long[] getLongArray();
-    float[] getFloatArray();
+    int getLength();
+   
+    boolean doubleOnly();
+    PVStructure getNTMultiChannel();
+    PVStructure getPVTop();
     double[] getDoubleArray();
-    String[] getStringArray();
-
-    void isConnectedArray(boolean[]data,int length);
-    void getBooleanArray(boolean[]data,int length);
-    void getByteArray(byte[]data,int length);
-    void getShortArray(short[]data,int length);
-    void getIntArray(int[]data,int length);
-    void getLongArray(long[]data,int length);
-    void getFloatArray(float[]data,int length);
-    void getDoubleArray( double[]data,int length);
-    void getStringArray(String[]data,int length);
-
-    void putBooleanArray(boolean[] value,int length);
-    void putByteArray(byte[] value,int lengt);
-    void putShortArray(short[] value,int lengt);
-    void putIntArray(int[] value,int lengt);
-    void putLongArray(long[] value,int lengt);
-    void putFloatArray(float[] value,int lengt);
-    void putDoubleArray(double[] value,int lengt);
-    void putStringArray(String[] value,int lengt);
-
+    int getDoubleArray(int index, double[]data,int length);
+    
+    boolean put(PVStructure pvNTMultiChannel);
+    void issuePut(PVStructure pvNTMultiChannel);
+    boolean put(double[] value);
+    void issuePut(double[] value);
+    boolean waitPut();
     void setStatus(Status status);
     Status getStatus();
-}</pre>
+}
+</pre>
 
 <p>where</p>
 <dl>
@@ -2008,69 +2124,44 @@ If there was a problem creating, status will provide the reason.</p>
   <dt>waitConnect</dt>
     <dd>Wait until the connection completes or for timeout/</dd>
   <dt>get</dt>
-    <dd>Do another get. When <span
-      style="font-weight:bold;">EasyMultiPut</span> is successfully created it
-      automatically does the first get. If a get fails than the next call to
-      another method will throw an exception. The only exception is <span
-      style="font-weight:bold;">getStatus</span>. If there was a problem,
+    <dd>Calls issueGet and then waitGet.</dd>
+  <dt>issueGet</dt>
+    <dd>Issues a get request for each channel.</dd>
+  <dt>waitGet</dt>
+    <dd>Get data from each channel.
+      If there was a problem,
       status will provide the reason. If an channel is not connected the
       severity will be INVALID.</dd>
-  <dt>getAlarm</dt>
-    <dd>Put the alarm. This is the overall alarm for the get. The severity is
-      always at least as great as the greatest severity of the channel alarms.
-      It is also used to report other problems.</dd>
   <dt>getTimeStamp</dt>
-    <dd>Put the time stamp. This is the time when that last get completed.</dd>
-  <dt>isConnectedArray</dt>
-    <dd>The connection state for each channel.</dd>
-  <dt>getBooleanArray</dt>
-    <dd>Put the boolean[] value. If each channel is not a boolean an exception
-      is thrown,</dd>
-  <dt>getByteArray</dt>
-    <dd>Put the value as a byte[]. If each channel is not a numeric scalar an
-      exception is thrown.</dd>
-  <dt>getShortArray</dt>
-    <dd>Put the value as a short[]. If each channel is not a numeric scalar an
-      exception is thrown.</dd>
-  <dt>getIntArray</dt>
-    <dd>Put the value as an int[]. If each channel is not a numeric scalar an
-      exception is thrown.</dd>
-  <dt>getLongArray</dt>
-    <dd>Put the value as a long[]. If each channel is not a numeric scalar an
-      exception is thrown.</dd>
-  <dt>getFloatArray</dt>
-    <dd>Put the value as a float[]. If each channel is not a numeric scalar an
-      exception is thrown.</dd>
+    <dd>Get the time stamp. This is the time when that last get completed.</dd>
+  <dt>getLength</dt>
+    <dd>Returns the number of channels.</dd>
+  <dt>doubleOnly</dt>
+    <dd>Is doubleOnly true.</dd>
+  <dt>getNTMultiChannel</dt>
+    <dd>Return the NTMultChannel structure.
+     <b>null</b> is returned if doubleOnly is true.
+    </dd>
+  <dt>getPVTop</dt>
+    <dd>If doubleOnly is false then <b>null</b> is returned.
+     Othewise the structure has the fields value, timeStamp, and channelName.
+     </dd>
   <dt>getDoubleArray</dt>
-    <dd>Put the value as a double[]. If each channel is not a numeric scalar an
-      exception is thrown.</dd>
-  <dt>getStringArray</dt>
-    <dd>Put the value as a string[]. If each channel is not a scalar an
-      exception is thrown.</dd>
-  <dt>putBooleanArray</dt>
-    <dd>Put the boolean[] value. If each channel is not a boolean an exception
-      is thrown,</dd>
-  <dt>putByteArray</dt>
-    <dd>Put the value as a byte[]. If each channel is not a numeric scalar an
-      exception is thrown.</dd>
-  <dt>putShortArray</dt>
-    <dd>Put the value as a short[]. If each channel is not a numeric scalar an
-      exception is thrown.</dd>
-  <dt>putIntArray</dt>
-    <dd>Put the value as an int[]. If each channel is not a numeric scalar an
-      exception is thrown.</dd>
-  <dt>putLongArray</dt>
-    <dd>Put the value as a long[]. If each channel is not a numeric scalar an
-      exception is thrown.</dd>
-  <dt>putFloatArray</dt>
-    <dd>Put the value as a float[]. If each channel is not a numeric scalar an
-      exception is thrown.</dd>
-  <dt>putDoubleArray</dt>
-    <dd>Put the value as a double[]. If each channel is not a numeric scalar an
-      exception is thrown.</dd>
-  <dt>putStringArray</dt>
-    <dd>Put the value as a string[]. If each channel is not a scalar an
-      exception is thrown.</dd>
+    <dd>If doubleOnly is false then <b>null</b> is returned for the first method
+     and <b>o</b> for the second.
+    Otherwise the data is returned for the first and the second
+    will return a value greater than zero.
+    </dd>
+  <dt>put</dt>
+    <dd>call issuePut and then waitPut.
+    doubleOnly determines which on the two methods must be called,
+    </dd>
+  <dt>issuePut</dt>
+    <dd>Call put for each channel.
+    doubleOnly determines which on the two methods must be called,
+    </dd>
+  <dt>waitPut</dt>
+    <dd>Wait until all puts are done.</dd>
   <dt>setStatus</dt>
     <dd>Set a new status value. The new value will replace the current status.
       The initial status is statusOK. </dd>

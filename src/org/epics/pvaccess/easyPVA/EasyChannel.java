@@ -12,9 +12,22 @@ import org.epics.pvdata.pv.Status;
  *
  */
 public interface EasyChannel {
+    /**
+     * 
+     */
     void destroy();
+    /**
+     * @return
+     */
     String getChannelName();
+    /**
+     * @return
+     */
     Channel getChannel();
+    /**
+     * @param timeout
+     * @return
+     */
     boolean connect(double timeout);
     void issueConnect();
     boolean waitConnect(double timeout);

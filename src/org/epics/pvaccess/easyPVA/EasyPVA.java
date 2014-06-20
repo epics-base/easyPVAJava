@@ -3,7 +3,7 @@
  */
 package org.epics.pvaccess.easyPVA;
 import org.epics.pvdata.pv.Requester;
-import org.epics.pvdata.pv.Status;
+import org.epics.pvdata.pv.*;
 
 /**
  * @author mrk
@@ -39,7 +39,20 @@ public interface EasyPVA extends Requester {
      * @param providerName The provider.
      * @return The interface.
      */
-    EasyMultiChannel createMultiChannel(String[] channelNames,String providerName);
+    EasyMultiChannel createMultiChannel(
+            String[] channelNames,
+            String providerName);
+    /**
+     * Create an EasyMultiChannel with the specified provider.
+     * @param channelNames The channelNames.
+     * @param providerName The provider.
+     * @param union The union interface for each the value field of each channel.
+     * @return The interface.
+     */
+    EasyMultiChannel createMultiChannel(
+            String[] channelNames,
+            String providerName,
+            Union union);
     /**
      * Set a requester. The default is for EasyPVA to handle messages by printing to System.out.
      * @param requester The requester.

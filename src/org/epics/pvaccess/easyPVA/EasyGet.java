@@ -34,6 +34,7 @@ public interface EasyGet {
     PVArray getArrayValue();
     PVScalarArray getScalarArrayValue();
     
+    
     boolean getBoolean();
     byte getByte();
     short getShort();
