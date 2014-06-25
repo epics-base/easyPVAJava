@@ -3,7 +3,6 @@
  */
 package org.epics.pvaccess.easyPVA;
 
-import org.epics.pvdata.property.TimeStamp;
 import org.epics.pvdata.pv.PVStructure;
 import org.epics.pvdata.pv.Status;
 
@@ -19,14 +18,13 @@ public interface EasyMultiPut {
     boolean get();
     void issueGet();
     boolean waitGet();
-    TimeStamp getTimeStamp();
     int getLength();
    
     boolean doubleOnly();
     PVStructure getNTMultiChannel();
     PVStructure getPVTop();
     double[] getDoubleArray();
-    int getDoubleArray(int index, double[]data,int length);
+    int getDoubleArray(int offset, double[]data,int length);
     
     boolean put(PVStructure pvNTMultiChannel);
     void issuePut(PVStructure pvNTMultiChannel);

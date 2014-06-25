@@ -12,22 +12,81 @@ import org.epics.pvdata.pv.Status;
  *
  */
 public interface EasyMultiGet {
+    /**
+     * Clean up
+     */
     void destroy();
+    /**
+     * Calls issueConnect and then waitConnect.
+     * @return
+     */
     boolean connect();
+    /**
+     * create the channelGet for all channels.
+     */
     void issueConnect();
+    /**
+     * Wait until all channelGets are created.
+     * @return
+     */
     boolean waitConnect();
+    /**
+     * call issueGet and the waitGet.
+     * @return
+     */
     boolean get();
+    /**
+     * Issue a get for each channel.
+     */
     void issueGet();
+    /**
+     * wait untill all gets are complete.
+     * @return (true,false) if (no errors, errors) resulted from gets.
+     * If an error occured then getStatus returns a reason.
+     */
     boolean waitGet();
+    /**
+     * Get the time when the last get was made.
+     * @return The timeStamp.
+     */
     TimeStamp getTimeStamp();
+    /**
+     * Get the number of channels.
+     * @return The number of channels.
+     */
     int getLength();
-   
+    /**
+     * Is value a double[] ?
+     * @return The answer.
+     */
     boolean doubleOnly();
+    /**
+     * Get the value field as a MTMultiChannel structure.
+     * @return The value.
+     * This is null if doubleOnly is true.
+     */
     PVStructure getNTMultiChannel();
+    /**
+     * Get the top level structure of the value field is a double[[]
+     * @return The top level structure.
+     * This is null if doubleOnly is false.
+     */
     PVStructure getPVTop();
+    /**
+     * Return the value field.
+     * @return The double[]
+     * This is null if doubleOnly is false.
+     */
     double[] getDoubleArray();
-    int getDoubleArray(int index, double[]data,int length);
-     
+    /**
+     * Get the data from the value field.
+     * @param offset The offset into the data of the value field.
+     * @param data The place to copy the data.
+     * @param length The number of elements to copy.
+     * @return The number of elements copied.
+     * This is 0 if doubleOnly is false.
+     */
+    int getDoubleArray(int offset, double[]data,int length);
     /**
      * Set a new status value. The new value will replace the current status. The initial status is statusOK.
      * @param status The new status.

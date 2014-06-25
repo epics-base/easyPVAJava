@@ -16,7 +16,7 @@ public interface EasyMultiChannel{
      */
     void destroy();
     /**
-     * Calls issueConnect and the connect.
+     * Calls issueConnect and then waitConnect.
      * @param timeout timeOut for waitConnect.
      * @return
      */
@@ -84,45 +84,15 @@ public interface EasyMultiChannel{
     EasyMultiGet createGet(boolean doubleOnly,PVStructure pvRequest);
     /**
      * create a multiChannelPut.
-     * calls the next method with request = "field(value)"
      * @return The interface.
      */
     EasyMultiPut createPut();
     /**
      * create a multiChannelPut.
-     * calls the next method after creating a pvRequest structure.
-     * @param request A request string valid for creatRequest.
-     * @return The interface.
-     */
-    EasyMultiPut createPut(String request);
-    /**
-     * create a multiChannelPut.
-     * @param pvRequest The pvRequest for each channel.
-     * @return The interface.
-     */
-    EasyMultiPut createPut(PVStructure pvRequest);
-    /**
-     * create a multiChannelGet.
-     * @param doubleOnly true if data presented as a double[].
+     * @param doubleOnly true if data must be presented as a double[].
      * @return
      */
     EasyMultiPut createPut(boolean doubleOnly);
-    /**
-     * create a multiChannelPut.
-     * calls the next method with request = "field(value)"
-     * @param doubleOnly true if data presented as a double[].
-     * @param request
-     * @return
-     */
-    EasyMultiPut createPut(boolean doubleOnly,String request);
-    /**
-     * create a multiChannelGet.
-     * calls the next method after creating a pvRequest structure.
-     * @param doubleOnly true if data presented as a double[].
-     * @param pvRequest The pvRequest for each channel.
-     * @return
-     */
-    EasyMultiPut createPut(boolean doubleOnly,PVStructure pvRequest);
     /**
      * Set a new status value. The new value will replace the current status. The initial status is statusOK.
      * @param status The new status.
