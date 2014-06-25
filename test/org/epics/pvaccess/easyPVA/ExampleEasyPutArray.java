@@ -119,7 +119,9 @@ public class ExampleEasyPutArray {
                 System.out.printf("%s put %d values%n",channelName,num);
             }
             break;
-            case pvByte: {
+            case pvUByte:
+            case pvByte:
+            {
                 int length = 5;
                 byte[] value = new byte[5];
                 for(int i=0; i<length; i++) value[i] = (byte)i;
@@ -128,7 +130,9 @@ public class ExampleEasyPutArray {
                 System.out.printf("%s put %d values%n",channelName,num);
             }
             break;
-            case pvShort: {
+            case pvUShort:
+            case pvShort:
+            {
                 int length = 5;
                 short[] value = new short[5];
                 for(int i=0; i<length; i++) value[i] = (short)(i*10);
@@ -137,7 +141,9 @@ public class ExampleEasyPutArray {
                 System.out.printf("%s put %d values%n",channelName,num);
             }
             break;
-            case pvInt: {
+            case pvUInt:
+            case pvInt:
+            {
                 int length = 5;
                 int[] value = new int[5];
                 for(int i=0; i<length; i++) value[i] = i*100;
@@ -146,7 +152,9 @@ public class ExampleEasyPutArray {
                 System.out.printf("%s put %d values%n",channelName,num);
             }
             break;
-            case pvLong: {
+            case pvULong:
+            case pvLong:
+            {
                 int length = 5;
                 long[] value = new long[5];
                 for(int i=0; i<length; i++) value[i] = (long)(i*1000);
