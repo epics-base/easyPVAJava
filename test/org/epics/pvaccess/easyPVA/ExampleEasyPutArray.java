@@ -21,8 +21,22 @@ public class ExampleEasyPutArray {
    
     public static void main(String[] args) {
         exampleDoubleArrayNoChecks("doubleArray01");
-        exampleDoubleArray("doubleArray01");
+        
+        exampleStringArray("booleanArray01");
+        exampleStringArray("byteArray01");
+        exampleStringArray("shortArray01");
+        exampleStringArray("intArray01");
+        exampleStringArray("floatArray01");
+        exampleStringArray("doubleArray01");
+        exampleStringArray("stringArray01");
+        
+        System.out.println("following will cause error");
+        exampleStringArray("string01");
+        System.out.println("following will cause error");
         exampleDoubleArray("stringArray01");
+        
+        exampleDoubleArray("doubleArray01");
+        
         exampleScalarArray("byteArray01");
         exampleScalarArray("shortArray01");
         exampleScalarArray("intArray01");
@@ -39,6 +53,15 @@ public class ExampleEasyPutArray {
         for(int i=0; i< len; i++) value[i] = i;
         int num = easyPVA.createChannel(
             channelName).createPut().putDoubleArray(value,len);
+        System.out.printf("%s put %d elements%n",channelName,num);
+    }
+    
+    static void exampleStringArray(String channelName) {
+        String[] value = easyPVA.createChannel(
+                channelName).createGet().getStringArray();
+        System.out.printf("%s%n[",channelName);
+        int num = easyPVA.createChannel(
+                channelName).createPut().putStringArray(value,value.length);
         System.out.printf("%s put %d elements%n",channelName,num);
     }
     

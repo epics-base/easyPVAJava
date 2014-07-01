@@ -48,8 +48,20 @@ public class ExampleEasyPutScalar {
     
     static void exampleDoublePrint(String channelName,double setValue) {
         // get the scalar value
-        double value = easyPVA.createChannel(channelName).createGet().getDouble();
+        double value = easyPVA.createChannel(channelName).createPut().getDouble();
+        if(!easyPVA.createChannel(channelName).createPut().putDouble(value)) {
+            System.out.printf(
+                    "exampleDoublePrint %s put failed %s%n",
+                    channelName,
+                    easyPVA.getStatus());
+            return;
+        }
         System.out.printf("channelName %s setValue %f value %f%n",channelName,setValue,value);
+    }
+    
+    static void exampleString(String channelName) {
+        String value = easyPVA.createChannel(channelName).createGet().getString();
+        easyPVA.createChannel(channelName).createPut().putString(value);
     }
     
     static void exampleDoubleCheck(String channelName,double value) {

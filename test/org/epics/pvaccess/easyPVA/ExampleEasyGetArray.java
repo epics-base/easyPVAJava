@@ -18,6 +18,13 @@ public class ExampleEasyGetArray {
    
     public static void main(String[] args) {
         exampleDoubleArrayNoChecks("doubleArray01");
+        exampleStringArray("booleanArray01");
+        exampleStringArray("byteArray01");
+        exampleStringArray("shortArray01");
+        exampleStringArray("intArray01");
+        exampleStringArray("floatArray01");
+        exampleStringArray("doubleArray01");
+        exampleStringArray("stringArray01");
         exampleDoubleArray("doubleArray01");
         exampleDoubleArrayMultiCall("doubleArray01");
         exampleDoubleArray("stringArray01");
@@ -27,6 +34,7 @@ public class ExampleEasyGetArray {
         exampleScalarArray("floatArray01");
         exampleScalarArray("doubleArray01");
         exampleScalarArray("stringArray01");
+        
         easyPVA.destroy();
         System.out.println("all done");
     }
@@ -41,6 +49,20 @@ public class ExampleEasyGetArray {
               }
               if(i!=0) System.out.printf(",");
               System.out.printf("%f",value[i]);
+        }
+        System.out.printf("%n]%n");
+    }
+   
+    static void exampleStringArray(String channelName) {
+        String[] value = easyPVA.createChannel(
+                channelName).createGet().getStringArray();
+        System.out.printf("%s%n[",channelName);
+        for(int i=0;i<value.length;i++) {
+            if(i%10 == 0) {
+                System.out.printf("%n  ");
+            }
+            if(i!=0) System.out.printf(",");
+            System.out.printf("%s",value[i]);
         }
         System.out.printf("%n]%n");
     }

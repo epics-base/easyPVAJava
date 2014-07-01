@@ -132,6 +132,15 @@ public class ExampleEasyMultiPut {
                 "exampleCheck %s channel connect failed %s%n",
                 channelName,
                 channel.getStatus());
+            boolean allConnected = channel.allConnected();
+            System.out.println("all connected " + allConnected);
+            if(!allConnected) {
+                boolean[] connected = channel.isConnected();
+                for(int i=0; i<channelName.length; ++i) {
+                    if(connected[i]) continue;
+                    System.out.println("channel " + channelName[i] + " not connected");
+                }
+            }
             easyPVA.setAuto(true, true);
             return;
         }
