@@ -2815,10 +2815,9 @@ public class EasyPVAFactory {
         // following initialized by init and 
         
         private volatile PVStructure[] topPVStructure = null;
+        private volatile BitSet[] putBitSet = null;
         private volatile ChannelPut[] channelPut = null;
         private EasyMultiGet easyMultiGet = null;
-       // private volatile PVStructure pvTop = null;
-        private volatile BitSet putBitSet = null;
         
         
      // following used by connect
@@ -2860,7 +2859,7 @@ public class EasyPVAFactory {
             channelPut = new ChannelPut[nchannel];
             topPVStructure = new PVStructure[nchannel];
             easyMultiGet = easyMultiChannel.createGet(doubleOnly, "field(value)");
-            putBitSet = new BitSet(2);
+            putBitSet = new BitSet[nchannel];
             return true;
         }
 
@@ -2899,6 +2898,7 @@ public class EasyPVAFactory {
                     ++numConnected;
                     isConnected[index] = true;
                     topPVStructure[index] = pvDataCreate.createPVStructure(structure);
+                    putBitSet[index] = new BitSet(topPVStructure[index].getNumberFields());
                     Field field = structure.getField("value");
                     if(field==null) {
                         setStatus(statusCreate.createStatus(
@@ -3118,9 +3118,9 @@ public class EasyPVAFactory {
                 PVField pvFrom = pvUnion.get();
                 if(convert.isCopyCompatible(pvFrom.getField(),pvTo.getField())) {
                     convert.copy(pvFrom, pvTo);
-                    putBitSet.clear();
-                    putBitSet.set(0);
-                    channelPut[i].put(top, putBitSet);
+                    putBitSet[i].clear();
+                    putBitSet[i].set(0);
+                    channelPut[i].put(top, putBitSet[i]);
                 } else {
                     String message = "channel " + channel[i].getChannelName();
                     message += " can not copy value";
@@ -3162,9 +3162,9 @@ public class EasyPVAFactory {
                 PVStructure top = topPVStructure[i];
                 PVScalar pvScalar = top.getSubField(PVScalar.class,"value");
                 convert.fromDouble(pvScalar,value[i]);
-                putBitSet.clear();
-                putBitSet.set(0);
-                channelPut[i].put(top, putBitSet);
+                putBitSet[i].clear();
+                putBitSet[i].set(0);
+                channelPut[i].put(top, putBitSet[i]);
             }
         }
 
