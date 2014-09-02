@@ -1,0 +1,21 @@
+<h1>Release release/0.3.1 IN DEVELOPMENT</h1>
+<p>The main changes since release 0.3.0</p>
+<ul>
+<li>EasyPVA automatically starts ChannelProvider for both Channel Access and pvAccess.</li>
+<li>EasyMultiChannel is now implemented</li>
+</ul>
+<h2>EasyPVA automatically starts Channel Providers</h2>
+<p>It is no longer necessary to start channel provider factories.
+There are two providers automatically started: pva and ca.</p>
+<p>Both createChannel or createMultiChannel have two version; one uses the default provider
+and the other allows the caller to specify the provider.
+The default provider is "pva", which uses the pvAccess network protocol.
+See pvAccessJava.html for details.
+The other provider is "ca", which uses the Channel Access network protocol,
+which can be used to communicate with EPICS IOCs that have no EPICS Version 4
+software installed.</p>
+<h2>EasyMultiChannel is now implemented.</h2>
+<p>Get and Put are available for accessing a set of channels.
+See easyPVA.html for details.</p>
+<h1>Release 0.3.0</h1>
+<p>This was the starting point for RELEASE_NOTES</p>
