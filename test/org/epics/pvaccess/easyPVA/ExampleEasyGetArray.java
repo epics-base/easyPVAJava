@@ -271,6 +271,10 @@ public class ExampleEasyGetArray {
                 System.out.printf("%n]%n");
             }
             break;
+            case pvUByte: throw new IllegalArgumentException("pvUByte not supported");
+            case pvUShort: throw new IllegalArgumentException("pvUShort not supported");
+            case pvUInt: throw new IllegalArgumentException("pvUInt not supported");
+            case pvULong: throw new IllegalArgumentException("pvULong not supported");
         }
     }
 }
