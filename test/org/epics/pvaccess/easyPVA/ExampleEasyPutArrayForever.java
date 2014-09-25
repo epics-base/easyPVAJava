@@ -2,17 +2,19 @@
  * 
  */
 package org.epics.pvaccess.easyPVA;
+import junit.framework.TestCase;
 
 /**
  * @author mrk
  *
  */
-public class ExampleEasyPutArrayForever {
+public class ExampleEasyPutArrayForever extends TestCase{
     static EasyPVA easyPVA = EasyPVAFactory.get();
+    static int forever = 3;
    
-    public static void main(String[] args) {
+    public static void testPutArrayForever() {
         String channelName = "doubleArray01";
-        EasyPut easyPut = easyPVA.createChannel(channelName).createPut();
+        EasyPut easyPut = easyPVA.createChannel(channelName,"ca").createPut();
         if(easyPut==null) {
             System.out.println(easyPVA.getStatus().getMessage());
         } else {
@@ -23,7 +25,7 @@ public class ExampleEasyPutArrayForever {
                 System.out.println(easyPVA.getStatus().getMessage());
             }
             try {
-                while(true) {
+                for(int time =0; time<forever; ++time) {
                     num = easyPut.getDoubleArray(value, length);
                     if(num<=0) {
                         System.out.println(easyPVA.getStatus().getMessage());

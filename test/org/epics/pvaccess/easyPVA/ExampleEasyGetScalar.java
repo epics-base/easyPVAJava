@@ -3,6 +3,7 @@
  */
 package org.epics.pvaccess.easyPVA;
 import java.util.Date;
+import junit.framework.TestCase;
 
 import org.epics.pvaccess.easyPVA.EasyChannel;
 import org.epics.pvaccess.easyPVA.EasyGet;
@@ -17,10 +18,10 @@ import org.epics.pvdata.property.TimeStamp;
  * @author mrk
  *
  */
-public class ExampleEasyGetScalar {
+public class ExampleEasyGetScalar  extends TestCase{
     static EasyPVA easyPVA = EasyPVAFactory.get();
    
-    public static void main(String[] args) {
+    public static void testGetScalar() {
         exampleDouble("double01");
         // following will throw exception
         try {
@@ -31,21 +32,21 @@ public class ExampleEasyGetScalar {
         exampleDoubleCheck("int01");
         exampleDoubleCheck("xxxxJUNK");
         exampleDoubleAlarmTimeStamp("double01");
-        exampleDoubleAlarmTimeStamp("byte01");
-        exampleTwoChannels("double01","byte01");
+        exampleDoubleAlarmTimeStamp("int01");
+        exampleTwoChannels("double01","int01");
         easyPVA.destroy();
         System.out.println("all done");
     }
 
     static void exampleDouble(String channelName) {
         // get the scalar value
-        double value = easyPVA.createChannel(channelName).createGet().getDouble();
+        double value = easyPVA.createChannel(channelName,"ca").createGet().getDouble();
         System.out.println(channelName +" = " + value);
     }
     
     static void exampleDoubleCheck(String channelName) {
         easyPVA.setAuto(false, true);
-        EasyChannel channel =  easyPVA.createChannel(channelName);
+        EasyChannel channel =  easyPVA.createChannel(channelName,"ca");
         boolean result = channel.connect(2.0);
         if(!result) {
             System.out.printf(
@@ -81,7 +82,7 @@ public class ExampleEasyGetScalar {
     }
     
     static void exampleDoubleAlarmTimeStamp(String channelName) {
-        EasyGet easyGet = easyPVA.createChannel(channelName).createGet();
+        EasyGet easyGet = easyPVA.createChannel(channelName,"ca").createGet();
         double value = easyGet.getDouble();
         Alarm alarm = easyGet.getAlarm();
         TimeStamp timeStamp = easyGet.getTimeStamp();
@@ -95,8 +96,8 @@ public class ExampleEasyGetScalar {
     
     static void exampleTwoChannels(String channelName0,String channelName1) {
         easyPVA.setAuto(false, true);
-        EasyChannel channel0 =  easyPVA.createChannel(channelName0);
-        EasyChannel channel1 = easyPVA.createChannel(channelName1);
+        EasyChannel channel0 =  easyPVA.createChannel(channelName0,"ca");
+        EasyChannel channel1 = easyPVA.createChannel(channelName1,"ca");
         // the connects will be done in parallel
         channel0.issueConnect();
         channel1.issueConnect();

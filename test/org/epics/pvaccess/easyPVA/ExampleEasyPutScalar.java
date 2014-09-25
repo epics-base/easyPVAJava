@@ -4,6 +4,7 @@
 package org.epics.pvaccess.easyPVA;
 
 import org.epics.pvaccess.easyPVA.EasyChannel;
+import junit.framework.TestCase;
 import org.epics.pvaccess.easyPVA.EasyPVA;
 import org.epics.pvaccess.easyPVA.EasyPVAFactory;
 import org.epics.pvaccess.easyPVA.EasyPut;
@@ -12,24 +13,24 @@ import org.epics.pvaccess.easyPVA.EasyPut;
  * @author mrk
  *
  */
-public class ExampleEasyPutScalar {
+public class ExampleEasyPutScalar extends TestCase {
 	static EasyPVA easyPVA = EasyPVAFactory.get();
    
-    public static void main(String[] args) {
-    	String channelName = "byte01";
+    public static void testPutScalar() {
+    	String channelName = "int00";
     	double setValue = 1.0; 
     	exampleDouble(channelName,setValue);
     	exampleDoublePrint(channelName,setValue);
     	exampleDoubleCheck(channelName,setValue);
-    	channelName = "short01";
+    	channelName = "int01";
     	setValue = 2.0; 
     	exampleDouble(channelName,setValue);
     	exampleDoublePrint(channelName,setValue);
-    	channelName = "int01";
+    	channelName = "calc00";
     	setValue = 3.0; 
     	exampleDouble(channelName,setValue);
     	exampleDoublePrint(channelName,setValue);
-    	channelName = "float01";
+    	channelName = "double00";
     	setValue = 4.0; 
     	exampleDouble(channelName,setValue);
     	exampleDoublePrint(channelName,setValue);
@@ -43,13 +44,13 @@ public class ExampleEasyPutScalar {
 
     static void exampleDouble(String channelName, double value) {
         // put the scalar value
-        easyPVA.createChannel(channelName).createPut("record[process=true]field(value)").putDouble(value);
+        easyPVA.createChannel(channelName,"ca").createPut("record[process=true]field(value)").putDouble(value);
     }
     
     static void exampleDoublePrint(String channelName,double setValue) {
         // get the scalar value
-        double value = easyPVA.createChannel(channelName).createPut().getDouble();
-        if(!easyPVA.createChannel(channelName).createPut().putDouble(value)) {
+        double value = easyPVA.createChannel(channelName,"ca").createPut().getDouble();
+        if(!easyPVA.createChannel(channelName,"ca").createPut().putDouble(value)) {
             System.out.printf(
                     "exampleDoublePrint %s put failed %s%n",
                     channelName,
@@ -66,7 +67,7 @@ public class ExampleEasyPutScalar {
     
     static void exampleDoubleCheck(String channelName,double value) {
         easyPVA.setAuto(false, false);
-        EasyChannel channel =  easyPVA.createChannel(channelName);
+        EasyChannel channel =  easyPVA.createChannel(channelName,"ca");
         boolean result = channel.connect(2.0);
         if(!result) {
             System.out.printf(

@@ -3,24 +3,26 @@
  */
 package org.epics.pvaccess.easyPVA;
 
+import junit.framework.TestCase;
 /**
  * @author mrk
  *
  */
-public class ExampleEasyMultiPutArrayForever {
+public class ExampleEasyMultiPutForever extends TestCase {
     static EasyPVA easyPVA = EasyPVAFactory.get();
+    static int forever = 3;
    
-    public static void main(String[] args) {
+    public static void testMultiPutForever() {
         int nchannel = 5;
         String[] channelName = new String[nchannel];
         for(int i=0; i<nchannel; ++i) channelName[i] = "double0" + i;
-        EasyMultiPut multiPut = easyPVA.createMultiChannel(channelName).createPut(true);
+        EasyMultiPut multiPut = easyPVA.createMultiChannel(channelName,"ca").createPut(true);
         if(multiPut==null) {
             System.out.println(easyPVA.getStatus().getMessage());
         } else {
             double[] value = new double[nchannel];
             try {
-                while(true) {
+                for(int time =0; time<forever; ++time) {
                     int num = multiPut.getDoubleArray(0, value, nchannel);
                     if(num!=nchannel) {
                         System.out.println("num!=length " +easyPVA.getStatus().getMessage());

@@ -11,18 +11,18 @@ import org.epics.pvdata.pv.PVField;
 import org.epics.pvdata.pv.PVScalarArray;
 import org.epics.pvdata.pv.ScalarType;
 import org.epics.pvdata.pv.Type;
+import junit.framework.TestCase;
 
 /**
  * @author mrk
  *
  */
-public class ExampleEasyPutArray {
+public class ExampleEasyPutArray extends TestCase {
     static EasyPVA easyPVA = EasyPVAFactory.get();
    
-    public static void main(String[] args) {
+    public static void testPutArray() {
         exampleDoubleArrayNoChecks("doubleArray01");
         
-        exampleStringArray("booleanArray01");
         exampleStringArray("byteArray01");
         exampleStringArray("shortArray01");
         exampleStringArray("intArray01");
@@ -52,16 +52,16 @@ public class ExampleEasyPutArray {
         double[] value = new double[5];
         for(int i=0; i< len; i++) value[i] = i;
         int num = easyPVA.createChannel(
-            channelName).createPut().putDoubleArray(value,len);
+            channelName,"ca").createPut().putDoubleArray(value,len);
         System.out.printf("%s put %d elements%n",channelName,num);
     }
     
     static void exampleStringArray(String channelName) {
         String[] value = easyPVA.createChannel(
-                channelName).createGet().getStringArray();
+                channelName,"ca").createGet().getStringArray();
         System.out.printf("%s%n[",channelName);
         int num = easyPVA.createChannel(
-                channelName).createPut().putStringArray(value,value.length);
+                channelName,"ca").createPut().putStringArray(value,value.length);
         System.out.printf("%s put %d elements%n",channelName,num);
     }
     
@@ -70,7 +70,7 @@ public class ExampleEasyPutArray {
         int length = 5;
         double[] value = new double[5];
         for(int i=0; i< length; i++) value[i] = i;
-        EasyChannel channel =  easyPVA.createChannel(channelName);
+        EasyChannel channel =  easyPVA.createChannel(channelName,"ca");
         boolean result = channel.connect(2.0);
         if(!result) {
             System.err.printf(
@@ -124,7 +124,7 @@ public class ExampleEasyPutArray {
     }
 
     static void exampleScalarArray(String channelName) {
-        EasyGet easyGet = easyPVA.createChannel(channelName).createGet();
+        EasyGet easyGet = easyPVA.createChannel(channelName,"ca").createGet();
         PVScalarArray pvArray = easyGet.getScalarArrayValue();
         if(pvArray==null) {
             System.err.printf("%s is not a scalar array%s", channelName);
@@ -138,7 +138,7 @@ public class ExampleEasyPutArray {
                 value[0] = value[4] = true;
                 value[1] = value[2] = value[3] = false;
                 int num  = easyPVA.createChannel(
-                    channelName).createPut().putBooleanArray(value,length);
+                    channelName,"ca").createPut().putBooleanArray(value,length);
                 System.out.printf("%s put %d values%n",channelName,num);
             }
             break;
@@ -149,7 +149,7 @@ public class ExampleEasyPutArray {
                 byte[] value = new byte[5];
                 for(int i=0; i<length; i++) value[i] = (byte)i;
                 int num  = easyPVA.createChannel(
-                    channelName).createPut().putByteArray(value,length);
+                    channelName,"ca").createPut().putByteArray(value,length);
                 System.out.printf("%s put %d values%n",channelName,num);
             }
             break;
@@ -160,7 +160,7 @@ public class ExampleEasyPutArray {
                 short[] value = new short[5];
                 for(int i=0; i<length; i++) value[i] = (short)(i*10);
                 int num  = easyPVA.createChannel(
-                    channelName).createPut().putShortArray(value,length);
+                    channelName,"ca").createPut().putShortArray(value,length);
                 System.out.printf("%s put %d values%n",channelName,num);
             }
             break;
@@ -171,7 +171,7 @@ public class ExampleEasyPutArray {
                 int[] value = new int[5];
                 for(int i=0; i<length; i++) value[i] = i*100;
                 int num  = easyPVA.createChannel(
-                    channelName).createPut().putIntArray(value,length);
+                    channelName,"ca").createPut().putIntArray(value,length);
                 System.out.printf("%s put %d values%n",channelName,num);
             }
             break;
@@ -182,7 +182,7 @@ public class ExampleEasyPutArray {
                 long[] value = new long[5];
                 for(int i=0; i<length; i++) value[i] = (long)(i*1000);
                 int num  = easyPVA.createChannel(
-                    channelName).createPut().putLongArray(value,length);
+                    channelName,"ca").createPut().putLongArray(value,length);
                 System.out.printf("%s put %d values%n",channelName,num);
             }
             break;
@@ -191,7 +191,7 @@ public class ExampleEasyPutArray {
                 float[] value = new float[5];
                 for(int i=0; i<length; i++) value[i] = i;
                 int num  = easyPVA.createChannel(
-                    channelName).createPut().putFloatArray(value,length);
+                    channelName,"ca").createPut().putFloatArray(value,length);
                 System.out.printf("%s put %d values%n",channelName,num);
             }
             break;
@@ -200,7 +200,7 @@ public class ExampleEasyPutArray {
                 double[] value = new double[5];
                 for(int i=0; i<length; i++) value[i] = 1.5*(i*100);
                 int num  = easyPVA.createChannel(
-                    channelName).createPut().putDoubleArray(value,length);
+                    channelName,"ca").createPut().putDoubleArray(value,length);
                 System.out.printf("%s put %d values%n",channelName,num);
             }
             break;
@@ -213,7 +213,7 @@ public class ExampleEasyPutArray {
                 value[3] = "name 3";
                 value[4] = "name 4";
                 int num  = easyPVA.createChannel(
-                        channelName).createPut().putStringArray(value,length);
+                        channelName,"ca").createPut().putStringArray(value,length);
                 System.out.printf("%s put %d values%n",channelName,num);
             }
             break;

@@ -3,15 +3,16 @@
  */
 package org.epics.pvaccess.easyPVA;
 import org.epics.pvdata.pv.PVStructure;
+import junit.framework.TestCase;
 
 /**
  * @author mrk
  *
  */
-public class ExampleEasyMultiGet {
+public class ExampleEasyMultiGet  extends TestCase{
     static EasyPVA easyPVA = EasyPVAFactory.get();
    
-    public static void main(String[] args) {
+    public static void testMultiGet() {
         int nchannel = 5;
         String[] channelName = new String[nchannel];
         for(int i=0; i<nchannel; ++i) channelName[i] = "double0" + i;
@@ -20,16 +21,15 @@ public class ExampleEasyMultiGet {
         for(int i=0; i<nchannel; ++i) channelName[i] = "string0" + i;
         exampleSimple(channelName);
         channelName[0] = "double00";
-        channelName[1] = "boolean01";
+        channelName[1] = "int01";
         channelName[2] = "stringArray01";
         channelName[3] = "doubleArray01";
         exampleSimple(channelName);
         for(int i=0; i<nchannel; ++i) channelName[i] = "double0" + i;
         exampleDoubleCheck(channelName);
         exampleDoubleSimple(channelName);
-        channelName[2] = "byte01";
-        channelName[3] = "short01";
-        channelName[4] = "int01";
+        channelName[2] = "int00";
+        channelName[3] = "int01";
         exampleDoubleCheck(channelName);
         exampleDoubleSimple(channelName);
         channelName[0] = "junk";
@@ -43,7 +43,7 @@ public class ExampleEasyMultiGet {
         System.out.println();
         System.out.println("exampleSimple");
         try {
-            PVStructure pvStructure = easyPVA.createMultiChannel(channelName).createGet().getNTMultiChannel();
+            PVStructure pvStructure = easyPVA.createMultiChannel(channelName,"ca").createGet().getNTMultiChannel();
             System.out.println(pvStructure);
         } catch( Exception e) {
             System.out.println("exception " + e.getMessage());
@@ -58,7 +58,7 @@ public class ExampleEasyMultiGet {
         System.out.println();
         System.out.println("exampleCheck");
         easyPVA.setAuto(false, true);
-        EasyMultiChannel channel =  easyPVA.createMultiChannel(channelName);
+        EasyMultiChannel channel =  easyPVA.createMultiChannel(channelName,"ca");
         boolean result = channel.connect(2.0);
         if(!result) {
             System.out.printf(
@@ -112,7 +112,7 @@ public class ExampleEasyMultiGet {
         System.out.println();
         System.out.println("exampleDoubleSimple");
         try {
-            double[] value = easyPVA.createMultiChannel(channelName).createGet(true).getDoubleArray();
+            double[] value = easyPVA.createMultiChannel(channelName,"ca").createGet(true).getDoubleArray();
             System.out.println("value length " + value.length);
             for(int i=0; i<value.length; ++i) System.out.println(value[i]);
         } catch( Exception e) {
@@ -128,7 +128,7 @@ public class ExampleEasyMultiGet {
         System.out.println();
         System.out.println("exampleDoubleCheck");
         easyPVA.setAuto(false, true);
-        EasyMultiChannel channel =  easyPVA.createMultiChannel(channelName);
+        EasyMultiChannel channel =  easyPVA.createMultiChannel(channelName,"ca");
         boolean result = channel.connect(2.0);
         if(!result) {
             System.out.printf(

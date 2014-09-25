@@ -3,6 +3,7 @@
  */
 package org.epics.pvaccess.easyPVA;
 import org.epics.pvaccess.easyPVA.EasyChannel;
+
 import org.epics.pvaccess.easyPVA.EasyPVA;
 import org.epics.pvaccess.easyPVA.EasyPVAFactory;
 import org.epics.pvaccess.easyPVA.EasyRPC;
@@ -13,6 +14,7 @@ import org.epics.pvdata.pv.FieldCreate;
 import org.epics.pvdata.pv.PVStructure;
 import org.epics.pvdata.pv.ScalarType;
 import org.epics.pvdata.pv.Structure;
+import junit.framework.TestCase;
 
 /**
  * ExampleEasyRPC provides examples of using the EasyPVA RPC client support to get data
@@ -30,7 +32,7 @@ import org.epics.pvdata.pv.Structure;
  * @author mrk
  * @version 11-Sep-2012 Greg White (greg@slac.stanford.edu) Added header.
  */
-public class ExampleEasyRPC {
+public class ExampleEasyRPC  extends TestCase{
     static EasyPVA easyPVA = EasyPVAFactory.get();
    
 	private final static FieldCreate fieldCreate = FieldFactory.getFieldCreate();
@@ -42,7 +44,7 @@ public class ExampleEasyRPC {
 							  fieldCreate.createScalar(ScalarType.pvString) }
 				);
 
-	public static void main(String[] args) {
+	public static void testEasyRPC() {
 		exampleRPC("sum");
 		exampleRPCCheck("sum");
         easyPVA.destroy();

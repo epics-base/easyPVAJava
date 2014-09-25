@@ -1,0 +1,185 @@
+record(calc, "calc00")
+{
+        field(DESC, "Counter")
+        field(SCAN,"1 second")
+        field(CALC, "(A<B)?(A+C):D")
+        field(INPA, "calc00.VAL  NPP NMS")
+        field(INPB, "9")
+        field(INPC, "1")
+        field(INPD, "0")
+        field(EGU, "Counts")
+        field(HOPR, "10")
+        field(HIHI, "8")
+        field(HIGH, "6")
+        field(LOW, "4")
+        field(LOLO, "2")
+        field(HHSV, "MAJOR")
+        field(HSV, "MINOR")
+        field(LSV, "MINOR")
+        field(LLSV, "MAJOR")
+}
+
+record(longout,"int00") {
+    field(VAL,"10")
+    field(HIGH,"90")
+    field(HSV,"MINOR")
+}
+
+record(longout,"int01") {
+    field(VAL,"10")
+    field(HIGH,"90")
+    field(HSV,"MINOR")
+}
+
+record(ao,"double00") {
+}
+
+record(ao,"double01") {
+    field(PREC,"4")
+    field(EGUF,"11.0")
+    field(EGUL,"0.0")
+        field(EGU, "increment")
+        field(HIHI, "8")
+        field(HIGH, "6")
+        field(LOW, "4")
+        field(LOLO, "2")
+        field(HHSV, "MAJOR")
+        field(HSV, "MINOR")
+        field(LSV, "MINOR")
+        field(LLSV, "MAJOR")
+}
+
+record(ao,"double02") { }
+record(ao,"double03") { }
+record(ao,"double04") { }
+record(ao,"double05") { }
+record(ao,"double06") { }
+record(ao,"double07") { }
+record(ao,"double08") { }
+record(ao,"double09") { }
+
+record(stringout,"string00") {
+    field(VAL,"string value")
+}
+
+record(stringout,"string00") { }
+record(stringout,"string01") { }
+record(stringout,"string02") { }
+record(stringout,"string03") { }
+record(stringout,"string04") { }
+record(stringout,"string05") { }
+record(stringout,"string06") { }
+record(stringout,"string07") { }
+record(stringout,"string08") { }
+record(stringout,"string09") { }
+
+record(bo,"bo00") {
+    field(ZNAM,"zero")
+    field(ONAM,"one")
+}
+
+record(mbbo,"mbbo00") {
+    field(VAL,"1")
+    field(ZRVL,"0x0")
+    field(ONVL,"0x1")
+    field(TWVL,"0x2")
+    field(THVL,"0x3")
+    field(FRVL,"0x4")
+    field(FVVL,"0x5")
+    field(SXVL,"0x6")
+    field(SVVL,"0x7")
+    field(EIVL,"0x8")
+    field(NIVL,"0x9")
+    field(TEVL,"0xa")
+    field(ELVL,"0xb")
+    field(TVVL,"0xc")
+    field(TTVL,"0xd")
+    field(FTVL,"0xe")
+    field(FFVL,"0xf")
+}
+
+record(bo,"bo01") {
+    field(ZNAM,"zero")
+    field(ONAM,"one")
+}
+
+record(mbbo,"mbbo02") {
+    field(VAL,"1")
+    field(ZRST,"zero")
+    field(ONST,"one")
+    field(TWST,"two")
+    field(THST,"three")
+    field(FRST,"four")
+    field(FVST,"five")
+    field(SXST,"six")
+    field(SVST,"seven")
+    field(EIST,"eight")
+    field(NIST,"nine")
+    field(TEST,"ten")
+    field(ELST,"eleven")
+    field(TVST,"twelve")
+    field(TTST,"thirteen")
+    field(FTST,"fourteen")
+    field(FFST,"fifteen")
+    field(ZRVL,"0x0")
+    field(ONVL,"0x1")
+    field(TWVL,"0x2")
+    field(THVL,"0x3")
+    field(FRVL,"0x4")
+    field(FVVL,"0x5")
+    field(SXVL,"0x6")
+    field(SVVL,"0x7")
+    field(EIVL,"0x8")
+    field(NIVL,"0x9")
+    field(TEVL,"0xa")
+    field(ELVL,"0xb")
+    field(TVVL,"0xc")
+    field(TTVL,"0xd")
+    field(FTVL,"0xe")
+    field(FFVL,"0xf")
+}
+
+record(ao,"ao01") {
+    field(VAL,"1.9")
+    field(PREC,"4")
+    field(HIGH,"2.0")
+    field(HSV,"MINOR")
+}
+
+
+record(waveform,"byteArray01") {
+    field(DESC, "Soft Waveform")
+    field(NELM,"1000")
+    field(FTVL,"UCHAR")
+}
+
+
+record(waveform,"shortArray01") {
+    field(DESC, "Soft Waveform")
+    field(NELM,"1000")
+    field(FTVL,"SHORT")
+}
+
+record(waveform,"intArray01") {
+    field(DESC, "Soft Waveform")
+    field(NELM,"1000")
+    field(FTVL,"LONG")
+}
+
+record(waveform,"stringArray01") {
+    field(DESC, "Soft Waveform")
+    field(NELM,"10")
+    field(FTVL,"STRING")
+}
+
+record(waveform,"floatArray01") {
+    field(DESC, "Soft Waveform")
+    field(NELM,"1000")
+    field(FTVL,"FLOAT")
+}
+
+record(waveform,"doubleArray01") {
+    field(DESC, "Soft Waveform")
+    field(NELM,"1000")
+    field(FTVL,"DOUBLE")
+}
