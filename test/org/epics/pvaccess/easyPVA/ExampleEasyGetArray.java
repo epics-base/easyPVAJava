@@ -32,8 +32,6 @@ public class ExampleEasyGetArray extends TestCase {
         exampleScalarArray("floatArray01");
         exampleScalarArray("doubleArray01");
         exampleScalarArray("stringArray01");
-        
-        easyPVA.destroy();
         System.out.println("all done");
     }
     

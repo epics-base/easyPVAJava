@@ -34,7 +34,6 @@ public class ExampleEasyGetScalar  extends TestCase{
         exampleDoubleAlarmTimeStamp("double01");
         exampleDoubleAlarmTimeStamp("int01");
         exampleTwoChannels("double01","int01");
-        easyPVA.destroy();
         System.out.println("all done");
     }
 

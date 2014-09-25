@@ -42,7 +42,6 @@ public class ExampleEasyMultiPut  extends TestCase{
         exampleUnionArrayCheck(channelName);
         System.out.println("following will generate exception");
         exampleUnionArraySimple(channelName);
-        easyPVA.destroy();
         System.out.println("all done");
     }
     

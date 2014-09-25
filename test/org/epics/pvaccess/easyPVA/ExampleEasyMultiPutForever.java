@@ -50,7 +50,6 @@ public class ExampleEasyMultiPutForever extends TestCase {
 
             }
         }
-        easyPVA.destroy();
         System.out.println("all done");
     }
 }

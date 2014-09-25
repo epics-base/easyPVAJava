@@ -35,7 +35,6 @@ public class ExampleEasyMultiGet  extends TestCase{
         channelName[0] = "junk";
         exampleCheck(channelName);
         exampleSimple(channelName);
-        easyPVA.destroy();
         System.out.println("all done");
     }
 

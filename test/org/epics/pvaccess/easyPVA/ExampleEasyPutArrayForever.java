@@ -46,7 +46,6 @@ public class ExampleEasyPutArrayForever extends TestCase{
 
             }
         }
-        easyPVA.destroy();
         System.out.println("all done");
     }
 }
