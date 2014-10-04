@@ -67,7 +67,7 @@ Additional methods provide access to the full features of pvAccess.
 </p>
 <p>
 EasyMultiChannel provides access to data from multiple channels as long
-as eacxh channel has a top level field named <b>value</b>.
+as each channel has a top level field named <b>value</b>.
 EasyMultiChannel provides two ways to access data from multiple channels:
 The first is as an NTMultiChannel. The second is as a double array.
 The double array can be used if the value field of every channel is a numeric scalar.
@@ -208,7 +208,7 @@ as a <b>double[]</b> or as a structure that has normative type NTMultiChannel.
 <p>
 Note that the format does <b>not</b> match what the "EPICS V4 Normative Types"
 specification states.
-I think the definiton of <b>NTMultichannelArray</b>
+I think the definition of <b>NTMultichannelArray</b>
 needs some discussion.
 </p>
 <p>Some items to discuss are:
@@ -225,7 +225,7 @@ needs some discussion.
      </dd>
     <dt>singular field names</dt>
       <dd>An array field name should not end in <b>s</b>.
-       Since it is an array that aleady implies multiple elements.
+       Since it is an array that already implies multiple elements.
       <dd>
     <dt>complete alarm fields</dt>
       <dd>In addition to <b>int[] severity</b> 
@@ -1307,7 +1307,7 @@ If there was a problem creating, status will provide the reason.</p>
       the get request was successful, If not the request fails, i. e. false is
       returned, than getStatus can be called to find the reason. </dd>
   <dt>getField</dt>
-    <dd>Get the introspection interace.</dd>
+    <dd>Get the introspection interface.</dd>
   <dt>setStatus</dt>
     <dd>Set a new status value. The new value will replace the current status.
       The initial status is statusOK. </dd>
@@ -1444,8 +1444,8 @@ If there was a problem creating, status will provide the reason.</p>
     <dd>Issue a get request and return immediately.</dd>
   <dt>waitGet</dt>
     <dd>Block until the get request completes. The return value indicates if
-      the get request was successful, If not the request fails, i. e. false is
-      returned, than getStatus can nbe called to find the reason. </dd>
+      the get request was successful. If not and the request fails, i. e. false is
+      returned, then getStatus can be called to find the reason. </dd>
   <dt>getAlarm</dt>
     <dd>Get the alarm. If the create request did not specify alarm the status
       and severity will both be <span style="font-weight:bold;">NONE</span> and
@@ -1499,8 +1499,7 @@ If there was a problem creating, status will provide the reason.</p>
       copies the data from the value to the array supplied by the caller.</dd>
   <dt>getPVStructure</dt>
     <dd>Get top level <span style="font-weight:bold;">PVStructure</span> for
-      the data. The client can use nor<span
-      style="font-weight:bold;"></span>mal pvData introspection to access the
+      the data. The client can use normal pvData introspection to access the
       data.</dd>
   <dt>getBitSet</dt>
     <dd>Get the bitSet for the top level <span
@@ -1637,7 +1636,7 @@ If there was a problem creating, status will provide the reason.</p>
     <dd>Return the interface for a scalar array value field or null if no
       scalar array value field.</dd>
   <dt>getBoolean</dt>
-    <dd>Put the boolean value. If the value is not a boolen then setStatus is
+    <dd>Put the boolean value. If the value is not a boolean then setStatus is
       called and false is returned.</dd>
   <dt>getByte</dt>
   <dt>getShort</dt>
@@ -1659,7 +1658,7 @@ If there was a problem creating, status will provide the reason.</p>
   <dt>putLong</dt>
   <dt>putFloat</dt>
   <dt>putDouble</dt>
-    <dd>Put value into the value field . If the value fielld is not a numeric
+    <dd>Put value into the value field . If the value field is not a numeric
       scalar setStatus is called and 0 is returned.</dd>
   <dt>putString</dt>
     <dd>Put the value as a string. If value field is not a string setStatus is
@@ -1888,10 +1887,10 @@ status will provide the reason.</p>
   <dt>getPVArray</dt>
     <dd>This gets the PVArray which holds data to get/put from the channel.</dd>
   <dt>get</dt>
-    <dd>Get the specified sub arrray. It is put into PVArray starting a offset
+    <dd>Get the specified sub array. It is put into PVArray starting a offset
       0.</dd>
   <dt>put</dt>
-    <dd>Put the specified sub arrray. It is taken from PVArray starting at
+    <dd>Put the specified sub array. It is taken from PVArray starting at
       offset 0.</dd>
   <dt>getBoolean</dt>
     <dd>Get data from PVArray and put it into array. An exception is thrown if
@@ -1964,10 +1963,10 @@ status will provide the reason.</p>
   <dt>waitConnect</dt>
     <dd>Wait until the connection completes or for timeout/</dd>
   <dt>setRequester</dt>
-    <dd>Set the requester. If this is not sepcified the only way to get events
+    <dd>Set the requester. If this is not specified the only way to get events
       is to call getEvent.</dd>
   <dt>getEvent</dt>
-    <dd>Get an event. This wil return null if no events are available. If data
+    <dd>Get an event. This will return null if no events are available. If data
       is returned that this may not be called again until releaseEvent is
       called.</dd>
   <dt>getChangedBitSet</dt>
@@ -2031,7 +2030,7 @@ public interface EasyMultiChannel{
     <dd>returns <b>true</b> if all channels are connected and <b>false</b> otherwise.
     </dd>
   <dt>isConnected</dt>
-    <dd>Returns the connectio status of each channel.</dd>
+    <dd>Returns the connection status of each channel.</dd>
   <dt>waitConnect</dt>
     <dd>Wait until the connection completes or for timeout/</dd>
   <dt>createGet</dt>
@@ -2127,7 +2126,7 @@ interface EasyMultiGet {
     </dd>
   <dt>getPVTop</dt>
     <dd>If doubleOnly is false then <b>null</b> is returned.
-     Othewise the structure has the fields value, timeStamp, and channelName.
+     Otherwise the structure has the fields value, timeStamp, and channelName.
      </dd>
   <dt>getDoubleArray</dt>
     <dd>If doubleOnly is false then <b>null</b> is returned for the first method
@@ -2209,7 +2208,7 @@ public interface EasyMultiPut {
     </dd>
   <dt>getPVTop</dt>
     <dd>If doubleOnly is false then <b>null</b> is returned.
-     Othewise the structure has the fields value, timeStamp, and channelName.
+     Otherwise the structure has the fields value, timeStamp, and channelName.
      </dd>
   <dt>getDoubleArray</dt>
     <dd>If doubleOnly is false then <b>null</b> is returned for the first method
