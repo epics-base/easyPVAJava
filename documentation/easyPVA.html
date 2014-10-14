@@ -28,7 +28,7 @@
 <h1>EPICS easyPVA</h1>
 <!-- Maturity: Working Draft or Request for Comments, or Recommendation, and date.  -->
 <h2 class="nocount">EPICS V4 Working Group, Working Draft,
-2014-06-25</h2>
+14-Oct-2014</h2>
 <dl>
   <dt>This version:</dt>
     <dd><a
@@ -67,7 +67,7 @@ Additional methods provide access to the full features of pvAccess.
 </p>
 <p>
 EasyMultiChannel provides access to data from multiple channels as long
-as each channel has a top level field named <b>value</b>.
+as eacxh channel has a top level field named <b>value</b>.
 EasyMultiChannel provides two ways to access data from multiple channels:
 The first is as an NTMultiChannel. The second is as a double array.
 The double array can be used if the value field of every channel is a numeric scalar.
@@ -84,7 +84,7 @@ There is code for NTMultiChannel that helps with access to more complicated data
 
 <h2 class="nocount">Status of this Document and of the EasyPVA Software</h2>
 
-<p>This is the June 25th, 2014 revision of the EPICS EasyPVA document.</p>
+<p>This is the 14-Oct-2014 revision of the EPICS EasyPVA document.</p>
 <p>This document acts as both a specification document and as a user guide. As of this revision,
 the software is NOT specification complete. Therefore, 
 readers should be aware that the present implementation may not include all of the facilities 
@@ -94,15 +94,17 @@ In addition the API is not final and may change.
 
 <p>As of this revision, at draft Java interfaces 
 have been described here for most of the intended EasyPVA facilities. However, 
-<em>EasyPVA, EasyChannel, EasyGet, EasyPut, EasyMultiChannel, EasyMultiGet, and EasyRPC
-are the only interfaces currently implemented, and they have only been implemented in Java.</em></p>
+<em>EasyPVA, EasyChannel, EasyGet, EasyPut, EasyMultiChannel, EasyMultiGet, EasyMultiPut, and EasyRPC
+are the only interfaces currently implemented, and they have only been implemented in Java.</em>
+In addition EasyMultiGet and and EasyMultiPut have methods that mention <em>NTMultiChannel</em>
+but these just use a top level pvStructure that has a union[] for the value field.
+</p>
 
-<p>There is example source code included here, which exercises the Java implementation of 
-EasyGet, EasyPut, and EasyMultiGet.
+<p>There is example source code that exercises the Java implementation of 
+EasyGet, EasyPut, EasyMultiGet, and EasyMultiPut.
+AllTests runs all the Example tests.
 There is also a test suite for EasyGet. However, it is not complete and much more testing
 should be done.</p>
-<p>If you are using a previous version of examplePVADatabase.zip you should
-get the latest version in order to run the examples for EasyMultiChannel.</p>
 
 </div> <!-- head -->
 
@@ -113,49 +115,6 @@ get the latest version in order to run the examples for EasyMultiChannel.</p>
 <!-- Place what you would like in the Table of Contents, inside the contents div -->
 <div id="contents" class="contents">	  
 <hr />
-
-<h2>Installation and Example Database</h2>
-<p>This section describes the prerequisites of easyPVA, how to acquire the software, and
-how to set up a demonstration example so that you can test out the illustrations. </p>
-<h3>Installation</h3>
-<p>This project uses pvDataJava and pvAccessJava.</p>
-<p>The Java version of easyPVA currently resides in mercurial repository:</p>
-<pre>
-epics-pvdata.hg.sourceforge.net/hgroot/epics-pvdata/easyPVAJava
-</pre>
-<p>After cloning this repository import the project into eclipse as follows:</p>
-Via the file menu select import "Existing Projects into Workspace".
-Then "Select root directory".
-Then select the easyPVA directory from the mercurial clone.</p>
-<p>The next step is to get the correct build path for pvAccessJava and pvDataJava.
-Select the project properties for easyPVA.
-Then select Java Build Path.
-Then select Projects.
-Then make sure you are correctly accessing your version of pvDataJava and pvAccessJava.
-</p>
-<h3>Example pvIOCJava database</h3>
-<p>The directory where this documentation is located also has a file:</p>
-<pre>
-    easyPVADatabase.zip
-</pre>
-<p>This file contains an example pvIOCJava database for use by the examples and tests described below.
-Unzip the file somewhere.
-Edit the "source" file so that it has the correct location of everything required to run the example.
-The just execute:</p>
-<pre>
-./startExample
-</pre>
-
-<h3>pvDatabaseCPP exampleDatabase</h3>
-<p>There is a test ExampleDatabaseEasyMultiPut that 
-connects to channels via channel access intead of pva.
-This test requires the exampleDatabase that comes with pvDatabaseCPP.
-Just execute:
-<pre>
-mrk&gt; pwd
-/home/hg/pvDatabaseCPP/exampleDatabase/iocBoot/exampleDatabase
-mrk&gt; ../../bin/linux-x86_64/exampleDatabase st.cmd
-</pre>
 
 <h2>Introduction</h2>
 
@@ -183,83 +142,6 @@ version and wrapper code for Python.</p>
 only created in the first call. This first call also
 starts the PVAccess client factory.</p>
 
-<h3>NTMultiChannel Overview</h3>
-<p>PROPOSED DEFINITION</p>
-<pre>
-structure NTMultiChannel
-  union[]     value                  // The channel values
-  boolean[]   connected        :opt
-  string[]    pvName           :opt  // Process Variable names
-  int[]       severity         :opt
-  int[]       status           :opt
-  string[]    message          :opt
-  long[]      secondsPastEpoch :opt
-  int[]       nanoSeconds      :opt
-  int[]       userTag          :opt
-  double[]    position         :opt  // position of each element
-  string      descriptor       :opt
-  alarm       alarm            :opt
-  timeStamp   timeStamp        :opt
-  double[]    deltaTime        :opt    // time relative to timeStamp
-  int[]       dbrType          :opt  // if server is ca
-</pre>
-<p>EasyMultiChannel get and put provide the data from each channel either
-as a <b>double[]</b> or as a structure that has normative type NTMultiChannel.
-<p>
-Note that the format does <b>not</b> match what the "EPICS V4 Normative Types"
-specification states.
-I think the definition of <b>NTMultichannelArray</b>
-needs some discussion.
-</p>
-<p>Some items to discuss are:
-<dl>
-   <dt>name</dt>
-     <dd>
-     <b>NTMultichannelArray</b> should be <b>NTMultiChannel</b> 
-      because multi already implies array.
-     </dd>
-   <dt>value type</dt>
-     <dd>Instead of <b>scalar_t[]</b> this should be <b>union[]</b>.
-      This means that the only restriction  of a channel is that
-      it has a top level field named <b>value</b>.
-     </dd>
-    <dt>singular field names</dt>
-      <dd>An array field name should not end in <b>s</b>.
-       Since it is an array that already implies multiple elements.
-      <dd>
-    <dt>complete alarm fields</dt>
-      <dd>In addition to <b>int[] severity</b> 
-       <b>int[] status</b> and <b>string[] message</b>
-      should be optional fields.
-      </dd>
-</dl>
-</p>
-<p>
-Unless every channel has a value field that is a numeric scalar then
-only NTMultiChannel is valid.
-In order to make it easier to use MTMultiChannel there needs to be
-a facility that has something like the following interface:</p>
-<pre>
-public interface NTMultiChannel {
-    TimeStamp getTimeStamp();
-    int getLength();
-    void getAlarm(Alarm[]alarms,int length);
-    void getTimeStamp(TimeStamp[]timeStamps,int length);
-    PVArray getValue();
-    PVField getElementValue(int index);
-    boolean allValueScalar();
-    boolean isValueScalar(int index);
-    boolean isValueScalarArray(int index);
-    
-    PVStructure getNTMultiChannel();
-    boolean putMultiChannel(PVStructure pvStructure);
-
-    boolean isValid(int index);
-}
-</pre>
-<p>
-Nothing has been started on this.</p>
-
 <h3>EasyPVA Overview</h3>
 
 <p>EasyPVA creates interfaces to one of the following:</p>
@@ -269,7 +151,7 @@ Nothing has been started on this.</p>
      There are two methods for creating an EasyChannel,
      with the difference being that the second
      specifiers the name of the provider.
-     The other assumes that the provider is "pva" (pvAccess).</p>
+     The other assumes that the provider is "pva" (pvAccess).
     </dd>
   <dt>EasyMultiChannel</dt>
     <dd>This creates an interface for accessing a set of channels.<br />
@@ -311,17 +193,17 @@ method:</p>
       ChannelPut. By default it asks for the field value, alarm, and timeStamp.
       If the channel has a value field then EasyPut provides convenience
       methods for a scalar value and for an array value. </dd>
+  <dt>EasyRPC</dt>
+    <dd>This is an interface to ChannelRPC.
+     The implementation allows full access to all the features of ChannelRPC.
+    </dd>
   <dt>EasyPutGet</dt>
     <dd>This is an interface to ChannelPutGet. Details TBD.</dd>
   <dt>EasyMonitor</dt>
     <dd>This is an interface to ChannelPutGet. Details TBD.</dd>
   <dt>EasyArray</dt>
     <dd>This is an interface to ChannelPutGet. Details TBD.</dd>
-  <dt>EasyRPC</dt>
-    <dd>This is an interface to ChannelPutGet. Details TBD.</dd>
   <dt>EasyProcess</dt>
-    <dd>This is an interface to ChannelPutGet. Details TBD.</dd>
-  <dt>EasyField</dt>
     <dd>This is an interface to ChannelPutGet. Details TBD.</dd>
 </dl>
 
@@ -344,17 +226,18 @@ The only requirement of the channels is that each must have a top level field na
 
 
 <h2>Hello World Examples</h2>
-
-<p>The examples described in this section require that a server is running
-that has the required channels.
-A Java server is provided by easyPVADatabase.zip that comes with this easyPVAJava.
-To run it unzip, edit the source file, and then:
+<p>The examples that appear in easyPVAJava/test will only work
+if a V3 softIOc is running and RPCServiceExample is running.
+To start the softIOC do the following:</p>
 <pre>
 mrk&gt; pwd
-/home/mrk/pvjava/easyPVADatabase
-.startExample 
+/home/hg/easyPVAJava/v3IOC
+mrk&gt; softIoc st.cmd
 </pre>
-
+<p>You can use eclipse to start RPCServiceExample.
+It is in package org.epics.pvaccess.easyPVA under easyPVAJava/test.
+Just run it as a main program.
+</p>
 
 <h3>Get Scalar</h3>
 
@@ -723,7 +606,7 @@ data types:</p>
 
 <p>The examples in this section are taken from ExampleEasyPutScalar.java</p>
 
-<p>The first example is a simple way to get a scalar value from a channel. This
+<p>The first example is a simple way to put a scalar value to a channel. This
 example has one line of code that puts a double to the value field of the
 specified channel. If anything goes wrong a message is displayed on standard
 out.</p>
@@ -856,7 +739,7 @@ problems:</p>
         easyPVA.setAuto(true, true);
     }</pre>
 
-<p>The last array example is an example that handles all of the scalar arrays
+<p>The last array example is an example that handles all of the scalar array
 data types:</p>
 <pre>    static void exampleScalarArray(String channelName) {
         EasyGet easyGet = easyPVA.createChannel(channelName).createGet();
@@ -953,7 +836,11 @@ data types:</p>
 
 <p>The first example is a simple way to get an array of data from a set of channels.
 This is done via one line of code as follows:</p>
+
 <pre>
+ int nchannel = 5;
+ String[] channelName = new String[nchannel];
+ for(int i=0; i&lt;nchannel; ++i) channelName[i] = "double0" + i;
  PVStructure pvStructure = easyPVA.createMultiChannel(channelName).createGet().getNTMultiChannel();
  System.out.println(pvStructure);
 </pre>
@@ -1050,8 +937,29 @@ value length 5
 <p>TBD</p>
 
 <h3>RPC</h3>
+ <p>The folowing example is taken from ExampleEasyRPC</p>
+<pre>
+static void exampleRPC(String channelName) {
+    PVStructure request = PVDataFactory.getPVDataCreate().createPVStructure(requestStructure);
+    request.getStringField("a").put("12.3");
+    request.getStringField("b").put("45.6");
 
-<p>TBD</p>
+    PVStructure result = easyPVA.createChannel(channelName).createRPC().request(request);
+    System.out.println(request +"\n =\n" + result);
+}
+</pre>
+<p>This produces:</p>
+<pre>
+structure 
+    string a 12.3
+    string b 45.6
+ =
+structure 
+    double c 57.900000000000006
+sum structure 
+    double c 57.900000000000006
+all done
+</pre>
 
 <h3>Introspection</h3>
 
@@ -1088,13 +996,17 @@ value length 5
 <pre>public interface EasyPVA {
     void destroy();
     EasyChannel createChannel(String channelName);
-    EasyChannel createChannel(String channelName,String providerName);
+    EasyChannel createChannel(
+        String channelName,
+        String providerName);
     EasyMultiChannel createMultiChannel(String[] channelName);
-    EasyMultiChannel createMultiChannel(String[] channelName,String providerName);
     EasyMultiChannel createMultiChannel(
-            String[] channelNames,
-            String providerName,
-            Union union);
+        String[] channelName,
+        String providerName);
+    EasyMultiChannel createMultiChannel(
+        String[] channelName,
+        String providerName,
+        Union union);
     void setRequester(Requester requester);
     void clearRequester();
     void setStatus(Status status);
@@ -1145,13 +1057,6 @@ value length 5
       argument is the minimum status which causes message to be called. The
       default is WARNING. </dd>
 </dl>
-
-<p><span style="font-weight:bold;">NOTE</span>: pvIOCJava has a package named
-caV3. It has a caV3 server that allows a caV3 client to access records in
-pvIOCJava BUT it also has client code that allows a pvAccess client to use
-jca/caj to communicate with a V3 record. This client code <span
-style="font-weight:bold;">SHOULD</span> be moved to pvAccess and become a
-standard provider.</p>
 
 <h2>EasyChannel</h2>
 
@@ -1220,50 +1125,50 @@ If there was a problem creating the channel, status will provide the reason.</p>
     <dd>Creates an <span style="font-weight:bold;">EasyField</span>. If no
       subField is specified then <span style="font-weight:bold;">""</span> is
       assumed. The syntax for subField is defined in package <span
-      style="font-weight:bold;">org.epics.pvaccess.client</span>.</dd>
+      style="font-weight:bold;">org.epics.pvdata.copy</span>.</dd>
   <dt>createProcess</dt>
     <dd>Creates an <span style="font-weight:bold;">EasyProcess</span>. If no
       request is specified then <span style="font-weight:bold;">""</span> is
       assumed. The other two methods use the syntax defined by <span
       style="font-weight:bold;">ChannelRequest</span> as described in package
-      <span style="font-weight:bold;">org.epics.pvaccess.client</span>.</dd>
+      <span style="font-weight:bold;">org.epics.pvdata.copy</span>.</dd>
   <dt>createGet</dt>
     <dd>Creates an <span style="font-weight:bold;">EasyGet</span>. If no
       request is specified then <span
       style="font-weight:bold;">"field(value,alarm,timeStamp)"</span> is
       assumed. The other two methods use the syntax defined by <span
       style="font-weight:bold;">ChannelRequest</span> as described in package
-      <span style="font-weight:bold;">org.epics.pvaccess.client</span>.</dd>
+      <span style="font-weight:bold;">org.epics.pvdata.copy</span>.</dd>
   <dt>createPut</dt>
     <dd>Creates an <span style="font-weight:bold;">EasyPut</span>. If no
       request is specified then <span
-      style="font-weight:bold;">"field(value,alarm,timeStamp)"</span> is
+      style="font-weight:bold;">"field(value)"</span> is
       assumed. The other two methods use the syntax defined by <span
       style="font-weight:bold;">ChannelRequest</span> as described in package
-      <span style="font-weight:bold;">org.epics.pvaccess.client</span>.</dd>
+      <span style="font-weight:bold;">org.epics.pvdata.copy</span>.</dd>
   <dt>createPutGet</dt>
     <dd>Creates an EasyPutGet. If no request is specified then <span
-      style="font-weight:bold;">"record[process=true]putField(arguments)getField(result)"</span>
+      style="font-weight:bold;">"record[process=true]putField(argument)getField(result)"</span>
       is assumed. The other two methods use the syntax defined by <span
       style="font-weight:bold;">ChannelRequest</span> as described in package
-      <span style="font-weight:bold;">org.epics.pvaccess.client</span>.</dd>
+      <span style="font-weight:bold;">org.epics.pvdata.copy</span>.</dd>
   <dt>createRPC</dt>
     <dd>Creates an EasyRPC. If no request is specified then <span
-      style="font-weight:bold;">"record[process=true]putField(arguments)getField(result)"
+      style="font-weight:bold;">"PVStructure(null)"
       </span> is assumed. The other two methods use the syntax defined by <span
       style="font-weight:bold;">ChannelRequest</span> as described in package
-      <span style="font-weight:bold;">org.epics.pvaccess.client</span>.</dd>
+      <span style="font-weight:bold;">org.epics.pvdata.copy</span>.</dd>
   <dt>createArray</dt>
     <dd>Creates an EasyArray, which gets/puts a sub array. In no request is
       specified <span style="font-weight:bold;">"field(value)"</span> is
       assumed. The other two methods use the syntax defined by ChannelRequest
-      as described in package org.epics.pvaccess.client.</dd>
+      as described in package org.epics.pvdata.copy.</dd>
   <dt>createMonitor</dt>
     <dd>Creates an EasyMonitor. If no request is specified <span
-      style="font-weight:bold;">record[queueSize=2]field(value,alarm,timeStamp)
+      style="font-weight:bold;">field(value,alarm,timeStamp)
       </span> is assumed. The other two methods use the syntax defined by <span
       style="font-weight:bold;">ChannelRequest</span> as described in package
-      <span style="font-weight:bold;">org.epics.pvaccess.client</span>.</dd>
+      <span style="font-weight:bold;">org.epics.pvdata.copy</span>.</dd>
   <dt>setStatus</dt>
     <dd>Set a new status value. The new value will replace the current status.
       The initial status is statusOK. </dd>
@@ -1273,6 +1178,7 @@ If there was a problem creating the channel, status will provide the reason.</p>
 </dl>
 
 <h2>EasyField</h2>
+<p><b>NOTE:</b> not implemented.</p>
 
 <p>An <span style="font-weight:bold;">EasyField</span> is created via a call to
 <span style="font-weight:bold;">easychannel.createField</span>. The first call
@@ -1307,7 +1213,7 @@ If there was a problem creating, status will provide the reason.</p>
       the get request was successful, If not the request fails, i. e. false is
       returned, than getStatus can be called to find the reason. </dd>
   <dt>getField</dt>
-    <dd>Get the introspection interface.</dd>
+    <dd>Get the introspection interace.</dd>
   <dt>setStatus</dt>
     <dd>Set a new status value. The new value will replace the current status.
       The initial status is statusOK. </dd>
@@ -1317,10 +1223,11 @@ If there was a problem creating, status will provide the reason.</p>
 </dl>
 
 <h2>EasyProcess</h2>
+<p><b>NOTE:</b> not implemented.</p>
 
 <p>An <span style="font-weight:bold;">EasyProcess</span> is created via a call
 to <span style="font-weight:bold;">easychannel.createProcess</span>. The first
-call to an <span>EasyGet</span> method will block until create is complete. If
+call to an <span>EasyProcess</span> method will block until create is complete. If
 a channel can not be created then the first time a <span
 style="font-weight:bold;">EasyProcess</span> method is called an exception is
 thrown. The only exception is <span style="font-weight:bold;">getStatus</span>.
@@ -1345,18 +1252,21 @@ If there was a problem creating, status will provide the reason.</p>
   <dt>destroy</dt>
     <dd>Destroy this <span style="font-weight:bold;">EasyProcess</span></dd>
   <dt>connect</dt>
-    <dd>Connect to the channel. This blocks until connected.</dd>
+    <dd>Call issueConnect and then waitConnect.</dd>
   <dt>issueConnect</dt>
     <dd>Issue a connect request and return immediately.</dd>
   <dt>waitConnect</dt>
-    <dd>Wait until the connection completes or for timeout/</dd>
+    <dd>Wait until the connection completes or for timeout.
+     If failure getStatus can be called to get reason.
+     </dd>
   <dt>process</dt>
     <dd>Calls issueProcess and then waitProcess.</dd>
   <dt>issueProcess</dt>
     <dd>Issue a process request and return immediately.</dd>
   <dt>waitProcess</dt>
-    <dd>Block until the process request completes. getStatus can be called to
-      see if the request was successful.</dd>
+    <dd>Block until the process request completes.
+     If failure getStatus can be called to get reason.
+     </dd>
   <dt>setStatus</dt>
     <dd>Set a new status value. The new value will replace the current status.
       The initial status is statusOK. </dd>
@@ -1390,6 +1300,7 @@ If there was a problem creating, status will provide the reason.</p>
     boolean isValueScalar();
     PVField getValue();
     PVScalar getScalarValue();
+    PVArray getArrayValue();
     PVScalarArray getScalarArrayValue();
 
     boolean getBoolean();
@@ -1444,8 +1355,8 @@ If there was a problem creating, status will provide the reason.</p>
     <dd>Issue a get request and return immediately.</dd>
   <dt>waitGet</dt>
     <dd>Block until the get request completes. The return value indicates if
-      the get request was successful. If not and the request fails, i. e. false is
-      returned, then getStatus can be called to find the reason. </dd>
+      the get request was successful, If not the request fails, i. e. false is
+      returned, than getStatus can nbe called to find the reason. </dd>
   <dt>getAlarm</dt>
     <dd>Get the alarm. If the create request did not specify alarm the status
       and severity will both be <span style="font-weight:bold;">NONE</span> and
@@ -1463,7 +1374,10 @@ If there was a problem creating, status will provide the reason.</p>
   <dt>getScalarValue</dt>
     <dd>Return the interface for a scalar value field or null if no scalar
       value field.</dd>
-  <dt>get ScalarArrayValue</dt>
+  <dt>getArrayValue</dt>
+    <dd>Return the interface for a array value field or null if no
+      array value field.</dd>
+  <dt>getScalarArrayValue</dt>
     <dd>Return the interface for a scalar array value field or null if no
       scalar array value field.</dd>
   <dt>getBoolean</dt>
@@ -1494,13 +1408,13 @@ If there was a problem creating, status will provide the reason.</p>
       versions. One returns a newly created copy of the value. The other copies
       the data from the value to the array supplied by the caller.</dd>
   <dt>getStringArray</dt>
-    <dd> If value is not a string array null is returned. There are two
+    <dd> If value is not a scalar array null is returned. There are two
       versions. One returns a newly created copy of the array and the other
       copies the data from the value to the array supplied by the caller.</dd>
   <dt>getPVStructure</dt>
-    <dd>Get top level <span style="font-weight:bold;">PVStructure</span> for
-      the data. The client can use normal pvData introspection to access the
-      data.</dd>
+    <dd>Get top level pvStructure returned by the last get.
+      The client can use normal pvData introspection to access the data.
+     </dd>
   <dt>getBitSet</dt>
     <dd>Get the bitSet for the top level <span
       style="font-weight:bold;">PVStructure</span>.</dd>
@@ -1632,11 +1546,15 @@ If there was a problem creating, status will provide the reason.</p>
   <dt>getScalarValue</dt>
     <dd>Return the interface for a scalar value field or null if no scalar
       value field.</dd>
+  <dt>getArrayValue</dt>
+    <dd>Return the interface for a array value field or null if no
+      array value field.</dd>
   <dt>get ScalarArrayValue</dt>
     <dd>Return the interface for a scalar array value field or null if no
       scalar array value field.</dd>
   <dt>getBoolean</dt>
-    <dd>Put the boolean value. If the value is not a boolean then setStatus is
+    <dd>Get the current boolean value.
+      If the value is not a boolen then setStatus is
       called and false is returned.</dd>
   <dt>getByte</dt>
   <dt>getShort</dt>
@@ -1644,7 +1562,8 @@ If there was a problem creating, status will provide the reason.</p>
   <dt>getLong</dt>
   <dt>getFloat</dt>
   <dt>getDouble</dt>
-    <dd>Get the value as the specified type. If value is not a numeric scalar
+    <dd>Get the current value as the specified type.s
+      If value is not a numeric scalar
       setStatus is called and 0 is returned.</dd>
   <dt>getString</dt>
     <dd>Get the value as a string. If value is not a scalar setStatus is called
@@ -1658,13 +1577,15 @@ If there was a problem creating, status will provide the reason.</p>
   <dt>putLong</dt>
   <dt>putFloat</dt>
   <dt>putDouble</dt>
-    <dd>Put value into the value field . If the value field is not a numeric
+    <dd>Put value into the value field . If the value fielld is not a numeric
       scalar setStatus is called and 0 is returned.</dd>
   <dt>putString</dt>
     <dd>Put the value as a string. If value field is not a string setStatus is
       called.</dd>
   <dt>getBooleanArray</dt>
-    <dd>If the value is not a boolean array null is returned. There are two
+    <dd>
+      Get the current boolean array value.
+      If the value is not a boolean array null is returned. There are two
       versions. One returns a newly created copy of the value. The other copies
       the data from the value to the array supplied by the caller.</dd>
   <dt>getByteArray</dt>
@@ -1673,11 +1594,15 @@ If there was a problem creating, status will provide the reason.</p>
   <dt>getLongArray</dt>
   <dt>getFloatArray</dt>
   <dt>getDoubleArray</dt>
-    <dd>If the value is not a numeric array null is returned. There are two
+    <dd>
+      Get the curent value as the specified scalar array type.
+      If the value is not a numeric array null is returned. There are two
       versions. One returns a newly created copy of the value. The other copies
       the data from the value to the array supplied by the caller.</dd>
   <dt>getStringArray</dt>
-    <dd>If value is not a string array null is returned. There are two
+    <dd>
+      Get the current value as a string array.
+      If value is not a scalar array null is returned. There are two
       versions. One returns a newly created copy of the array and the other
       copies the data from the value to the array supplied by the caller.</dd>
   <dt>putBooleanArray</dt>
@@ -1695,12 +1620,12 @@ If there was a problem creating, status will provide the reason.</p>
     <dd>If the value is not a string array setStatus is called. Otherwise the
       value is copied to the value field.</dd>
   <dt>getPVStructure</dt>
-    <dd>Get the top level <span style="font-weight:bold;">PVStructure</span>
-      for the data. The client can use normal pvData introspection to access
-      the data.</dd>
+    <dd>Get a top level pvStructure for the channelPut.
+      The client can use normal pvData introspection to access the data.
+     </dd>
   <dt>getBitSet</dt>
-    <dd>Get the bitSet for the top level <span
-      style="font-weight:bold;">PVStructure</span>. </dd>
+    <dd>Get the bitSet for the top level pvStructure.
+     </dd>
   <dt>setStatus</dt>
     <dd>Set a new status value. The new value will replace the current status.
       The initial status is statusOK. </dd>
@@ -1710,6 +1635,7 @@ If there was a problem creating, status will provide the reason.</p>
 </dl>
 
 <h2>EasyPutGet</h2>
+<p><b>NOTE:</b> not implemented.</p>
 
 <p>An <span style="font-weight:bold;">EasyPutGet</span> is created via a call
 to <span style="font-weight:bold;">easychannel.createPutGet</span>. The first
@@ -1778,7 +1704,7 @@ status will provide the reason.</p>
       statusOK.</dd>
 </dl>
 
-<h2>EasyRPC - Remote Procedure Call</h2>
+<h2>EasyRPC</h2>
 
 <p>An <span style="font-weight:bold;">EasyRPC</span> is created via a call to
 <span style="font-weight:bold;">easychannel.createRPC</span>. The first call to
@@ -1828,6 +1754,7 @@ If there was a problem creating, status will provide the reason.</p>
 </dl>
 
 <h2>EasyArray</h2>
+<p><b>NOTE:</b> not implemented.</p>
 
 <p>EasyArray allows a client to get and put a sub-array.</p>
 
@@ -1887,10 +1814,10 @@ status will provide the reason.</p>
   <dt>getPVArray</dt>
     <dd>This gets the PVArray which holds data to get/put from the channel.</dd>
   <dt>get</dt>
-    <dd>Get the specified sub array. It is put into PVArray starting a offset
+    <dd>Get the specified sub arrray. It is put into PVArray starting a offset
       0.</dd>
   <dt>put</dt>
-    <dd>Put the specified sub array. It is taken from PVArray starting at
+    <dd>Put the specified sub arrray. It is taken from PVArray starting at
       offset 0.</dd>
   <dt>getBoolean</dt>
     <dd>Get data from PVArray and put it into array. An exception is thrown if
@@ -1924,6 +1851,7 @@ status will provide the reason.</p>
 </dl>
 
 <h2>EasyMonitor</h2>
+<p><b>NOTE:</b> not implemented.</p>
 
 <p>An <span style="font-weight:bold;">EasyMonitor</span> is created via a call
 to <span style="font-weight:bold;">easychannel.createMonitor</span>. The first
@@ -1963,10 +1891,10 @@ status will provide the reason.</p>
   <dt>waitConnect</dt>
     <dd>Wait until the connection completes or for timeout/</dd>
   <dt>setRequester</dt>
-    <dd>Set the requester. If this is not specified the only way to get events
+    <dd>Set the requester. If this is not sepcified the only way to get events
       is to call getEvent.</dd>
   <dt>getEvent</dt>
-    <dd>Get an event. This will return null if no events are available. If data
+    <dd>Get an event. This wil return null if no events are available. If data
       is returned that this may not be called again until releaseEvent is
       called.</dd>
   <dt>getChangedBitSet</dt>
@@ -2030,7 +1958,7 @@ public interface EasyMultiChannel{
     <dd>returns <b>true</b> if all channels are connected and <b>false</b> otherwise.
     </dd>
   <dt>isConnected</dt>
-    <dd>Returns the connection status of each channel.</dd>
+    <dd>Returns the connectio status of each channel.</dd>
   <dt>waitConnect</dt>
     <dd>Wait until the connection completes or for timeout/</dd>
   <dt>createGet</dt>
@@ -2126,7 +2054,7 @@ interface EasyMultiGet {
     </dd>
   <dt>getPVTop</dt>
     <dd>If doubleOnly is false then <b>null</b> is returned.
-     Otherwise the structure has the fields value, timeStamp, and channelName.
+     Othewise the structure has the fields value, timeStamp, and channelName.
      </dd>
   <dt>getDoubleArray</dt>
     <dd>If doubleOnly is false then <b>null</b> is returned for the first method
@@ -2208,7 +2136,7 @@ public interface EasyMultiPut {
     </dd>
   <dt>getPVTop</dt>
     <dd>If doubleOnly is false then <b>null</b> is returned.
-     Otherwise the structure has the fields value, timeStamp, and channelName.
+     Othewise the structure has the fields value, timeStamp, and channelName.
      </dd>
   <dt>getDoubleArray</dt>
     <dd>If doubleOnly is false then <b>null</b> is returned for the first method
@@ -2233,6 +2161,7 @@ public interface EasyMultiPut {
     <dd>Get the latest status. Calling this resets the latest status to
       statusOK.</dd>
 </dl>
+
 </div> <!-- class="contents" -->
 </body>
 </html>

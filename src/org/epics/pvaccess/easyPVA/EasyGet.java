@@ -34,177 +34,221 @@ public interface EasyGet {
     void issueConnect();
     /**
      * wait until the channelGet connection to the channel is complete.
-     * @return (false,true) if the channelGet (was not, was) created.
-     * If false is returned getStatus will provide the reason why the connection request failed, 
+     * If failure getStatus can be called to get reason.
+     * @return (false,true) means (failure,success)
      */
     boolean waitConnect();
     /**
      * Call issueGet and then waitGet.
-     * @return
+     * @return (false,true) means (failure,success)
      */
     boolean get();
     /**
-     * 
+     * Issue a get and return immediately.
      */
     void issueGet();
     /**
-     * @return
+     * Wait until get completes.
+     * If failure getStatus can be called to get reason.
+     * @return (false,true) means (failure,success)
      */
     boolean waitGet();
     /**
-     * @return
+     * Get the alarm for the last get.
+     * @return The alarm.
      */
     Alarm getAlarm();
     /**
-     * @return
+     * Get the timeStamp for the last get.
+     * @return The timeStamp.
      */
     TimeStamp getTimeStamp();
     /**
-     * @return
+     * Is there a top level field named value of the PVstructure returned by channelGet?
+     * @return The answer.
      */
     boolean hasValue();
     /**
-     * @return
+     * Is the value field a scalar?
+     * @return The answer.
      */
     boolean isValueScalar();
     /**
-     * @return
+     * Return the interface to the value field.
+     * @return The interface or null if no top level value field.
      */
     PVField getValue();
     /**
-     * @return
+     * Return the interface to a scalar value field.
+     * @return Return the interface for a scalar value field or null if no scalar value field.
      */
     PVScalar getScalarValue();
     /**
-     * @return
+     * Return the interface to an array value field.
+     * @return Return the interface or null if an array value field does not exist.
      */
     PVArray getArrayValue();
     /**
-     * @return
+     * Return the interface to a scalar array value field.
+     * @return Return the interface or null if a scalar array value field does not exist
      */
     PVScalarArray getScalarArrayValue();
     
     
     /**
-     * @return
+     * Get the boolean value. If value is not a boolean setStatus is called and false is returned. 
+     * @return true or false.
      */
     boolean getBoolean();
     /**
-     * @return
+     * Get the value as a byte.
+     * @return If value is not a numeric scalar setStatus is called and 0 is returned
      */
     byte getByte();
     /**
-     * @return
+     * Get the value as a short.
+     * @return  If value is not a numeric scalar setStatus is called and 0 is returned.
      */
     short getShort();
     /**
-     * @return
+     * Get the value as an int.
+     * @return  If value is not a numeric scalar setStatus is called and 0 is returned.
      */
     int getInt();
     /**
-     * @return
+     * Get the value as a long.
+     * @return  If value is not a numeric scalar setStatus is called and 0 is returned.
      */
     long getLong();
     /**
-     * @return
+     * Get the value as a float.
+     * @return  If value is not a numeric scalar setStatus is called and 0 is returned.
      */
     float getFloat();
     /**
-     * @return
+     * Get the value as a double.
+     * @return  If value is not a numeric scalar setStatus is called and 0 is returned.
      */
     double getDouble();
     /**
-     * @return
+     * Get the value as a string.
+     * @return If value is not a scalar setStatus is called and 0 is returned.
      */
     String getString();
     
     /**
-     * @return
+     * Get the value as a boolean array.
+     * @return If the value is not a boolean array null is returned.
      */
     boolean[] getBooleanArray();
     /**
-     * @return
+     * Get the value as a byte array.
+     * @return If the value is not a numeric array null is returned. 
      */
     byte[] getByteArray();
     /**
-     * @return
+     * Get the value as a short array.
+     * @return If the value is not a numeric array null is returned. 
      */
     short[] getShortArray();
     /**
-     * @return
+     * Get the value as an int array.
+     * @return If the value is not a numeric array null is returned. 
      */
     int[] getIntArray();
     /**
-     * @return
+     * Get the value as a long array.
+     * @return If the value is not a numeric array null is returned. 
      */
     long[] getLongArray();
     /**
-     * @return
+     * Get the value as a float array.
+     * @return If the value is not a numeric array null is returned. 
      */
     float[] getFloatArray();
     /**
-     * @return
+     * Get the value as a double array.
+     * @return If the value is not a numeric array null is returned. 
      */
     double[] getDoubleArray();
     /**
-     * @return
+     * Get the value as a string array.
+     * @return If the value is not a scalar array null is returned.
      */
     String[] getStringArray();
     
     /**
-     * @param value
-     * @param length
-     * @return
+     * Copy a sub-array of the value field into value.
+     * If the value field is not a boolean array field no elements are copied.
+     * @param value The place where data is copied.
+     * @param length The maximum number of elements to copy.
+     * @return The number of elements copied.
      */
     int getBooleanArray(boolean[] value,int length);
     /**
-     * @param value
-     * @param length
-     * @return
+     * Copy a sub-array of the value field into value.
+     * If the value field is not a numeric array field no elements are copied.
+     * @param value The place where data is copied.
+     * @param length The maximum number of elements to copy.
+     * @return The number of elements copied.
      */
     int getByteArray(byte[] value,int length);
     /**
-     * @param value
-     * @param length
-     * @return
+     * Copy a sub-array of the value field into value.
+     * If the value field is not a numeric array field no elements are copied.
+     * @param value The place where data is copied.
+     * @param length The maximum number of elements to copy.
+     * @return The number of elements copied.
      */
     int getShortArray(short[] value,int length);
     /**
-     * @param value
-     * @param length
-     * @return
+     * Copy a sub-array of the value field into value.
+     * If the value field is not a numeric array field no elements are copied.
+     * @param value The place where data is copied.
+     * @param length The maximum number of elements to copy.
+     * @return The number of elements copied.
      */
     int getIntArray(int[] value,int length);
     /**
-     * @param value
-     * @param length
-     * @return
+     * Copy a sub-array of the value field into value.
+     * If the value field is not a numeric array field no elements are copied.
+     * @param value The place where data is copied.
+     * @param length The maximum number of elements to copy.
+     * @return The number of elements copied.
      */
     int getLongArray(long[] value,int length);
     /**
-     * @param value
-     * @param length
-     * @return
+     * Copy a sub-array of the value field into value.
+     * If the value field is not a numeric array field no elements are copied.
+     * @param value The place where data is copied.
+     * @param length The maximum number of elements to copy.
+     * @return The number of elements copied.
      */
     int getFloatArray(float[] value,int length);
     /**
-     * @param value
-     * @param length
-     * @return
+     * Copy a sub-array of the value field into value.
+     * If the value field is not a numeric array field no elements are copied.
+     * @param value The place where data is copied.
+     * @param length The maximum number of elements to copy.
+     * @return The number of elements copied.
      */
     int getDoubleArray(double[] value,int length);
     /**
-     * @param value
-     * @param length
-     * @return
+     * Copy a sub-array of the value field into value.
+     * If the value field is not a scalar array field no elements are copied.
+     * @param value The place where data is copied.
+     * @param length The maximum number of elements to copy.
+     * @return The number of elements copied.
      */
     int getStringArray(String[] value,int length);
     /**
-     * @return
+     * Get the top level pvStructure returned by the last channelGet.
+     * @return The pvStructutre.
      */
     PVStructure getPVStructure();
     /**
-     * @return
+     * Get the bitSet for the top level structure.
+     * @return The bitSet.
      */
     BitSet getBitSet();
     /**

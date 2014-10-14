@@ -40,9 +40,9 @@ public interface EasyMultiGet {
      */
     void issueGet();
     /**
-     * wait untill all gets are complete.
+     * wait until all gets are complete.
      * @return (true,false) if (no errors, errors) resulted from gets.
-     * If an error occured then getStatus returns a reason.
+     * If an error occurred then getStatus returns a reason.
      */
     boolean waitGet();
     /**

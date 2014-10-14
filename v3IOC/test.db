@@ -98,6 +98,18 @@ record(mbbo,"mbbo00") {
     field(FFVL,"0xf")
 }
 
+record(mbbi,"mbbiwierd") {
+    field(VAL,"1")
+    field(ZRST,"1")
+    field(ONST,"10")
+    field(TWST,"100")
+    field(THST,"1000")
+    field(FRST,"10000")
+    field(FVST,"100000")
+    field(SXST,"1000000")
+    field(SVST,"10000000")
+}
+
 record(bo,"bo01") {
     field(ZNAM,"zero")
     field(ONAM,"one")

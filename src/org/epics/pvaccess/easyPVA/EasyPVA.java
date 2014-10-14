@@ -29,28 +29,28 @@ public interface EasyPVA extends Requester {
     EasyChannel createChannel(String channelName,String providerName);
     /**
      * Create an EasyMultiChannel. The provider is pvAccess.
-     * @param channelNames The channelNames.
+     * @param channelName The channelName array.
      * @return The interface.
      */
-    EasyMultiChannel createMultiChannel(String[] channelNames);
+    EasyMultiChannel createMultiChannel(String[] channelName);
     /**
      * Create an EasyMultiChannel with the specified provider.
-     * @param channelNames The channelNames.
+     * @param channelName The channelName array.
      * @param providerName The provider.
      * @return The interface.
      */
     EasyMultiChannel createMultiChannel(
-            String[] channelNames,
+            String[] channelName,
             String providerName);
     /**
      * Create an EasyMultiChannel with the specified provider.
-     * @param channelNames The channelNames.
+     * @param channelName The channelName.
      * @param providerName The provider.
-     * @param union The union interface for each the value field of each channel.
+     * @param union The union interface for the value field of each channel.
      * @return The interface.
      */
     EasyMultiChannel createMultiChannel(
-            String[] channelNames,
+            String[] channelName,
             String providerName,
             Union union);
     /**
