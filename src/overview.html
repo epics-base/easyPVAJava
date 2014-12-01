@@ -1,0 +1,28 @@
+<html>
+<body>
+<p>EasyPVA (Easy PVAccess) is a software library that provides to an EPICS client programmer, a friendly
+client side programming interface to the data of an EPICS based control system. It is intended 
+for such uses as rapid development of ad hoc programs by controls engineers, or to provide
+scientists a way to directly develop analytical applications.</p>
+
+<p>Specifically, easyPVA provides an easy interface for pvAccess, which is the
+software support for high speed controls network communications used in EPICS version 4.
+PvAccess provides a callback based interface, which can be hard to use.
+EasyPVA provides an interface that does not require callbacks even for monitors.
+</p>
+<p>
+EasyChannel provides many "convenience" methods to directly get and put
+scalar and scalarArray data types.
+Additional methods provide access to the full features of pvAccess.
+</p>
+<p>
+EasyMultiChannel provides access to data from multiple channels as long
+as eacxh channel has a top level field named <b>value</b>.
+EasyMultiChannel provides two ways to access data from multiple channels:
+The first is as an NTMultiChannel. The second is as a double array.
+The double array can be used if the value field of every channel is a numeric scalar.
+There is code for NTMultiChannel that helps with access to more complicated data types.
+</p>
+
+</body>
+</html>

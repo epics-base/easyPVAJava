@@ -12,8 +12,7 @@ import org.epics.pvdata.pv.Status;
  */
 public interface EasyRPC {
     /**
-     * Get the bitSet for the top level structure.
-     * @return The bitSet.
+     * Disconnect from channel and destroy all resources.
      */
     void destroy();
     /**

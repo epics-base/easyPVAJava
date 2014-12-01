@@ -17,7 +17,7 @@ public interface EasyMultiPut {
     void destroy();
     /**
      * Calls issueConnect and then waitConnect.
-     * @return
+     * @return (false,true) if (failure, success)
      */
     boolean connect();
     /**
@@ -26,12 +26,12 @@ public interface EasyMultiPut {
     void issueConnect();
     /**
      * Wait until all channelPuts are created.
-     * @return
+     * @return (false,true) if (failure, success)
      */
     boolean waitConnect();
     /**
      * call issueGet and the waitGet.
-     * @return
+     * @return (false,true) if (failure, success)
      */
     boolean get();
     /**
@@ -42,6 +42,7 @@ public interface EasyMultiPut {
      * wait until all gets are complete.
      * @return (true,false) if (no errors, errors) resulted from gets.
      * If an error occurred then getStatus returns a reason.
+     * @return (false,true) if (failure, success)
      */
     boolean waitGet();
     /**
@@ -95,13 +96,13 @@ public interface EasyMultiPut {
     void issuePut(PVStructure pvNTMultiChannel);
     /**
      * Call issuePut and then waitPut.
-     * @param pvNTMultiChannel The pvStructure for an NTMultiChannel.
+     * @param value The value for each channel.
      * @return (false,true) means (failure,success)
      */
     boolean put(double[] value);
     /**
      * Put the value field as a double array.
-     * @param pvNTMultiChannel The double array.
+     * @param value The value for each channel.
      */
     void issuePut(double[] value);
     /**
