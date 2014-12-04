@@ -596,7 +596,7 @@ public class EasyPVAFactory {
          */
         @Override
         public EasyMonitor createMonitor() {
-            return createMonitor("field()");
+            return createMonitor("field(value,alarm,timeStamp)");
         }
 
         /* (non-Javadoc)

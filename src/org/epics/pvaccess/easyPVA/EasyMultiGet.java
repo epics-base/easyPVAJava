@@ -18,7 +18,7 @@ public interface EasyMultiGet {
     void destroy();
     /**
      * Calls issueConnect and then waitConnect.
-     * @return
+     * @return (false,true) if (not connected, connected)
      */
     boolean connect();
     /**
@@ -27,12 +27,12 @@ public interface EasyMultiGet {
     void issueConnect();
     /**
      * Wait until all channelGets are created.
-     * @return
+     * @return (false,true) if (not all connected, all connected)
      */
     boolean waitConnect();
     /**
      * call issueGet and the waitGet.
-     * @return
+     * @return (false,true) if (failure, success)
      */
     boolean get();
     /**
@@ -40,9 +40,10 @@ public interface EasyMultiGet {
      */
     void issueGet();
     /**
-     * wait untill all gets are complete.
+     * wait until all gets are complete.
      * @return (true,false) if (no errors, errors) resulted from gets.
-     * If an error occured then getStatus returns a reason.
+     * If an error occurred then getStatus returns a reason.
+     * @return (false,true) if (failure, success)
      */
     boolean waitGet();
     /**

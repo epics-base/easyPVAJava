@@ -18,7 +18,7 @@ public interface EasyMultiChannel{
     /**
      * Calls issueConnect and then waitConnect.
      * @param timeout timeOut for waitConnect.
-     * @return
+     * @return (false,true) if (not connected, connected)
      */
     boolean connect(double timeout);
     /**
@@ -72,14 +72,14 @@ public interface EasyMultiChannel{
      * calls the next method with request = "field(value)"
      * @param doubleOnly true if data presented as a double[].
      * @param request  A request string valid for creatRequest.
-     * @return
+     * @return EasyMultiGet or null if invalid request.
      */
     EasyMultiGet createGet(boolean doubleOnly,String request);
     /**
      * create a multiChannelGet.
      * @param doubleOnly true if data presented as a double[].
      * @param pvRequest The pvRequest for each channel.
-     * @return
+     * @return  EasyMultiGet or null if invalid request.
      */
     EasyMultiGet createGet(boolean doubleOnly,PVStructure pvRequest);
     /**
@@ -90,7 +90,7 @@ public interface EasyMultiChannel{
     /**
      * create a multiChannelPut.
      * @param doubleOnly true if data must be presented as a double[].
-     * @return
+     * @return EasyMultiPut or null if invalid request.
      */
     EasyMultiPut createPut(boolean doubleOnly);
     /**

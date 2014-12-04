@@ -22,8 +22,7 @@ public class TestEasyGet extends TestCase {
     private static final EasyPVA easyPVA = EasyPVAFactory.get();
     
     public static void bad(Status status) {
-        System.out.printf("%s %s",status.getType().name(),status.getMessage());
-        System.exit(1);
+        fail(status.getType().name() + " " +status.getMessage());
     }
     
     public static EasyGet getCommon(String testName,EasyChannel channel) {
