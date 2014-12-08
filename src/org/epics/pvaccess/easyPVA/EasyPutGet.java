@@ -9,6 +9,8 @@ import org.epics.pvdata.pv.PVStructure;
 import org.epics.pvdata.pv.Status;
 
 /**
+ * EasyPutGet is not implemented.
+ * The following is a guess at the methods to be implemented.
  * @author mrk
  *
  */

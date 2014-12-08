@@ -6,6 +6,7 @@ import org.epics.pvdata.pv.Requester;
 import org.epics.pvdata.pv.*;
 
 /**
+ * EasyPVA is an easy to use interface to pvAccess.
  * @author mrk
  *
  */

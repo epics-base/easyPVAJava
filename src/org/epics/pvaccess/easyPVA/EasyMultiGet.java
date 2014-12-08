@@ -8,6 +8,7 @@ import org.epics.pvdata.pv.PVStructure;
 import org.epics.pvdata.pv.Status;
 
 /**
+ * An easy way to get data from multiple channels.
  * @author mrk
  *
  */

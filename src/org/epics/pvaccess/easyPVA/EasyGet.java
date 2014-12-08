@@ -14,6 +14,7 @@ import org.epics.pvdata.pv.PVStructure;
 import org.epics.pvdata.pv.Status;
 
 /**
+ * This is an easy to use alternative to ChannelGet
  * @author mrk
  *
  */

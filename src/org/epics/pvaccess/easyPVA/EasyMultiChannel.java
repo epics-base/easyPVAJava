@@ -7,12 +7,13 @@ import org.epics.pvdata.pv.PVStructure;
 import org.epics.pvdata.pv.Status;
 
 /**
+ * An easy to use interface to get/put data from/to multiple channels.
  * @author mrk
  *
  */
 public interface EasyMultiChannel{
     /**
-     * Clean up.
+     * Destroy all resources.
      */
     void destroy();
     /**

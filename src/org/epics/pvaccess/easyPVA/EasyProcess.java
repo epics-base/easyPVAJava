@@ -6,6 +6,7 @@ package org.epics.pvaccess.easyPVA;
 import org.epics.pvdata.pv.Status;
 
 /**
+ * An easy interface to channelProcess.
  * @author mrk
  *
  */

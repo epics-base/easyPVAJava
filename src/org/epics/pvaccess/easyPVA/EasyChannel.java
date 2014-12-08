@@ -8,6 +8,7 @@ import org.epics.pvdata.pv.PVStructure;
 import org.epics.pvdata.pv.Status;
 
 /**
+ * An easy to use alternative to directly calling the Channel methods of pvAccess.
  * @author mrk
  *
  */

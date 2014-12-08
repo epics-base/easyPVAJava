@@ -7,6 +7,7 @@ import org.epics.pvdata.pv.PVStructure;
 import org.epics.pvdata.pv.Status;
 
 /**
+ * An easy way to put data to multiple channels.
  * @author mrk
  *
  */

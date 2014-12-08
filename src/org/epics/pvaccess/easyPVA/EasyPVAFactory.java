@@ -69,11 +69,16 @@ import org.epics.pvdata.pv.UnionArrayData;
 
 
 /**
+ * The factory that creates an instance of EasyPVA.
  * @author mrk
  *
  */
 public class EasyPVAFactory {
 	
+    /**
+     * Create an instance of EasyPVA.
+     * @return The newly created EasyPVA.
+     */
     static public synchronized EasyPVA get() {
         if(easyPVA==null) {
             easyPVA = new EasyPVAImpl();
@@ -118,6 +123,9 @@ public class EasyPVAFactory {
         private Status status = statusCreate.getStatusOK();
         private StatusType autoMessageThreashold = StatusType.WARNING;
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPVA#destroy()
+         */
         @Override
         public void destroy() {
             if(isDestroyed) return;
@@ -135,11 +143,17 @@ public class EasyPVAFactory {
                multiListNode = easyMultiChannelList.removeTail();
             }
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPVA#createChannel(java.lang.String)
+         */
         @Override
         public EasyChannel createChannel(String channelName) {
             return createChannel(channelName,defaultProvider);
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPVA#createChannel(java.lang.String, java.lang.String)
+         */
         @Override
         public EasyChannel createChannel(String channelName,String providerName) {
             if(isDestroyed) return null;
@@ -148,14 +162,23 @@ public class EasyPVAFactory {
             easyChannelList.addTail(listNode);
             return easyChannel;
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPVA#createMultiChannel(java.lang.String[])
+         */
         @Override
         public EasyMultiChannel createMultiChannel(String[] channelNames) {
             return createMultiChannel(channelNames,defaultProvider);
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPVA#createMultiChannel(java.lang.String[], java.lang.String)
+         */
         @Override
         public EasyMultiChannel createMultiChannel(String[] channelNames,String providerName) {
             return createMultiChannel(channelNames,providerName,variantUnion);
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPVA#createMultiChannel(java.lang.String[], java.lang.String, org.epics.pvdata.pv.Union)
+         */
         @Override
         public EasyMultiChannel createMultiChannel(String[] channelNames,String providerName, Union union) {
             if(isDestroyed) return null;
@@ -176,14 +199,23 @@ public class EasyPVAFactory {
             return easyMultiChannel;
            
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPVA#setRequester(org.epics.pvdata.pv.Requester)
+         */
         @Override
         public void setRequester(Requester requester) {
         	this.requester = requester;
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPVA#clearRequester()
+         */
         @Override
         public void clearRequester() {
         	requester = null;
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPVA#setStatus(org.epics.pvdata.pv.Status)
+         */
         @Override
         public void setStatus(Status status) {
         	this.status = status;
@@ -202,34 +234,55 @@ public class EasyPVAFactory {
         		message(message,messageType);
         	}
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPVA#getStatus()
+         */
         @Override
         public Status getStatus() {
         	Status save = status;
         	status = statusCreate.getStatusOK();
         	return save;
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPVA#setAuto(boolean, boolean)
+         */
         @Override
         public void setAuto(boolean get, boolean put) {
         	this.autoGet = get;
         	this.autoPut = put;
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPVA#isAutoGet()
+         */
         @Override
         public boolean isAutoGet() {
         	return autoGet;
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPVA#isAutoPut()
+         */
         @Override
         public boolean isAutoPut() {
         	return autoPut;
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPVA#setAutoMessage(org.epics.pvdata.pv.Status.StatusType)
+         */
         @Override
         public void setAutoMessage(StatusType type) {
         	this.autoMessageThreashold = type;
         }
+		/* (non-Javadoc)
+		 * @see org.epics.pvdata.pv.Requester#getRequesterName()
+		 */
 		@Override
         public String getRequesterName() {
 			if(requester!=null) return requester.getRequesterName();
 	        return easyPVAName;
         }
+		/* (non-Javadoc)
+		 * @see org.epics.pvdata.pv.Requester#message(java.lang.String, org.epics.pvdata.pv.MessageType)
+		 */
 		@Override
         public void message(String message, MessageType messageType) {
 	        if(requester!=null) {
@@ -745,10 +798,16 @@ public class EasyPVAFactory {
             this.channel = channel;
             this.pvRequest = pvRequest;
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvdata.pv.Requester#getRequesterName()
+         */
         @Override
         public String getRequesterName() {
             return easyChannel.providerName;
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvdata.pv.Requester#message(java.lang.String, org.epics.pvdata.pv.MessageType)
+         */
         @Override
         public void message(String message, MessageType messageType) {
             if(isDestroyed) return;
@@ -851,6 +910,9 @@ public class EasyPVAFactory {
                lock.unlock();
             }
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyGet#destroy()
+         */
         @Override
         public void destroy() {
             synchronized (this) {
@@ -859,11 +921,17 @@ public class EasyPVAFactory {
             }
             if(channelGet!=null) channelGet.destroy();
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyGet#connect()
+         */
         @Override
         public boolean connect() {
             issueConnect();
             return waitConnect();
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyGet#issueConnect()
+         */
         @Override
         public void issueConnect() {
         	if(isDestroyed) return;
@@ -875,6 +943,9 @@ public class EasyPVAFactory {
         	}
         	channelGet = channel.createChannelGet(this, pvRequest);
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyGet#waitConnect()
+         */
         @Override
         public boolean waitConnect() {
         	if(isDestroyed) return false;
@@ -897,12 +968,18 @@ public class EasyPVAFactory {
         	if(connectState==ConnectState.notConnected) return false;
         	return true;
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyGet#get()
+         */
         @Override
         public boolean get() {
             issueGet();
             return waitGet();
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyGet#issueGet()
+         */
         @Override
         public void issueGet() {
             if(isDestroyed) return;
@@ -916,6 +993,9 @@ public class EasyPVAFactory {
             getState = GetState.getActive;
             channelGet.get();
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyGet#waitGet()
+         */
         @Override
         public boolean waitGet() {
             if(isDestroyed) return false;
@@ -935,26 +1015,41 @@ public class EasyPVAFactory {
             getState = GetState.getIdle;
             return getSuccess;
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyGet#getValue()
+         */
         @Override
         public PVField getValue() {
             checkGetState();
             return pvValue;
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyGet#getScalarValue()
+         */
         @Override
         public PVScalar getScalarValue() {
             checkGetState();
             return pvScalarValue;
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyGet#getArrayValue()
+         */
         @Override
         public PVArray getArrayValue() {
         	checkGetState();
             return pvArrayValue;
         }
+		/* (non-Javadoc)
+		 * @see org.epics.pvaccess.easyPVA.EasyGet#getScalarArrayValue()
+		 */
 		@Override
         public PVScalarArray getScalarArrayValue() {
 			checkGetState();
             return pvScalarArrayValue;
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyGet#getAlarm()
+         */
         @Override
         public Alarm getAlarm() {
             if(pvAlarmStructure!=null) {
@@ -963,6 +1058,9 @@ public class EasyPVAFactory {
             }
             return alarm;
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyGet#getTimeStamp()
+         */
         @Override
         public TimeStamp getTimeStamp() {
             if(pvTimeStampStructure!=null) {
@@ -971,16 +1069,25 @@ public class EasyPVAFactory {
             }
             return timeStamp;
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyGet#hasValue()
+         */
         @Override
         public boolean hasValue() {
             return hasValue;
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyGet#isValueScalar()
+         */
         @Override
         public boolean isValueScalar() {
             return valueIsScalar;
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyGet#getBoolean()
+         */
         @Override
         public boolean getBoolean() {
             if(!checkGetState()) return false;
@@ -991,42 +1098,63 @@ public class EasyPVAFactory {
             }
             return pvBooleanValue.get();
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyGet#getByte()
+         */
         @Override
         public byte getByte() {
         	if(!checkNumericScalar()) return 0;
         	return convert.toByte(pvScalarValue);
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyGet#getShort()
+         */
         @Override
         public short getShort() {
         	if(!checkNumericScalar()) return 0;
             return convert.toShort(pvScalarValue);
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyGet#getInt()
+         */
         @Override
         public int getInt() {
         	if(!checkNumericScalar()) return 0;
             return convert.toInt(pvScalarValue);	
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyGet#getLong()
+         */
         @Override
         public long getLong() {
         	if(!checkNumericScalar()) return 0;
             return convert.toLong(pvScalarValue);
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyGet#getFloat()
+         */
         @Override
         public float getFloat() {
         	if(!checkNumericScalar()) return 0;
             return convert.toFloat(pvScalarValue);
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyGet#getDouble()
+         */
         @Override
         public double getDouble() {
         	if(!checkNumericScalar()) return 0;
             return convert.toDouble(pvScalarValue);
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyGet#getBooleanArray()
+         */
         @Override
         public boolean[] getBooleanArray() {
         	if(!checkGetState()) return null;
@@ -1041,6 +1169,9 @@ public class EasyPVAFactory {
             return data;
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyGet#getByteArray()
+         */
         @Override
         public byte[] getByteArray() {
         	if(!checkNumericScalarArray()) return new byte[0];
@@ -1050,6 +1181,9 @@ public class EasyPVAFactory {
             return data;
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyGet#getShortArray()
+         */
         @Override
         public short[] getShortArray() {
         	if(!checkNumericScalarArray()) return new short[0];
@@ -1059,6 +1193,9 @@ public class EasyPVAFactory {
             return data;
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyGet#getIntArray()
+         */
         @Override
         public int[] getIntArray() {
         	if(!checkNumericScalarArray()) return new int[0];
@@ -1068,6 +1205,9 @@ public class EasyPVAFactory {
             return data;
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyGet#getLongArray()
+         */
         @Override
         public long[] getLongArray() {
         	if(!checkNumericScalarArray()) return new long[0];
@@ -1077,6 +1217,9 @@ public class EasyPVAFactory {
             return data;
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyGet#getFloatArray()
+         */
         @Override
         public float[] getFloatArray() {
         	if(!checkNumericScalarArray()) return new float[0];
@@ -1086,6 +1229,9 @@ public class EasyPVAFactory {
             return data;
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyGet#getDoubleArray()
+         */
         @Override
         public double[] getDoubleArray() {
         	if(!checkNumericScalarArray()) return new double[0];
@@ -1095,6 +1241,9 @@ public class EasyPVAFactory {
             return data;
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyGet#getStringArray()
+         */
         @Override
         public String[] getStringArray() {
         	if(!checkGetState()) return null;
@@ -1109,6 +1258,9 @@ public class EasyPVAFactory {
             return data;
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyGet#getBooleanArray(boolean[], int)
+         */
         @Override
         public int getBooleanArray(boolean[] value, int length) {
         	if(!checkGetState()) return 0;
@@ -1140,42 +1292,63 @@ public class EasyPVAFactory {
             return ntransfered;
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyGet#getByteArray(byte[], int)
+         */
         @Override
         public int getByteArray(byte[] value, int length) {
         	if(!checkNumericScalarArray()) return 0;
             return convert.toByteArray(pvScalarArrayValue,0, length,value, 0);
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyGet#getShortArray(short[], int)
+         */
         @Override
         public int getShortArray(short[] value, int length) {
         	if(!checkNumericScalarArray()) return 0;
             return convert.toShortArray(pvScalarArrayValue,0, length,value, 0);
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyGet#getIntArray(int[], int)
+         */
         @Override
         public int getIntArray(int[] value, int length) {
         	if(!checkNumericScalarArray()) return 0;
             return convert.toIntArray(pvScalarArrayValue,0, length,value, 0);
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyGet#getLongArray(long[], int)
+         */
         @Override
         public int getLongArray(long[] value, int length) {
         	if(!checkNumericScalarArray()) return 0;
             return convert.toLongArray(pvScalarArrayValue,0, length,value, 0);
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyGet#getFloatArray(float[], int)
+         */
         @Override
         public int getFloatArray(float[] value, int length) {
         	if(!checkNumericScalarArray()) return 0;
             return convert.toFloatArray(pvScalarArrayValue,0, length,value, 0);
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyGet#getDoubleArray(double[], int)
+         */
         @Override
         public int getDoubleArray(double[] value, int length) {
         	if(!checkNumericScalarArray()) return 0;
             return convert.toDoubleArray(pvScalarArrayValue,0, length,value, 0);
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyGet#getStringArray(java.lang.String[], int)
+         */
         @Override
         public int getStringArray(String[] value, int length) {
         	if(!checkGetState()) return 0;
@@ -1187,6 +1360,9 @@ public class EasyPVAFactory {
             return convert.toStringArray(pvScalarArrayValue,0, length,value, 0);
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyGet#getString()
+         */
         @Override
         public String getString() {
             if(!checkGetState()) return null;
@@ -1199,22 +1375,34 @@ public class EasyPVAFactory {
             return "not scalar or scalarArray";
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyGet#getPVStructure()
+         */
         @Override
         public PVStructure getPVStructure() {
             if(!checkGetState()) return null;
             return pvStructure;
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyGet#getBitSet()
+         */
         @Override
         public BitSet getBitSet() {
             if(!checkGetState()) return null;
             return bitSet;
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyGet#setStatus(org.epics.pvdata.pv.Status)
+         */
         @Override
         public void setStatus(Status status) {
         	this.status = status;
         	easyChannel.setStatus(status);
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyGet#getStatus()
+         */
         @Override
         public Status getStatus() {
         	Status save = status;
@@ -1340,10 +1528,16 @@ public class EasyPVAFactory {
             this.pvRequest = pvRequest;
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvdata.pv.Requester#getRequesterName()
+         */
         @Override
         public String getRequesterName() {
             return easyChannel.providerName;
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvdata.pv.Requester#message(java.lang.String, org.epics.pvdata.pv.MessageType)
+         */
         @Override
         public void message(String message, MessageType messageType) {
             if(isDestroyed) return;
@@ -1448,6 +1642,9 @@ public class EasyPVAFactory {
         }
 
 
+		/* (non-Javadoc)
+		 * @see org.epics.pvaccess.easyPVA.EasyPut#destroy()
+		 */
 		@Override
         public void destroy() {
             synchronized (this) {
@@ -1457,12 +1654,18 @@ public class EasyPVAFactory {
             channelPut.destroy();
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#connect()
+         */
         @Override
         public boolean connect() {
             issueConnect();
             return waitConnect();
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#issueConnect()
+         */
         @Override
         public void issueConnect() {
             if(isDestroyed) return;
@@ -1475,6 +1678,9 @@ public class EasyPVAFactory {
             channelPut = channel.createChannelPut(this, pvRequest);
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#waitConnect()
+         */
         @Override
         public boolean waitConnect() {
             if(isDestroyed) return false;
@@ -1498,12 +1704,18 @@ public class EasyPVAFactory {
             return true;
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#get()
+         */
         @Override
         public boolean get() {
             issueGet();
             return waitGet();
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#issueGet()
+         */
         @Override
         public void issueGet() {
             if(isDestroyed) return;
@@ -1524,6 +1736,9 @@ public class EasyPVAFactory {
             channelPut.get();
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#waitGet()
+         */
         @Override
         public boolean waitGet() {
         	if(isDestroyed) return false;
@@ -1544,12 +1759,18 @@ public class EasyPVAFactory {
             return getSuccess;
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#put()
+         */
         @Override
         public boolean put() {
             issuePut();
             return waitPut();
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#issuePut()
+         */
         @Override
         public void issuePut() {
             if(isDestroyed) return;
@@ -1571,6 +1792,9 @@ public class EasyPVAFactory {
             channelPut.put(pvStructure, bitSet);
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#waitPut()
+         */
         @Override
         public boolean waitPut() {
         	if(isDestroyed) return false;
@@ -1591,37 +1815,58 @@ public class EasyPVAFactory {
             return putSuccess;
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#hasValue()
+         */
         @Override
         public boolean hasValue() {
             checkGetState();
             return hasValue;
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#isValueScalar()
+         */
         @Override
         public boolean isValueScalar() {
             checkGetState();
             return valueIsScalar;
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#getValue()
+         */
         @Override
         public PVField getValue() {
         	checkGetState();
             return pvValue;
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#getScalarValue()
+         */
         @Override
         public PVScalar getScalarValue() {
         	checkGetState();
             return pvScalarValue;
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#getArrayValue()
+         */
         @Override
         public PVArray getArrayValue() {
         	checkGetState();
             return pvArrayValue;
         }
+		/* (non-Javadoc)
+		 * @see org.epics.pvaccess.easyPVA.EasyPut#getScalarArrayValue()
+		 */
 		@Override
         public PVScalarArray getScalarArrayValue() {
 			checkGetState();
             return pvScalarArrayValue;
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#getBoolean()
+         */
         @Override
         public boolean getBoolean() {
             if(!checkGetState()) return false;
@@ -1632,36 +1877,57 @@ public class EasyPVAFactory {
             }
             return pvBooleanValue.get();
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#getByte()
+         */
         @Override
         public byte getByte() {
         	if(!checkNumericScalar(true)) return 0;
             return convert.toByte(pvScalarValue);
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#getShort()
+         */
         @Override
         public short getShort() {
         	if(!checkNumericScalar(true)) return 0;
             return convert.toShort(pvScalarValue);
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#getInt()
+         */
         @Override
         public int getInt() {
         	if(!checkNumericScalar(true)) return 0;
             return convert.toInt(pvScalarValue);	
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#getLong()
+         */
         @Override
         public long getLong() {
         	if(!checkNumericScalar(true)) return 0;
             return convert.toLong(pvScalarValue);
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#getFloat()
+         */
         @Override
         public float getFloat() {
         	if(!checkNumericScalar(true)) return 0;
             return convert.toFloat(pvScalarValue);
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#getDouble()
+         */
         @Override
         public double getDouble() {
         	if(!checkNumericScalar(true)) return 0;
             return convert.toDouble(pvScalarValue);
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#getString()
+         */
         @Override
         public String getString() {
             if(!checkGetState()) return null;
@@ -1674,6 +1940,9 @@ public class EasyPVAFactory {
             return "not scalar or scalarArray";
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#putBoolean(boolean)
+         */
         @Override
         public boolean putBoolean(boolean value) {
         	if(!checkConnected()) return false;
@@ -1687,6 +1956,9 @@ public class EasyPVAFactory {
             if(easyPVA.isAutoPut()) return put();
             return true;
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#putByte(byte)
+         */
         @Override
         public boolean putByte(byte value) {
         	if(!checkNumericScalar(false)) return false;
@@ -1695,6 +1967,9 @@ public class EasyPVAFactory {
         	if(easyPVA.isAutoPut()) return put();
             return true;
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#putShort(short)
+         */
         @Override
         public boolean putShort(short value) {
         	if(!checkNumericScalar(false)) return false;
@@ -1702,6 +1977,9 @@ public class EasyPVAFactory {
         	bitSet.set(pvScalarValue.getFieldOffset());
         	return put();
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#putInt(int)
+         */
         @Override
         public boolean putInt(int value) {
         	if(!checkNumericScalar(false)) return false;
@@ -1710,6 +1988,9 @@ public class EasyPVAFactory {
         	if(easyPVA.isAutoPut()) return put();
             return true;
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#putLong(long)
+         */
         @Override
         public boolean putLong(long value) {
         	if(!checkNumericScalar(false)) return false;
@@ -1718,6 +1999,9 @@ public class EasyPVAFactory {
         	if(easyPVA.isAutoPut()) return put();
             return true;
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#putFloat(float)
+         */
         @Override
         public boolean putFloat(float value) {
         	if(!checkNumericScalar(false)) return false;
@@ -1726,6 +2010,9 @@ public class EasyPVAFactory {
         	if(easyPVA.isAutoPut()) return put();
             return true;
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#putDouble(double)
+         */
         @Override
         public boolean putDouble(double value) {
         	if(!checkNumericScalar(false)) return false;
@@ -1735,6 +2022,9 @@ public class EasyPVAFactory {
         	if(easyPVA.isAutoPut()) return put();
             return true;
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#putString(java.lang.String)
+         */
         @Override
         public boolean putString(String value) {
         	if(!checkConnected()) return false;
@@ -1750,6 +2040,9 @@ public class EasyPVAFactory {
             return true;
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#getBooleanArray()
+         */
         @Override
         public boolean[] getBooleanArray() {
             if(!checkGetState()) return null;
@@ -1764,6 +2057,9 @@ public class EasyPVAFactory {
             return data;
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#getByteArray()
+         */
         @Override
         public byte[] getByteArray() {
         	if(!checkNumericScalarArray(true)) return new byte[0];
@@ -1773,6 +2069,9 @@ public class EasyPVAFactory {
             return data;
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#getShortArray()
+         */
         @Override
         public short[] getShortArray() {
         	if(!checkNumericScalarArray(true)) return new short[0];
@@ -1782,6 +2081,9 @@ public class EasyPVAFactory {
             return data;
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#getIntArray()
+         */
         @Override
         public int[] getIntArray() {
         	if(!checkNumericScalarArray(true)) return new int[0];
@@ -1791,6 +2093,9 @@ public class EasyPVAFactory {
             return data;
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#getLongArray()
+         */
         @Override
         public long[] getLongArray() {
         	if(!checkNumericScalarArray(true)) return new long[0];
@@ -1800,6 +2105,9 @@ public class EasyPVAFactory {
             return data;
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#getFloatArray()
+         */
         @Override
         public float[] getFloatArray() {
         	if(!checkNumericScalarArray(true)) return new float[0];
@@ -1809,6 +2117,9 @@ public class EasyPVAFactory {
             return data;
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#getDoubleArray()
+         */
         @Override
         public double[] getDoubleArray() {
         	if(!checkNumericScalarArray(true)) return new double[0];
@@ -1818,6 +2129,9 @@ public class EasyPVAFactory {
             return data;
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#getStringArray()
+         */
         @Override
         public String[] getStringArray() {
         	if(!checkGetState()) return null;
@@ -1832,6 +2146,9 @@ public class EasyPVAFactory {
             return data;
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#getBooleanArray(boolean[], int)
+         */
         @Override
         public int getBooleanArray(boolean[] value, int length) {
         	if(!checkGetState()) return 0;
@@ -1863,42 +2180,63 @@ public class EasyPVAFactory {
             return ntransfered;
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#getByteArray(byte[], int)
+         */
         @Override
         public int getByteArray(byte[] value, int length) {
         	if(!checkNumericScalarArray(true)) return 0;
             return convert.toByteArray(pvScalarArrayValue,0, length,value, 0);
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#getShortArray(short[], int)
+         */
         @Override
         public int getShortArray(short[] value, int length) {
         	if(!checkNumericScalarArray(true)) return 0;
             return convert.toShortArray(pvScalarArrayValue,0, length,value, 0);
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#getIntArray(int[], int)
+         */
         @Override
         public int getIntArray(int[] value, int length) {
         	if(!checkNumericScalarArray(true)) return 0;
             return convert.toIntArray(pvScalarArrayValue,0, length,value, 0);
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#getLongArray(long[], int)
+         */
         @Override
         public int getLongArray(long[] value, int length) {
         	if(!checkNumericScalarArray(true)) return 0;
             return convert.toLongArray(pvScalarArrayValue,0, length,value, 0);
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#getFloatArray(float[], int)
+         */
         @Override
         public int getFloatArray(float[] value, int length) {
         	if(!checkNumericScalarArray(true)) return 0;
             return convert.toFloatArray(pvScalarArrayValue,0, length,value, 0);
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#getDoubleArray(double[], int)
+         */
         @Override
         public int getDoubleArray(double[] value, int length) {
         	if(!checkNumericScalarArray(true)) return 0;
             return convert.toDoubleArray(pvScalarArrayValue,0, length,value, 0);
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#getStringArray(java.lang.String[], int)
+         */
         @Override
         public int getStringArray(String[] value, int length) {
         	if(!checkGetState()) return 0;
@@ -1910,6 +2248,9 @@ public class EasyPVAFactory {
         	return convert.toStringArray(pvScalarArrayValue,0, length,value, 0);
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#putBooleanArray(boolean[], int)
+         */
         @Override
         public int putBooleanArray(boolean[] value,int length){
         	if(!checkConnected()) return 0;
@@ -1929,6 +2270,9 @@ public class EasyPVAFactory {
         	}
         	return num;
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#putByteArray(byte[], int)
+         */
         @Override
         public int putByteArray(byte[] value,int length) {
         	if(!checkNumericScalarArray(false)) return 0;
@@ -1942,6 +2286,9 @@ public class EasyPVAFactory {
             }
             return num;
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#putShortArray(short[], int)
+         */
         @Override
         public int putShortArray(short[] value,int length) {
         	if(!checkNumericScalarArray(false)) return 0;
@@ -1955,6 +2302,9 @@ public class EasyPVAFactory {
             }
             return num;
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#putIntArray(int[], int)
+         */
         @Override
         public int putIntArray(int[] value,int length) {
         	if(!checkNumericScalarArray(false)) return 0;
@@ -1968,6 +2318,9 @@ public class EasyPVAFactory {
             }
             return num;
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#putLongArray(long[], int)
+         */
         @Override
         public int putLongArray(long[] value,int length) {
         	if(!checkNumericScalarArray(false)) return 0;
@@ -1981,6 +2334,9 @@ public class EasyPVAFactory {
             }
             return num;
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#putFloatArray(float[], int)
+         */
         @Override
         public int putFloatArray(float[] value,int length) {
         	if(!checkNumericScalarArray(false)) return 0;
@@ -1994,6 +2350,9 @@ public class EasyPVAFactory {
             }
             return num;
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#putDoubleArray(double[], int)
+         */
         @Override
         public int putDoubleArray(double[] value,int length) {
         	if(!checkNumericScalarArray(false)) return 0;
@@ -2007,6 +2366,9 @@ public class EasyPVAFactory {
             }
             return num;
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#putStringArray(java.lang.String[], int)
+         */
         @Override
         public int putStringArray(String[] value,int length) {
         	if(!checkConnected()) return 0;
@@ -2026,22 +2388,34 @@ public class EasyPVAFactory {
             return num;
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#getPVStructure()
+         */
         @Override
         public PVStructure getPVStructure() {
             if(!checkGetState()) throw new IllegalStateException("not connected");
             return pvStructure;
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#getBitSet()
+         */
         @Override
         public BitSet getBitSet() {
             if(!checkGetState()) throw new IllegalStateException("not connected");
             return bitSet;
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#setStatus(org.epics.pvdata.pv.Status)
+         */
         @Override
         public void setStatus(Status status) {
         	this.status = status;
         	easyChannel.setStatus(status);
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyPut#getStatus()
+         */
         @Override
         public Status getStatus() {
         	Status save = status;
@@ -2095,16 +2469,25 @@ public class EasyPVAFactory {
                 connectionState[i] = ConnectionState.NEVER_CONNECTED;
             }
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvdata.pv.Requester#getRequesterName()
+         */
         @Override
         public String getRequesterName() {
             return easyPVA.getRequesterName();
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvdata.pv.Requester#message(java.lang.String, org.epics.pvdata.pv.MessageType)
+         */
         @Override
         public void message(String message, MessageType messageType) {
             if(isDestroyed) return;
             String mess = channelName + " " + message;
             easyPVA.message(mess, messageType);
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.client.ChannelRequester#channelCreated(org.epics.pvdata.pv.Status, org.epics.pvaccess.client.Channel)
+         */
         @Override
         public  void channelCreated(Status status, Channel channel) {
             for(int i=0; i<channelName.length; ++i) {
@@ -2115,6 +2498,9 @@ public class EasyPVAFactory {
                 }
             }
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.client.ChannelRequester#channelStateChange(org.epics.pvaccess.client.Channel, org.epics.pvaccess.client.Channel.ConnectionState)
+         */
         @Override
         public void channelStateChange(Channel channel,ConnectionState connectionState) {
             synchronized (this) {
@@ -2155,6 +2541,9 @@ public class EasyPVAFactory {
                 lock.unlock();
             }
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiChannel#destroy()
+         */
         @Override
         public void destroy() {
             synchronized (this) {
@@ -2168,12 +2557,18 @@ public class EasyPVAFactory {
 
        
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiChannel#connect(double)
+         */
         @Override
         public boolean connect(double timeout) {
             issueConnect();
             return waitConnect(timeout);
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiChannel#issueConnect()
+         */
         @Override
         public synchronized void issueConnect() {
             if(isDestroyed) return;
@@ -2194,6 +2589,9 @@ public class EasyPVAFactory {
             }
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiChannel#waitConnect(double)
+         */
         @Override
         public boolean waitConnect(double timeout) {
             if(isDestroyed) return false;
@@ -2226,23 +2624,35 @@ public class EasyPVAFactory {
             return true;
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiChannel#allConnected()
+         */
         @Override
         public boolean allConnected() {
            if(numConnected==numChannel) return true;
            return false;
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiChannel#isConnected()
+         */
         @Override
         public boolean[] isConnected() {
             return isConnected;
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiChannel#createGet()
+         */
         @Override
         public EasyMultiGet createGet() {
             return createGet("field(value,alarm,timeStamp)");
         }
         
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiChannel#createGet(java.lang.String)
+         */
         @Override
         public EasyMultiGet createGet(String request) {
             PVStructure pvStructure = createRequest(request);
@@ -2250,6 +2660,9 @@ public class EasyPVAFactory {
             return createGet(pvStructure);
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiChannel#createGet(org.epics.pvdata.pv.PVStructure)
+         */
         @Override
         public EasyMultiGet createGet(PVStructure pvRequest) {
             if(!checkConnected()) return null;
@@ -2258,11 +2671,17 @@ public class EasyPVAFactory {
             return null;
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiChannel#createGet(boolean)
+         */
         @Override
         public EasyMultiGet createGet(boolean doubleOnly) {
             return createGet(doubleOnly,"field(value)");
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiChannel#createGet(boolean, java.lang.String)
+         */
         @Override
         public EasyMultiGet createGet(boolean doubleOnly, String request) {
             PVStructure pvStructure = createRequest(request);
@@ -2270,6 +2689,9 @@ public class EasyPVAFactory {
             return createGet(doubleOnly,pvStructure);
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiChannel#createGet(boolean, org.epics.pvdata.pv.PVStructure)
+         */
         @Override
         public EasyMultiGet createGet(boolean doubleOnly, PVStructure pvRequest) {
             if(!checkConnected()) return null;
@@ -2287,11 +2709,17 @@ public class EasyPVAFactory {
             return null;
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiChannel#createPut()
+         */
         @Override
         public EasyMultiPut createPut() {
              return createPut(false);
         }
  
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiChannel#createPut(boolean)
+         */
         @Override
         public EasyMultiPut createPut(boolean doubleOnly) {
             if(!checkConnected()) return null;
@@ -2300,11 +2728,17 @@ public class EasyPVAFactory {
             return multiPut;
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiChannel#setStatus(org.epics.pvdata.pv.Status)
+         */
         @Override
         public void setStatus(Status status) {
             this.status = status;
             easyPVA.setStatus(status);
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiChannel#getStatus()
+         */
         @Override
         public Status getStatus() {
             Status save = status;
@@ -2376,7 +2810,7 @@ public class EasyPVAFactory {
             
         }
         
-        public boolean init()
+        private boolean init()
         {
             PVField pvValue = pvRequest.getSubField("field.value");
             if(pvValue==null ) {
@@ -2479,10 +2913,16 @@ public class EasyPVAFactory {
             return false;
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.pvdata.pv.Requester#getRequesterName()
+         */
         @Override
         public String getRequesterName() {
             return easyMultiChannel.providerName;
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvdata.pv.Requester#message(java.lang.String, org.epics.pvdata.pv.MessageType)
+         */
         @Override
         public void message(String message, MessageType messageType) {
             if(isDestroyed) return;
@@ -2620,6 +3060,9 @@ public class EasyPVAFactory {
                 lock.unlock();
             }
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiGet#destroy()
+         */
         @Override
         public void destroy() {
             synchronized (this) {
@@ -2630,11 +3073,17 @@ public class EasyPVAFactory {
                 if(channelGet[i]!=null) channelGet[i].destroy();
             }
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiGet#connect()
+         */
         @Override
         public boolean connect() {
             issueConnect();
             return waitConnect();
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiGet#issueConnect()
+         */
         @Override
         public void issueConnect() {
             if(isDestroyed) return;
@@ -2648,6 +3097,9 @@ public class EasyPVAFactory {
             connectState = ConnectState.connectActive;
             for(int i=0; i<channel.length; ++i) channelGet[i] = channel[i].createChannelGet(this, pvRequest);
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiGet#waitConnect()
+         */
         @Override
         public boolean waitConnect() {
             if(isDestroyed) return false;
@@ -2673,12 +3125,18 @@ public class EasyPVAFactory {
             }
             return true;
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiGet#get()
+         */
         @Override
         public boolean get() {
             issueGet();
             return waitGet();
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiGet#issueGet()
+         */
         @Override
         public void issueGet() {
             if(isDestroyed) return;
@@ -2706,6 +3164,9 @@ public class EasyPVAFactory {
             }
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiGet#waitGet()
+         */
         @Override
         public boolean waitGet() {
             if(isDestroyed) return false;
@@ -2742,6 +3203,9 @@ public class EasyPVAFactory {
             return true;
         }
        
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiGet#getTimeStamp()
+         */
         @Override
         public TimeStamp getTimeStamp() {
             if(pvTimeStampStructure!=null) {
@@ -2750,16 +3214,25 @@ public class EasyPVAFactory {
             }
             return timeStamp;
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiGet#getLength()
+         */
         @Override
         public int getLength() {
             return nchannel;
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiGet#doubleOnly()
+         */
         @Override
         public boolean doubleOnly() {
             return doubleOnly;
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiGet#getNTMultiChannel()
+         */
         @Override
         public PVStructure getNTMultiChannel() {
             boolean result = checkGetState();
@@ -2769,12 +3242,18 @@ public class EasyPVAFactory {
         }
         
         
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiGet#getPVTop()
+         */
         @Override
         public PVStructure getPVTop() {
             checkGetState();
             return pvTop;
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiGet#getDoubleArray()
+         */
         @Override
         public double[] getDoubleArray() {
             boolean result = checkGetState();
@@ -2782,6 +3261,9 @@ public class EasyPVAFactory {
             return doubleValue;
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiGet#getDoubleArray(int, double[], int)
+         */
         @Override
         public int getDoubleArray(int offset, double[] data, int length) {
             boolean result = checkGetState();
@@ -2793,11 +3275,17 @@ public class EasyPVAFactory {
             return num;
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiGet#setStatus(org.epics.pvdata.pv.Status)
+         */
         @Override
         public void setStatus(Status status) {
             this.status = status;
             easyMultiChannel.setStatus(status);
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiGet#getStatus()
+         */
         @Override
         public Status getStatus() {
             Status save = status;
@@ -2854,7 +3342,7 @@ public class EasyPVAFactory {
             for(int i=0; i<nchannel; ++i) isConnected[i] = false;
         }
         
-        public boolean init()
+        private boolean init()
         {
             channelPut = new ChannelPut[nchannel];
             topPVStructure = new PVStructure[nchannel];
@@ -2868,17 +3356,26 @@ public class EasyPVAFactory {
         }
         
         
+        /* (non-Javadoc)
+         * @see org.epics.pvdata.pv.Requester#getRequesterName()
+         */
         @Override
         public String getRequesterName() {
             return easyMultiChannel.providerName;
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvdata.pv.Requester#message(java.lang.String, org.epics.pvdata.pv.MessageType)
+         */
         @Override
         public void message(String message, MessageType messageType) {
             if(isDestroyed) return;
             easyMultiChannel.message(message, messageType);
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.client.ChannelPutRequester#channelPutConnect(org.epics.pvdata.pv.Status, org.epics.pvaccess.client.ChannelPut, org.epics.pvdata.pv.Structure)
+         */
         @Override
         public void channelPutConnect(Status status, ChannelPut channelPut,Structure structure) {
             if(isDestroyed) return;
@@ -2940,6 +3437,9 @@ public class EasyPVAFactory {
             }
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.client.ChannelPutRequester#putDone(org.epics.pvdata.pv.Status, org.epics.pvaccess.client.ChannelPut)
+         */
         @Override
         public void putDone(Status status, ChannelPut channelPut) {
             int index = -1;
@@ -2970,12 +3470,18 @@ public class EasyPVAFactory {
                 lock.unlock();
             }
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.client.ChannelPutRequester#getDone(org.epics.pvdata.pv.Status, org.epics.pvaccess.client.ChannelPut, org.epics.pvdata.pv.PVStructure, org.epics.pvdata.misc.BitSet)
+         */
         @Override
         public void getDone(Status status, ChannelPut channelPut,PVStructure pvStructure, BitSet bitSet) {
             // using EasyMultiGet so this not used.
             
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiPut#destroy()
+         */
         @Override
         public void destroy() {
             synchronized (this) {
@@ -2988,12 +3494,18 @@ public class EasyPVAFactory {
             }
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiPut#connect()
+         */
         @Override
         public boolean connect() {
             issueConnect();
             return waitConnect();
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiPut#issueConnect()
+         */
         @Override
         public void issueConnect() {
             if(isDestroyed) return;
@@ -3008,6 +3520,9 @@ public class EasyPVAFactory {
             for(int i=0; i<channel.length; ++i) channelPut[i] = channel[i].createChannelPut(this, pvRequest);
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiPut#waitConnect()
+         */
         @Override
         public boolean waitConnect() {
             if(isDestroyed) return false;
@@ -3034,58 +3549,91 @@ public class EasyPVAFactory {
             return true;
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiPut#get()
+         */
         @Override
         public boolean get() {
             return easyMultiGet.get();
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiPut#issueGet()
+         */
         @Override
         public void issueGet() {
             easyMultiGet.issueGet();
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiPut#waitGet()
+         */
         @Override
         public boolean waitGet() {
             return easyMultiGet.waitGet();
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiPut#getLength()
+         */
         @Override
         public int getLength() {
             return nchannel;
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiPut#doubleOnly()
+         */
         @Override
         public boolean doubleOnly() {
             return doubleOnly;
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiPut#getNTMultiChannel()
+         */
         @Override
         public PVStructure getNTMultiChannel() {
             if(doubleOnly) return null;
             return easyMultiGet.getNTMultiChannel();
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiPut#getPVTop()
+         */
         @Override
         public PVStructure getPVTop() {
             return easyMultiGet.getPVTop();
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiPut#getDoubleArray()
+         */
         @Override
         public double[] getDoubleArray() {
             return easyMultiGet.getDoubleArray();
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiPut#getDoubleArray(int, double[], int)
+         */
         @Override
         public int getDoubleArray(int index, double[] data, int length) {
             return easyMultiGet.getDoubleArray(index,data,length);
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiPut#put(org.epics.pvdata.pv.PVStructure)
+         */
         @Override
         public boolean put(PVStructure pvNTMultiChannel) {
             issuePut(pvNTMultiChannel);
             return waitPut();
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiPut#issuePut(org.epics.pvdata.pv.PVStructure)
+         */
         @Override
         public void issuePut(PVStructure pvNTMultiChannel) {
             if(doubleOnly) {
@@ -3129,12 +3677,18 @@ public class EasyPVAFactory {
             }
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiPut#put(double[])
+         */
         @Override
         public boolean put(double[] value) {
             issuePut(value);
             return waitPut();
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiPut#issuePut(double[])
+         */
         @Override
         public void issuePut(double[] value) {
             if(!doubleOnly) {
@@ -3168,6 +3722,9 @@ public class EasyPVAFactory {
             }
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiPut#waitPut()
+         */
         @Override
         public boolean waitPut() {
             if(isDestroyed) return false;
@@ -3198,12 +3755,18 @@ public class EasyPVAFactory {
             return true;
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiPut#setStatus(org.epics.pvdata.pv.Status)
+         */
         @Override
         public void setStatus(Status status) {
             this.status = status;
             easyMultiChannel.setStatus(status);
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.easyPVA.EasyMultiPut#getStatus()
+         */
         @Override
         public Status getStatus() {
             Status save = status;
@@ -3255,15 +3818,24 @@ public class EasyPVAFactory {
 	        this.channel = channel;
 	        this.pvRequest = pvRequest;
 	    }
+	    /* (non-Javadoc)
+	     * @see org.epics.pvdata.pv.Requester#getRequesterName()
+	     */
 	    @Override
 	    public String getRequesterName() {
 	        return easyChannel.providerName;
 	    }
+	    /* (non-Javadoc)
+	     * @see org.epics.pvdata.pv.Requester#message(java.lang.String, org.epics.pvdata.pv.MessageType)
+	     */
 	    @Override
 	    public void message(String message, MessageType messageType) {
 	        if(isDestroyed) return;
 	        easyChannel.message(message, messageType);
 	    }
+	    /* (non-Javadoc)
+	     * @see org.epics.pvaccess.client.ChannelRPCRequester#channelRPCConnect(org.epics.pvdata.pv.Status, org.epics.pvaccess.client.ChannelRPC)
+	     */
 	    @Override
 	    public void channelRPCConnect(Status status, ChannelRPC channelRPC) {
 	        if(isDestroyed) return;
@@ -3281,6 +3853,9 @@ public class EasyPVAFactory {
 	           lock.unlock();
 	        }
 	    }
+	    /* (non-Javadoc)
+	     * @see org.epics.pvaccess.client.ChannelRPCRequester#requestDone(org.epics.pvdata.pv.Status, org.epics.pvaccess.client.ChannelRPC, org.epics.pvdata.pv.PVStructure)
+	     */
 	    @Override
 	    public void requestDone(Status status, ChannelRPC channelRPC, PVStructure result) {
 	        this.status = status;
@@ -3293,6 +3868,9 @@ public class EasyPVAFactory {
 	           lock.unlock();
 	        }
 	    }
+	    /* (non-Javadoc)
+	     * @see org.epics.pvaccess.easyPVA.EasyRPC#destroy()
+	     */
 	    @Override
 	    public void destroy() {
 	        synchronized (this) {
@@ -3301,11 +3879,17 @@ public class EasyPVAFactory {
 	        }
 	        channelRPC.destroy();
 	    }
+	    /* (non-Javadoc)
+	     * @see org.epics.pvaccess.easyPVA.EasyRPC#connect()
+	     */
 	    @Override
 	    public boolean connect() {
 	        issueConnect();
 	        return waitConnect();
 	    }
+	    /* (non-Javadoc)
+	     * @see org.epics.pvaccess.easyPVA.EasyRPC#issueConnect()
+	     */
 	    @Override
 	    public void issueConnect() {
 	    	if(isDestroyed) return;
@@ -3317,6 +3901,9 @@ public class EasyPVAFactory {
 	    	}
 	    	channelRPC = channel.createChannelRPC(this, pvRequest);
 	    }
+	    /* (non-Javadoc)
+	     * @see org.epics.pvaccess.easyPVA.EasyRPC#waitConnect()
+	     */
 	    @Override
 	    public boolean waitConnect() {
 	    	if(isDestroyed) return false;
@@ -3343,12 +3930,18 @@ public class EasyPVAFactory {
 	    	return true;
 	    }
 	    
+		/* (non-Javadoc)
+		 * @see org.epics.pvaccess.easyPVA.EasyRPC#request(org.epics.pvdata.pv.PVStructure)
+		 */
 		@Override
 		public PVStructure request(PVStructure request) {
 	        issueRequest(request);
 	        return waitRequest();
 	    }
 	
+	    /* (non-Javadoc)
+	     * @see org.epics.pvaccess.easyPVA.EasyRPC#issueRequest(org.epics.pvdata.pv.PVStructure)
+	     */
 	    @Override
 		public void issueRequest(PVStructure request) {
 	        if(isDestroyed) return;
@@ -3362,6 +3955,9 @@ public class EasyPVAFactory {
 	        rpcState = RPCState.rpcActive;
 	        channelRPC.request(request);
 	    }
+	    /* (non-Javadoc)
+	     * @see org.epics.pvaccess.easyPVA.EasyRPC#waitRequest()
+	     */
 	    @Override
 	    public PVStructure waitRequest() {
 	        if(isDestroyed) return null;
@@ -3387,11 +3983,17 @@ public class EasyPVAFactory {
 	        return result;
 	    }
 	
+	    /* (non-Javadoc)
+	     * @see org.epics.pvaccess.easyPVA.EasyRPC#setStatus(org.epics.pvdata.pv.Status)
+	     */
 	    @Override
 	    public void setStatus(Status status) {
 	    	this.status = status;
 	    	easyChannel.setStatus(status);
 	    }
+	    /* (non-Javadoc)
+	     * @see org.epics.pvaccess.easyPVA.EasyRPC#getStatus()
+	     */
 	    @Override
 	    public Status getStatus() {
 	    	Status save = status;

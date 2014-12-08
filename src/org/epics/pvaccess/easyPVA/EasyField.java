@@ -7,6 +7,7 @@ import org.epics.pvdata.pv.Field;
 import org.epics.pvdata.pv.Status;
 
 /**
+ * An easy to use alternative to directly calling the Channel::getField method of pvAccess.
  * @author mrk
  *
  */

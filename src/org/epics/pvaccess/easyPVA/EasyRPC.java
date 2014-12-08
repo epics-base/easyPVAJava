@@ -7,6 +7,7 @@ import org.epics.pvdata.pv.PVStructure;
 import org.epics.pvdata.pv.Status;
 
 /**
+ * An easy to use interface to channelRPC.
  * @author mrk
  *
  */

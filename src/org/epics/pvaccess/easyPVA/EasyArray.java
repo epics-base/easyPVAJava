@@ -8,6 +8,8 @@ import org.epics.pvdata.pv.PVStructure;
 import org.epics.pvdata.pv.Status;
 
 /**
+ * EasyArray is not implemented.
+ * The following is a guess at the methods but only a guess.
  * @author mrk
  *
  */

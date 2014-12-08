@@ -12,6 +12,7 @@ import org.epics.pvdata.pv.PVStructure;
 import org.epics.pvdata.pv.Status;
 
 /**
+ * An easy interface to channelPut.
  * @author mrk
  *
  */
