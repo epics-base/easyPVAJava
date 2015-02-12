@@ -1,0 +1,7 @@
+#! /bin/bash
+source source
+java org.epics.pvaccess.easyPVA.example.DoubleArrayPut \
+   -channelName exampleDoubleArray \
+   -waitSecs 1.0 \
+   -maxSize 10 \
+   -numberSizes 5

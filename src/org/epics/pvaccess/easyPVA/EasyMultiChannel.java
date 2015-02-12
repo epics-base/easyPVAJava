@@ -3,6 +3,7 @@
  */
 package org.epics.pvaccess.easyPVA;
 
+import org.epics.pvaccess.client.ChannelRequester;
 import org.epics.pvdata.pv.PVStructure;
 import org.epics.pvdata.pv.Status;
 
@@ -11,7 +12,17 @@ import org.epics.pvdata.pv.Status;
  * @author mrk
  *
  */
-public interface EasyMultiChannel{
+public interface EasyMultiChannel extends ChannelRequester{
+    /**
+     * Get the name of the channelProvider.
+     * @return The name.
+     */
+    String getProviderName();
+    /**
+     * Get the channelNames.
+     * @return the names.
+     */
+    String[] getChannelNames();
     /**
      * Destroy all resources.
      */

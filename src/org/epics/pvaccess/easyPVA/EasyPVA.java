@@ -3,7 +3,8 @@
  */
 package org.epics.pvaccess.easyPVA;
 import org.epics.pvdata.pv.Requester;
-import org.epics.pvdata.pv.*;
+import org.epics.pvdata.pv.Status;
+import org.epics.pvdata.pv.Union;
 
 /**
  * EasyPVA is an easy to use interface to pvAccess.

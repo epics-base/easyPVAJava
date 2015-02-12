@@ -3,9 +3,7 @@
  */
 package org.epics.pvaccess.easyPVA;
 
-import org.epics.pvdata.misc.BitSet;
-import org.epics.pvdata.monitor.MonitorRequester;
-import org.epics.pvdata.pv.PVStructure;
+import org.epics.pvdata.monitor.MonitorElement;
 import org.epics.pvdata.pv.Status;
 
 /**
@@ -15,17 +13,62 @@ import org.epics.pvdata.pv.Status;
  *
  */
 public interface EasyMonitor {
+    /**
+     * Optional callback for client
+     */
+    public interface EasyRequester {
+        
+        /**
+         * A monitor event has occurred.
+         * @param monitor The EasyMonitor that traped the event.
+         */
+        void event(EasyMonitor monitor);
+    }
+    /**
+     * clean up resources used.
+     */
     void destroy();
+    /**
+     * call issueConnect and then waitConnect.
+     * @return the result from waitConnect.
+     */
     boolean connect();
+    /**
+     * create the monitor connection to the channel.
+     * This can only be called once.
+     */
     void issueConnect();
+    /**
+     * wait until the monitor connection to the channel is complete.
+     * If failure getStatus can be called to get reason.
+     * @return (false,true) means (failure,success)
+     */
     boolean waitConnect();
-    void setRequester(MonitorRequester monitorRequester);
-    void start();
-    void stop();
-    PVStructure getEvent();
-    BitSet getChangedBitSet();
-    BitSet getOverrunBitSet();
-    void releaseEvent();
+    /**
+     * Optional request to be notified when monitors occur.
+     * @param requester The requester which must be implemented by the caller.
+     */
+    void setRequester(EasyRequester requester);
+    /**
+     * Start monitoring.
+     * This will wait until the monitor is connected.
+     * If false is returned then failure and getNessage will return reason.
+     */
+    boolean start();
+    /**
+     * Stop monitoring.
+     */
+    boolean stop();
+    /**
+     * Get the data for the next monitor.
+     * @return the next monitor or null if no new monitorElement are present.
+     * If successful releaseEvent must be called before another call to poll.
+     */
+    MonitorElement poll();
+    /**
+     * Release the monitorElement returned by poll.
+     */
+    boolean releaseEvent();
     /**
      * Set a new status value. The new value will replace the current status. The initial status is statusOK.
      * @param status The new status.

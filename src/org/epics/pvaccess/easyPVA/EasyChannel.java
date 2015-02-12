@@ -4,7 +4,9 @@
 package org.epics.pvaccess.easyPVA;
 
 import org.epics.pvaccess.client.Channel;
+import org.epics.pvaccess.client.ChannelRequester;
 import org.epics.pvdata.pv.PVStructure;
+import org.epics.pvdata.pv.Requester;
 import org.epics.pvdata.pv.Status;
 
 /**
@@ -12,7 +14,7 @@ import org.epics.pvdata.pv.Status;
  * @author mrk
  *
  */
-public interface EasyChannel {
+public interface EasyChannel extends ChannelRequester,Requester{
     /**
      * Destroy the pvAccess connection.
      */
