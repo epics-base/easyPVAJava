@@ -18,8 +18,8 @@ public class DoublePut {
     
     static private EasyPVA easyPVA = EasyPVAFactory.get();
     
-    static private double waitSecs = .001;
-    static private int numberPuts = 1000; 
+    static private double waitSecs = 1.0;
+    static private int numberPuts = 4; 
     
     public static void main(String[] args) {
         if(args.length<1) {

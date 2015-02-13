@@ -19,8 +19,8 @@ public class DoubleArrayPut {
     
     static private EasyPVA easyPVA = EasyPVAFactory.get();
     
-    static private double waitSecs = .001;
-    static private int maxSize = 5000000;
+    static private double waitSecs = 1.0;
+    static private int maxSize = 10;
     static private int numberSizes = 5;
     
     public static void main(String[] args) {

@@ -3,4 +3,4 @@ source source
 java org.epics.pvaccess.easyPVA.example.DoublePut \
       -channelName exampleDouble \
       -waitSecs 1.0 \
-      -numberPuts 2
+      -numberPuts 4
