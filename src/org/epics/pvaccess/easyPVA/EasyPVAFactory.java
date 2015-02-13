@@ -101,6 +101,10 @@ public class EasyPVAFactory {
                multiListNode = easyMultiChannelList.removeTail();
             }
         }
+        @Override
+        public EasyPVStructure createEasyPVStructure() {
+            return EasyPVStructureImpl.create();
+        }
         /* (non-Javadoc)
          * @see org.epics.pvaccess.easyPVA.EasyPVA#createChannel(java.lang.String)
          */

@@ -1,6 +1,10 @@
 package org.epics.pvaccess.easyPVA.example;
-import org.epics.pvaccess.easyPVA.*;
-import org.epics.pvdata.property.*;
+import org.epics.pvaccess.easyPVA.EasyChannel;
+import org.epics.pvaccess.easyPVA.EasyPVA;
+import org.epics.pvaccess.easyPVA.EasyPVAFactory;
+import org.epics.pvaccess.easyPVA.EasyPut;
+import org.epics.pvdata.property.TimeStamp;
+import org.epics.pvdata.property.TimeStampFactory;
 
 public class DoubleArrayPut {
     

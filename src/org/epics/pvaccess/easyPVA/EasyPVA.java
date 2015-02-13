@@ -17,6 +17,11 @@ public interface EasyPVA extends Requester {
      */
     void destroy();
     /**
+     * Create a EasyPVAStructure.
+     * @return The interface to the EasyPVAStructure.
+     */
+    EasyPVStructure createEasyPVStructure();
+    /**
      * Create an EasyChannel. The provider is pvAccess.
      * @param channelName The channelName.
      * @return The interface.
