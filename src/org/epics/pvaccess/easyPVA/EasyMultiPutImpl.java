@@ -36,8 +36,11 @@ public class EasyMultiPutImpl {
     static EasyMultiPut create(
         EasyMultiChannel easyMultiChannel,
         Channel[] channel,
-        boolean doubleOnly) {
-        return new EMultiPut(easyMultiChannel,channel,doubleOnly);
+        boolean doubleOnly)
+    {
+        EMultiPut multiPut =   new EMultiPut(easyMultiChannel,channel,doubleOnly);
+        if(multiPut.init()) return multiPut;
+        return null;
     }
 
     private static final StatusCreate statusCreate = StatusFactory.getStatusCreate();
@@ -92,7 +95,7 @@ public class EasyMultiPutImpl {
             for(int i=0; i<nchannel; ++i) isConnected[i] = false;
         }
         
-        public boolean init()
+        private boolean init()
         {
             channelPut = new ChannelPut[nchannel];
             topPVStructure = new PVStructure[nchannel];

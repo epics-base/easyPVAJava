@@ -13,11 +13,6 @@ import org.epics.pvdata.pv.Status;
  */
 public interface EasyMultiPut {
     /**
-     * Perform initialization.
-     * @return (false,true) means (failure, success)
-     */
-    boolean init();
-    /**
      * Clean up
      */
     void destroy();

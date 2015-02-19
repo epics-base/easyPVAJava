@@ -3,60 +3,50 @@
  */
 package org.epics.pvaccess.easyPVA;
 
+import org.epics.pvdata.misc.BitSet;
 import org.epics.pvdata.property.TimeStamp;
 import org.epics.pvdata.pv.PVStructure;
 import org.epics.pvdata.pv.Status;
+import org.epics.pvdata.pv.Structure;
 
 /**
  * An easy way to get data from multiple channels.
  * @author mrk
  *
  */
-public interface EasyMultiGet {
+public interface EasyMultiData {
+    
     /**
-     * Clean up
+     * Set the introspection interface for the specified  channel.
+     * @param topStructure The interface.
+     * @param indChannel The index of the channel.
      */
-    void destroy();
+    void setStructure(Structure topStructure,int indChannel);
     /**
-     * Calls issueConnect and then waitConnect.
-     * @return (false,true) if (not connected, connected)
+     * Update the data for the specified channel.
+     * @param topPVStructure The newest data for the channel.
+     * @param bitset The bitSet showing which fields have changed value.
+     * @param indChannel The index of the channel.
      */
-    boolean connect();
+    void setPVStructure(PVStructure topPVStructure,BitSet bitset,int indChannel);
     /**
-     * create the channelGet for all channels.
+     * Get the number of channels.
+     * @return The number of channels.
      */
-    void issueConnect();
+    int getNumber();
     /**
-     * Wait until all channelGets are created.
-     * @return (false,true) if (not all connected, all connected)
+     * Set the timeStamp base for computing deltaTimes. 
      */
-    boolean waitConnect();
+    void startDeltaTime();
     /**
-     * call issueGet and the waitGet.
-     * @return (false,true) if (failure, success)
+     * Update NTMultiChannel fields and/or doubleOnly fields.
      */
-    boolean get();
-    /**
-     * Issue a get for each channel.
-     */
-    void issueGet();
-    /**
-     * wait until all gets are complete.
-     * @return (true,false) if (no errors, errors) resulted from gets.
-     * If an error occurred then getStatus returns a reason.
-     * @return (false,true) if (failure, success)
-     */
-    boolean waitGet();
+    void endDeltaTime(); 
     /**
      * Get the time when the last get was made.
      * @return The timeStamp.
      */
     TimeStamp getTimeStamp();
-    /**
-     * Get the number of channels.
-     * @return The number of channels.
-     */
-    int getLength();
     /**
      * Is value a double[] ?
      * @return The answer.
@@ -69,7 +59,7 @@ public interface EasyMultiGet {
      */
     PVStructure getNTMultiChannel();
     /**
-     * Get the top level structure of the value field is a double[[]
+     * Get the top level structure if the value field is a double[]
      * @return The top level structure.
      * This is null if doubleOnly is false.
      */
@@ -99,5 +89,4 @@ public interface EasyMultiGet {
      * @return The status.
      */
     Status getStatus();
-
 }

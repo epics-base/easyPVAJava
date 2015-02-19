@@ -5,6 +5,7 @@ The main changes since release 0.3.0
 
 * EasyPVA automatically starts ChannelProvider for both Channel Access and pvAccess.
 * EasyMultiChannel is now implemented
+* Support for monitors is now available both for EasyChannel and EasyMultiChannel.
 
 
 EasyPVA automatically starts Channel Providers
@@ -25,6 +26,12 @@ EasyMultiChannel is now implemented.
 --------------
 
 Get and Put are available for accessing a set of channels.
+See easyPVA.html for details.
+
+
+EasyMonitor and EasyMultiLonitor are now implemented.
+---------------
+
 See easyPVA.html for details.
 
 

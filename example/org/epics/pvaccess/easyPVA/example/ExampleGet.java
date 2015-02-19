@@ -4,7 +4,7 @@ import org.epics.pvaccess.easyPVA.EasyPVA;
 import org.epics.pvaccess.easyPVA.EasyPVAFactory;
 import org.epics.pvdata.pv.PVStructure;
 
-class ExampleGet
+public class ExampleGet
 {
 
 	static EasyPVA easyPVA= EasyPVAFactory.get();

@@ -213,12 +213,12 @@ public class TestEasyGet extends TestCase {
     }
     
     public void testGetNumericScalar() {
-        EasyChannel channel = easyPVA.createChannel("byte01","ca");
+        EasyChannel channel = easyPVA.createChannel("byte01");
         EasyGet easyGet = getCommon("testGetNumericScalar",channel);
         printScalar(easyGet);
         channel.destroy();
 
-        channel = easyPVA.createChannel("short01","ca");
+        channel = easyPVA.createChannel("short01");
         easyGet = getCommon("testGetNumericScalar",channel);
         printScalar(easyGet);
 
@@ -226,11 +226,11 @@ public class TestEasyGet extends TestCase {
         easyGet = getCommon("testGetNumericScalar",channel);
         printScalar(easyGet);
 
-        //channel = easyPVA.createChannel("long01");
-        //easyGet = getCommon("testGetNumericScalar",channel);
-        //printScalar(easyGet);
+        channel = easyPVA.createChannel("long01");
+        easyGet = getCommon("testGetNumericScalar",channel);
+        printScalar(easyGet);
 
-        channel = easyPVA.createChannel("float01","ca");
+        channel = easyPVA.createChannel("float01");
         easyGet = getCommon("testGetNumericScalar",channel);
         printScalar(easyGet);
 

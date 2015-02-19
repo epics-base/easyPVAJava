@@ -651,8 +651,32 @@ public class EasyPVAFactory {
         }
     }
 
+    private static class ChannelRequesterPvt implements ChannelRequester
+    {
+        private final EasyMultiChannelImpl multiChannel;
+        private final int indChannel;
+        
+        ChannelRequesterPvt(EasyMultiChannelImpl multiChannel,int indChannel)
+        {
+            this.multiChannel = multiChannel;
+            this.indChannel = indChannel;
+        }
+        public String getRequesterName() {
+            return multiChannel.getRequesterName();
+        }
+        public void message(String message, MessageType messageType) {
+            multiChannel.message(message, messageType);
+        }
+        public void channelCreated(Status status, Channel channel) {
+            multiChannel.channelCreated(status, channel,indChannel);
+        }
+        public void channelStateChange(Channel channel,ConnectionState connectionState)
+        {
+            multiChannel.channelStateChange(channel,connectionState,indChannel);
+        }
+    }
     
-    static private class EasyMultiChannelImpl implements EasyMultiChannel, ChannelRequester {
+    static private class EasyMultiChannelImpl implements EasyMultiChannel {
         private final EasyPVA easyPVA;
         private final String[] channelName;
         private final String providerName;
@@ -661,12 +685,13 @@ public class EasyPVAFactory {
         private final ReentrantLock lock = new ReentrantLock();
         private final Condition waitForConnect = lock.newCondition();
 
-        
+        private ChannelRequesterPvt[] channelRequester = null;
         private volatile int numConnected = 0;
         private volatile int numNewConnectRequest = 0;
         private volatile Channel[] channel = null;
         private volatile boolean[] connectRequested = null;
         private volatile boolean[] isConnected = null;
+        
         private volatile boolean isDestroyed = false;
         private volatile Status[] channelStatus = null;
         private volatile Status status = statusCreate.getStatusOK();
@@ -684,12 +709,14 @@ public class EasyPVAFactory {
             this.providerName = providerName;
             this.union = union;
             numChannel = channelNames.length;
+            channelRequester = new ChannelRequesterPvt[numChannel];
             channel = new Channel[numChannel];
             connectRequested = new boolean[numChannel];
             isConnected = new boolean[numChannel];
             channelStatus = new Status[numChannel];
             connectionState = new ConnectionState[numChannel];
             for(int i=0; i<numChannel; ++i) {
+                channelRequester[i] = new ChannelRequesterPvt(this,i);
                 channel[i] = null;
                 connectRequested[i] = false;
                 isConnected[i] = false;
@@ -697,53 +724,27 @@ public class EasyPVAFactory {
                 connectionState[i] = ConnectionState.NEVER_CONNECTED;
             }
         }
-        /* (non-Javadoc)
-         * @see org.epics.pvdata.pv.Requester#getRequesterName()
-         */
-        @Override
+        
         public String getRequesterName() {
             return easyPVA.getRequesterName();
         }
-        /* (non-Javadoc)
-         * @see org.epics.pvdata.pv.Requester#message(java.lang.String, org.epics.pvdata.pv.MessageType)
-         */
-        @Override
+        
         public void message(String message, MessageType messageType) {
             if(isDestroyed) return;
             String mess = channelName + " " + message;
             easyPVA.message(mess, messageType);
         }
-        /* (non-Javadoc)
-         * @see org.epics.pvaccess.client.ChannelRequester#channelCreated(org.epics.pvdata.pv.Status, org.epics.pvaccess.client.Channel)
-         */
-        @Override
-        public  void channelCreated(Status status, Channel channel) {
-            for(int i=0; i<channelName.length; ++i) {
-                if(channelName[i].equals(channel.getChannelName())) {
+       
+        private  void channelCreated(Status status, Channel channel,int i)
+        {
                     this.channel[i] = channel;
                     channelStatus[i] = status;
                     return;
-                }
-            }
         }
-        /* (non-Javadoc)
-         * @see org.epics.pvaccess.client.ChannelRequester#channelStateChange(org.epics.pvaccess.client.Channel, org.epics.pvaccess.client.Channel.ConnectionState)
-         */
-        @Override
-        public void channelStateChange(Channel channel,ConnectionState connectionState) {
+        
+        private void channelStateChange(Channel channel,ConnectionState connectionState,int index) {
             synchronized (this) {
                 if(isDestroyed) return;
-                int index =-1;
-                for(int i=0; i<channelName.length; ++i) {
-                    if(channelName[i].equals(channel.getChannelName())) {
-                        this.channel[i] = channel;
-                        index = i;
-                        break;
-                    }
-                }
-                if(index<0) {
-                    throw new IllegalStateException("should not happen");
-                }
                 this.connectionState[index] = connectionState;
                 
                 if(connectionState!=ConnectionState.CONNECTED) {
@@ -784,12 +785,6 @@ public class EasyPVAFactory {
         }
 
        
-
-        @Override
-        public String getProviderName() {
-            return providerName;
-        }
-
         @Override
         public String[] getChannelNames() {
             return channelName;
@@ -802,6 +797,12 @@ public class EasyPVAFactory {
         public boolean connect(double timeout) {
             issueConnect();
             return waitConnect(timeout);
+        }
+
+        @Override
+        public boolean connect(double timeout, int minConnect) {
+            issueConnect();
+            return waitConnect(timeout,minConnect);
         }
 
         /* (non-Javadoc)
@@ -823,7 +824,10 @@ public class EasyPVAFactory {
                 numNewConnectRequest++;
                 connectRequested[i] = true;
                 isConnected[i] = false;
-                channel[i] = channelProvider.createChannel(channelName[i], this, ChannelProvider.PRIORITY_DEFAULT);   
+                channel[i] = channelProvider.createChannel(
+                    channelName[i],
+                    channelRequester[i],
+                    ChannelProvider.PRIORITY_DEFAULT);   
             }
         }
 
@@ -832,6 +836,11 @@ public class EasyPVAFactory {
          */
         @Override
         public boolean waitConnect(double timeout) {
+            return waitConnect(timeout,numChannel);
+        }
+        
+        @Override
+        public boolean waitConnect(double timeout, int minConnect) {
             if(isDestroyed) return false;
             int numNowConected = 0;
             while(true) {
@@ -854,14 +863,15 @@ public class EasyPVAFactory {
                 if(numNowConected<numConnected)  continue;
                 break;
             }
-            if(numConnected!=numChannel) {
-                Status status = statusCreate.createStatus(StatusType.ERROR,"all channels are not connected",null);
+            if(numConnected<minConnect) {
+                String message = " channels " + numChannel + " but only " + numNowConected + " are connected";
+                Status status = statusCreate.createStatus(StatusType.ERROR,message,null);
                 setStatus(status);
                 return false;
             }
             return true;
         }
-        
+
         /* (non-Javadoc)
          * @see org.epics.pvaccess.easyPVA.EasyMultiChannel#allConnected()
          */
@@ -878,13 +888,18 @@ public class EasyPVAFactory {
         public boolean[] isConnected() {
             return isConnected;
         }
-
+        
+        @Override
+        public EasyMultiData createEasyMultiData(PVStructure pvRequest,Union union)
+        {
+            return EasyMultiDataImpl.create(this,channel,pvRequest,union);
+        }
         /* (non-Javadoc)
          * @see org.epics.pvaccess.easyPVA.EasyMultiChannel#createGet()
          */
         @Override
         public EasyMultiGet createGet() {
-            return createGet("field(value,alarm,timeStamp)");
+            return createGet(false);
         }
         
 
@@ -893,9 +908,7 @@ public class EasyPVAFactory {
          */
         @Override
         public EasyMultiGet createGet(String request) {
-            PVStructure pvStructure = createRequest(request);
-            if(pvStructure==null) return null;
-            return createGet(pvStructure);
+            return createGet(false,request);
         }
 
         /* (non-Javadoc)
@@ -903,10 +916,7 @@ public class EasyPVAFactory {
          */
         @Override
         public EasyMultiGet createGet(PVStructure pvRequest) {
-            if(!checkConnected()) return null;
-            EasyMultiGet multiGet = EasyMultiGetImpl.create(this,channel,pvRequest,union);
-            if(multiGet.init()) return multiGet;
-            return null;
+            return createGet(false,pvRequest);
         }
 
         /* (non-Javadoc)
@@ -914,7 +924,8 @@ public class EasyPVAFactory {
          */
         @Override
         public EasyMultiGet createGet(boolean doubleOnly) {
-            return createGet(doubleOnly,"field(value)");
+            String request = doubleOnly ? "value" : "value,alarm,timeStamp";
+            return createGet(doubleOnly,request);
         }
 
         /* (non-Javadoc)
@@ -941,9 +952,7 @@ public class EasyPVAFactory {
                 field[0] = fieldCreate.createScalar(ScalarType.pvDouble);
                 union = fieldCreate.createUnion(name, field);
             }
-            EasyMultiGet  multiGet = EasyMultiGetImpl.create(this,channel,pvRequest,union);
-            if(multiGet.init()) return multiGet;
-            return null;
+            return  EasyMultiGetImpl.create(this,channel,pvRequest,union);
         }
 
         /* (non-Javadoc)
@@ -960,9 +969,49 @@ public class EasyPVAFactory {
         @Override
         public EasyMultiPut createPut(boolean doubleOnly) {
             if(!checkConnected()) return null;
-            EasyMultiPut multiPut = EasyMultiPutImpl.create(this,channel,doubleOnly);
-            if(!multiPut.init()) return null;
-            return multiPut;
+            return EasyMultiPutImpl.create(this,channel,doubleOnly);
+        }
+
+        @Override
+        public EasyMultiMonitor createMonitor() {
+            return createMonitor(false);
+        }
+
+        @Override
+        public EasyMultiMonitor createMonitor(String request) {
+            return createMonitor(false,request);
+        }
+
+        @Override
+        public EasyMultiMonitor createMonitor(PVStructure pvRequest) {
+            return createMonitor(false,pvRequest);
+        }
+
+        @Override
+        public EasyMultiMonitor createMonitor(boolean doubleOnly) {
+            String request = doubleOnly ? "value" : "value,alarm,timeStamp";
+            return createMonitor(doubleOnly,request);
+        }
+
+        @Override
+        public EasyMultiMonitor createMonitor(boolean doubleOnly, String request) {
+            PVStructure pvRequest = createRequest(request);
+            if(pvRequest==null) return null;
+            return createMonitor(doubleOnly,pvRequest);
+        }
+
+        @Override
+        public EasyMultiMonitor createMonitor(boolean doubleOnly,PVStructure pvRequest) {
+            if(!checkConnected()) return null;
+            Union union = this.union;
+            if(doubleOnly) {
+                Field[] field = new Field[1];
+                String[] name = new String[1];
+                name[0] = "double";
+                field[0] = fieldCreate.createScalar(ScalarType.pvDouble);
+                union = fieldCreate.createUnion(name, field);
+            }
+            return EasyMultiMonitorImpl.create(this, channel, pvRequest,union);
         }
 
         /* (non-Javadoc)

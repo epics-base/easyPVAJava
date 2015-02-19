@@ -1,7 +1,7 @@
 TODO
 ===========
 
-Only get and put are implemented
+Not all functionality is implemented,
 --------
 
-Monitor, channelPutGet, channelArray are not implemented.
+channelProcess, channelPutGet, channelArray are not implemented.

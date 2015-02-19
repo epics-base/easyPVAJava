@@ -3,6 +3,7 @@
  */
 package org.epics.pvaccess.easyPVA;
 
+import org.epics.pvdata.monitor.MonitorElement;
 import org.epics.pvdata.property.TimeStamp;
 import org.epics.pvdata.pv.PVStructure;
 import org.epics.pvdata.pv.Status;
@@ -12,7 +13,18 @@ import org.epics.pvdata.pv.Status;
  * @author mrk
  *
  */
-public interface EasyMultiGet {
+public interface EasyMultiMonitor {
+    /**
+     * Optional callback for client
+     */
+    public interface EasyMultiRequester {
+        
+        /**
+         * A monitor event has occurred.
+         * @param monitor The EasyMonitor that traped the event.
+         */
+        void event(EasyMultiMonitor monitor);
+    }
     /**
      * Clean up
      */
@@ -32,21 +44,41 @@ public interface EasyMultiGet {
      */
     boolean waitConnect();
     /**
-     * call issueGet and the waitGet.
-     * @return (false,true) if (failure, success)
+     * Optional request to be notified when monitors occur.
+     * @param requester The requester which must be implemented by the caller.
      */
-    boolean get();
+    void setRequester(EasyMultiRequester requester);
     /**
-     * Issue a get for each channel.
+     * Start monitoring.
+     * This will wait until the monitor is connected.
+     * @param waitBetweenEvents The time to wait between events to see if more are available. 
+     * @return (false,true) means (failure,success).
+     * If false is returned then failure and getMessage will return reason.
      */
-    void issueGet();
+    boolean start(double waitBetweenEvents);
     /**
-     * wait until all gets are complete.
-     * @return (true,false) if (no errors, errors) resulted from gets.
-     * If an error occurred then getStatus returns a reason.
-     * @return (false,true) if (failure, success)
+     * Stop monitoring.
      */
-    boolean waitGet();
+    boolean stop();
+    /**
+     * Get the monitorElements.
+     * The client MUST only access the monitorElements between poll and release.
+     * An element is null if it has data.
+     * @return The monitorElements.
+     */
+    MonitorElement[] getMonitorElement();
+    /**
+     * poll for new events.
+     * @return the number of channels with a new monitor.
+     * If > 0 then each element that is not null has the data for the corresponding channel.
+     * A new poll can not be issued until release is called.
+     */
+    int poll();
+    /**
+     * Release each monitor element that is not null.
+     * @return (false,true) if additional monitors are available.
+     */
+    boolean release();
     /**
      * Get the time when the last get was made.
      * @return The timeStamp.

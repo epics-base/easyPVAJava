@@ -5,7 +5,7 @@ import org.epics.pvaccess.easyPVA.EasyGet;
 import org.epics.pvaccess.easyPVA.EasyPVA;
 import org.epics.pvaccess.easyPVA.EasyPVAFactory;
 
-class ExampleGetDouble
+public class ExampleGetDouble
 {
 
 	static EasyPVA easyPVA;
