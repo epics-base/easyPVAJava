@@ -55,7 +55,7 @@ public interface EasyMultiChannel {
      * Wait until all channels are connected or until timeout.
      * @param timeout The time to wait for connections.
      * When a timeout occurs a new time out will start if any channels connected since the last timeout.
-     * @return (false,true) of all channels (did not, did) connect.
+     * @return (false,true) if all channels (did not, did) connect.
      */
     boolean waitConnect(double timeout);
     /**

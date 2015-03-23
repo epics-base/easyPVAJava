@@ -860,7 +860,8 @@ public class EasyPVAFactory {
                     lock.unlock();
                 }
                 if(numConnected==numChannel) break;
-                if(numNowConected<numConnected)  continue;
+                if(numNowConected==numConnected) break;  // no new so quit 
+                if(numNowConected<minConnect)  continue;
                 break;
             }
             if(numConnected<minConnect) {
