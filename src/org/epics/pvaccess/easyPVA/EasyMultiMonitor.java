@@ -70,7 +70,7 @@ public interface EasyMultiMonitor {
     /**
      * poll for new events.
      * @return the number of channels with a new monitor.
-     * If > 0 then each element that is not null has the data for the corresponding channel.
+     * If &gt; 0 then each element that is not null has the data for the corresponding channel.
      * A new poll can not be issued until release is called.
      */
     int poll();
