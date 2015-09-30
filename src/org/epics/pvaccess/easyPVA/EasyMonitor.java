@@ -52,11 +52,13 @@ public interface EasyMonitor {
     /**
      * Start monitoring.
      * This will wait until the monitor is connected.
-     * If false is returned then failure and getNessage will return reason.
+     * If false is returned then failure and getMessage will return reason.
+     * @return (false,true) means (failure.success)
      */
     boolean start();
     /**
      * Stop monitoring.
+     * @return (false,true) means (failure.success)
      */
     boolean stop();
     /**
@@ -67,6 +69,7 @@ public interface EasyMonitor {
     MonitorElement poll();
     /**
      * Release the monitorElement returned by poll.
+     *  @return (false,true) means (failure.success)
      */
     boolean releaseEvent();
     /**

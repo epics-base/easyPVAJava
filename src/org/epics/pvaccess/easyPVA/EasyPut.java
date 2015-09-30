@@ -140,6 +140,7 @@ public interface EasyPut {
     /**
      * Put a boolean value. If value is not a boolean setStatus is called and false is returned. 
      * If autoPut is true put is called.
+     * @param value the new value.
      * @return true or false.
      */
     boolean putBoolean(boolean value);
@@ -147,6 +148,7 @@ public interface EasyPut {
      * Put the value as a byte.
      * If value is not a numeric scalar setStatus is called and false is returned.
      * If autoPut is true put is called.
+     * @param value the new value.
      * @return (false,true) means (failure,success)
      */
     boolean putByte(byte value);
@@ -154,6 +156,7 @@ public interface EasyPut {
      * Put the value as a short.
      * If value is not a numeric scalar setStatus is called and false is returned.
      * If autoPut is true put is called.
+     * @param value the new value.
      * @return (false,true) means (failure,success)
      */
     boolean putShort(short value);
@@ -161,6 +164,7 @@ public interface EasyPut {
      * Put the value as an int.
      * If value is not a numeric scalar setStatus is called and false is returned.
      * If autoPut is true put is called.
+     * @param value the new value.
      * @return (false,true) means (failure,success)
      */
     boolean putInt(int value);
@@ -168,6 +172,7 @@ public interface EasyPut {
      * Put the value as a long.
      * If value is not a numeric scalar setStatus is called and false is returned.
      * If autoPut is true put is called.
+     * @param value the new value.
      * @return (false,true) means (failure,success)
      */
     boolean putLong(long value);
@@ -175,6 +180,7 @@ public interface EasyPut {
      * Put the value as a float.
      * If value is not a numeric scalar setStatus is called and false is returned.
      * If autoPut is true put is called.
+     * @param value the new value.
      * @return (false,true) means (failure,success)
      */
     boolean putFloat(float value);
@@ -182,6 +188,7 @@ public interface EasyPut {
      * Put the value as a double.
      * If value is not a numeric scalar setStatus is called and false is returned.
      * If autoPut is true put is called.
+     * @param value the new value.
      * @return (false,true) means (failure,success)
      */
     boolean putDouble(double value);
@@ -189,6 +196,7 @@ public interface EasyPut {
      * Put the value as a string.
      * If value is not a  scalar setStatus is called and false is returned.
      * If autoPut is true put is called.
+     * @param value the new value.
      * @return (false,true) means (failure,success)
      */
     boolean putString(String value);
