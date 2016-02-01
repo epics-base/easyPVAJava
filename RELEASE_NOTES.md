@@ -11,8 +11,8 @@ This is for EPICS V4 release 4.5
 It is the last release because it is replaced by pvaClient.
 If you are using this it is time to start converting to pvaClientJava.
 
-Release 0.4 IN DEVELOPMENT
---------------------------
+Release 0.4
+===========
 
 The main changes since release 0.3.0
 
@@ -42,12 +42,13 @@ Get and Put are available for accessing a set of channels.
 See easyPVA.html for details.
 
 
-EasyMonitor and EasyMultiLonitor are now implemented.
+EasyMonitor and EasyMultiMonitor are now implemented.
 ---------------
 
 See easyPVA.html for details.
 
 
 Release 0.3.0
-==========
+=============
+
 This was the starting point for RELEASE_NOTES
