@@ -4,7 +4,7 @@
 
     <groupId>org.epics</groupId>
     <artifactId>easyPVAJava</artifactId>
-    <version>4.1.2</version>
+    <version>4.1.3</version>
     <packaging>jar</packaging>
 
     <name>easyPVA - Java</name>
@@ -24,12 +24,12 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>pvDataJava</artifactId>
-            <version>5.0.2</version>
+            <version>5.0.3</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>pvAccessJava</artifactId>
-            <version>4.1.2</version>
+            <version>4.1.3</version>
         </dependency>
     </dependencies>
     
